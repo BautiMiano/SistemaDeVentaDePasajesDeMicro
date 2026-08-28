@@ -1,3 +1,4 @@
+from Funciones.Asientos import asientos, ImprimirMatriz, RellenarMatriz, matriz
 def VentaPasajes():
     print("Venta de pasajes")
     print(" ")
@@ -10,9 +11,13 @@ def VentaPasajes():
     print("---Fechas---")
     for i in range(len(fechas)):
             print(i+1,".",fechas[i])
+    print("")
     opcion2 = int(input("Seleccione una fecha: "))
+    print("")
     print("Mostrando asientos disponibles para", destinos[opcion1], "el", fechas[opcion2-1])
-    
+    RellenarMatriz(matriz)
+    ImprimirMatriz(matriz)
+
 
 
 destinos = ["Mar del Plata", "Pinamar", "Cobos", "Villa Gesel", "San Bernardo"]
