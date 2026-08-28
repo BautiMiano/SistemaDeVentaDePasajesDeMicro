@@ -16,7 +16,6 @@ def asientos():
         estado = "O" #Estado O significa libre
     return estado
 
-
 def ImprimirMatriz(matriz):
     for i in matriz:
         print(*i)
@@ -39,6 +38,17 @@ def RellenarMatriz(matriz):
             else:
                 matriz[f][c] = asientos()
 
-
-RellenarMatriz(matriz)
-ImprimirMatriz(matriz)
+def ElegirAsiento(x, y):
+    if y == "A":
+        y = 1
+    elif y == "B":
+        y = 2
+    elif y == "C":
+        y = 3
+    else:
+        y=4
+    
+    if matriz[x][y] == "X":
+        print("Asiento ocupado")
+    else:
+        print("Asiento libre")
