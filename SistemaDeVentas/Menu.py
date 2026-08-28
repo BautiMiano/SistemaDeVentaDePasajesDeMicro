@@ -30,10 +30,8 @@ def main():
             VentaPasajes()
         elif opcion == 2:
             VerReserva()
-            # Lógica para ver reserva
         elif opcion == 3:
             CancelarReserva()
-            # Lógica para cancelar reserva
         elif opcion == 4:
             Salir()
         else:
