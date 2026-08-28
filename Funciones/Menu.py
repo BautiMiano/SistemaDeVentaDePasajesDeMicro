@@ -6,7 +6,3 @@ def Menu():
     print("4 - Salir")
     opcion = int(input("Eliga una opcion: "))
     return opcion
-
-
-def Salir():
-    print("Saliendo del programa...")
