@@ -1,4 +1,4 @@
-from Funciones.Asientos import asientos, ImprimirMatriz, RellenarMatriz, matriz
+from Funciones.Asientos import asientos, ImprimirMatriz, RellenarMatriz, matriz,SeleccionarAsiento
 def VentaPasajes():
     print("Venta de pasajes")
     print(" ")
@@ -17,6 +17,7 @@ def VentaPasajes():
     print("Mostrando asientos disponibles para", destinos[opcion1], "el", fechas[opcion2-1])
     RellenarMatriz(matriz)
     ImprimirMatriz(matriz)
+    SeleccionarAsiento(matriz)
 
 
 

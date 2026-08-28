@@ -39,6 +39,24 @@ def RellenarMatriz(matriz):
             else:
                 matriz[f][c] = asientos()
 
+def SeleccionarAsiento(matriz):
+    fila = int(input("Ingrese la fila del asiento: "))
+    columna = input("Ingrese la columna del asiento: ")
+    if columna == "A":
+        c = 1
+    elif columna == "B":
+        c = 2
+    elif columna == "C":
+        c = 4
+    elif columna == "D":
+        c = 5
+    else:
+        print("Columna inválida")
+        return
+    f = fila
 
-RellenarMatriz(matriz)
-ImprimirMatriz(matriz)
+    if matriz[f][c] == "X":
+        print("Ese asiento ya está ocupado.")
+    else:
+        matriz[f][c] = "X"
+        print("Asiento seleccionado correctamente.")
