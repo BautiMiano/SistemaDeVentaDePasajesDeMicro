@@ -11,11 +11,12 @@ def main():
         opcion = Menu()
         if opcion == 1:
             VentaPasajes()
+            break
         elif opcion == 2:
             VerReserva()
         elif opcion == 3:
             CancelarReserva()
-        elif opcion == 4:
+        elif opcion == 4: #Salir
             print("Saliendo del programa...")
             break
         else:
