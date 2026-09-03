@@ -14,7 +14,7 @@ def VentaPasajes():
             print(i+1,".",fechas[i])
     print("")
     opcion2 = int(input("Seleccione una fecha: "))
-    
+
     print("")
     print("Mostrando asientos disponibles para", destinos[opcion1-1], "el", fechas[opcion2-1])
     RellenarMatriz(matriz)
@@ -27,6 +27,7 @@ def VentaPasajes():
     letra = asiento[1].upper()
 
     ElegirAsiento(numero, letra)
+    return [opcion1, opcion2, asiento]
 
 
 
