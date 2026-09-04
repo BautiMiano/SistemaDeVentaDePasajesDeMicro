@@ -4,5 +4,6 @@ def Menu():
     print("2 - Ver reserva")
     print("3 - Cancelar reserva")
     print("4 - Cerrar sesión")
-    opcion = int(input("Eliga una opcion: "))
+    opcion = input("Eliga una opcion: ")
+    opcion = str(opcion)
     return opcion
