@@ -1,4 +1,6 @@
 from Funciones.Asientos import asientos, ImprimirMatriz, RellenarMatriz, ElegirAsiento, matriz
+from Funciones.ReservaPasaje import AgregarReserva
+
 def VentaPasajes():
     print("Venta de pasajes")
     print(" ")
@@ -14,19 +16,32 @@ def VentaPasajes():
             print(i+1,".",fechas[i])
     print("")
     opcion2 = int(input("Seleccione una fecha: "))
-    
+
     print("")
     print("Mostrando asientos disponibles para", destinos[opcion1-1], "el", fechas[opcion2-1])
-    RellenarMatriz(matriz)
     ImprimirMatriz(matriz)
 
     print("")
     asiento = input("Seleccione un asiento disponible: ")
     
-    numero = int(asiento[0])
-    letra = asiento[1].upper()
+    numero = int(asiento[:-1])
+    letra = asiento[-1].upper()
 
-    ElegirAsiento(numero, letra)
+    resultado = ElegirAsiento(numero, letra)
+
+
+    while resultado == 0 :
+         print ("Asiento ocupado, seleccione otro asiento")
+         asiento = input("Seleccione un asiento disponible: ")
+
+         numero = int(asiento[:-1])
+         letra = asiento[-1].upper()
+         resultado = ElegirAsiento(numero, letra)
+
+
+    reserva = [destinos[opcion1 - 1], fechas[opcion2 - 1], asiento] 
+    AgregarReserva(reserva)
+    return reserva
 
 
 
@@ -42,4 +57,3 @@ fechas = ["7/12/26","14/12/26","21/12/26","28/12/26","4/1/27","11/1/27","18/1/27
 
 
     
-

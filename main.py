@@ -11,7 +11,7 @@ def main():
         opcion = Menu()
         if opcion == 1:
             VentaPasajes()
-            break
+            
         elif opcion == 2:
             VerReserva()
         elif opcion == 3:
