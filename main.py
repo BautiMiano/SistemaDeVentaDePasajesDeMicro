@@ -1,13 +1,16 @@
 from Funciones.VentaPasaje import VentaPasajes
-from Menu.Menu import Menu
+from Menu.Menu import Menu_Sesion_Iniciada, Menu_Inicio_Sesion
 from Funciones.ReservaPasaje import VerReserva
 from Funciones.CancelarReserva import CancelarReserva
+from Menu.Sesion import login
 
 
 def main():
-    while True:
+    Menu_Inicio_Sesion()
+
+    while login() == True:
         print("")
-        opcion = Menu()
+        opcion = Menu_Sesion_Iniciada()
         if opcion.isdigit():
             if opcion == "1":
                 VentaPasajes()
