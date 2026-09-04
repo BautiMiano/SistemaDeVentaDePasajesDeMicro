@@ -9,6 +9,7 @@ def VerReserva():
 
     if len(reservas) == 0:
         print("No hay reservas realizadas.")
+        print(2 * "\n")
         return
     else:
         for i in range(len(reservas)):

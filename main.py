@@ -1,6 +1,6 @@
 
 from Funciones.VentaPasaje import VentaPasajes
-from Funciones.Menu import Menu
+from Menu.Menu import Menu
 from Funciones.ReservaPasaje import VerReserva
 from Funciones.CancelarReserva import CancelarReserva
 
