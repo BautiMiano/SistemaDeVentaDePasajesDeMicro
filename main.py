@@ -1,6 +1,6 @@
 
 from Funciones.VentaPasaje import VentaPasajes
-from Funciones.Menu import Menu
+from Menu.Menu import Menu
 from Funciones.ReservaPasaje import VerReserva
 from Funciones.CancelarReserva import CancelarReserva
 
@@ -11,7 +11,7 @@ def main():
         opcion = Menu()
         if opcion == 1:
             VentaPasajes()
-            break
+            
         elif opcion == 2:
             VerReserva()
         elif opcion == 3:
