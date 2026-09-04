@@ -41,6 +41,7 @@ def RellenarMatriz(matriz):
             else:
                 matriz[f][c] = asientos()
 
+<<<<<<< HEAD
 def ElegirAsiento(x, y):
 
     if y == "A":
@@ -100,3 +101,31 @@ def ModificarAsiento(x, y):
 
 
 RellenarMatriz(matriz)
+=======
+def SeleccionarAsiento(matriz):
+
+    asiento = input("Seleccione un asiento (ejemplo: 1A): ")
+
+    asiento = asiento.upper()
+
+    fila = int(asiento[:-1])
+    letra = asiento[-1]
+
+    if letra == "A":
+        columna = 1
+    elif letra == "B":
+        columna = 2
+    elif letra == "C":
+        columna = 4
+    elif letra == "D":
+        columna = 5
+    else:
+        print("Asiento inválido")
+        return
+
+    if matriz[fila][columna] == "X":
+        print("Ese asiento ya está ocupado.")
+    else:
+        matriz[fila][columna] = "X"
+        print("Asiento", asiento, "seleccionado correctamente.")
+>>>>>>> 452d7d4a85816aece606e84c5c07ef4435bbf2f4
