@@ -41,7 +41,6 @@ def RellenarMatriz(matriz):
             else:
                 matriz[f][c] = asientos()
 
-
 def ElegirAsiento(x, y):
 
     if y == "A":
@@ -60,10 +59,6 @@ def ElegirAsiento(x, y):
         matriz[x][y] = "X"
         print("Asiento reservado correctamente")
         return 1
-
-
-
-
 
 def CancelarAsiento(x, y):
 
@@ -98,7 +93,6 @@ def ModificarAsiento(x, y):
         print("Asiento liberado correctamente")
     else:
         print("Ese asiento ya está libre")  
-
 
 RellenarMatriz(matriz)
 
