@@ -1,31 +1,47 @@
 from Funciones.VentaPasaje import VentaPasajes
-from Menu.Menu import Menu
-from Funciones.ReservaPasaje import VerReserva
-from Funciones.CancelarReserva import CancelarReserva
+from Funciones.Menu import menu_inicio, menu_principal
+from Funciones.ReservaPasaje import VerReserva, CancelarReserva
+from Funciones.Login import login
+from Funciones.Registro import registro
 
 
 def main():
+
     while True:
-        print("")
-        opcion = Menu()
+        opcion = menu_inicio()
         if opcion.isdigit():
             if opcion == "1":
-                VentaPasajes()
+                if login():
+
+                    while True:
+                        opcion2= menu_principal()
+
+                        if opcion2 == "1":
+                            VentaPasajes()
+
+                        elif opcion2 == "2":
+                            VerReserva()
+
+                        elif opcion2 == "3":
+                            CancelarReserva()
+
+                        elif opcion2 == "4":
+                            print("Cerrando sesion...")
+                            break
+                        else:
+                            print("opcion invalida")
 
             elif opcion == "2":
-                VerReserva()
-
+                registro()
             elif opcion == "3":
-                CancelarReserva()
-
-            elif opcion == "4":
-                print("Saliendo del programa...")
+                print("Saliendo...")
                 break
-
             else:
-                print("Opción inválida. Por favor, elija una opción válida.")
+                print("opcion invalida")
+    
         else:
-            print("Opción inválida. Por favor, elija una opción válida.")
+            print("opcion invalida")
+        
 
 
 main()
