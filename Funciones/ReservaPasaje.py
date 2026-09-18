@@ -37,7 +37,7 @@ def VerReserva(usuarioActual):
             asiento = reservas[i][3]
             precio = reservas[i][4]
 
-            print(f"{numReservas:<5}{destino:<25}{fecha:<15}{asiento:>10}{precio:>10}")
+            print(f"{numReservas:<5}{destino:<25}{fecha:<15}{asiento:>10}{"$":>4}{precio}")
             numReservas += 1
 
 
