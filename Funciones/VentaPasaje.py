@@ -24,14 +24,23 @@ def VentaPasajes():
             print(f"{i + 1:>2} - {fechas[i]}")
 
     print("-" * 50)
-    
+
     opcion2 = int(input("Seleccione una fecha: "))
 
     print("")
-    print("Mostrando asientos disponibles para", destinos[opcion1-1], "el", fechas[opcion2-1])
+    print("-" * 50)
+    print("ASIENTOS DISPONIBLES".center(50))
+    print("-" * 50)
+
+    print(f"Destino: {destinos[opcion1 - 1]}")
+    print(f"Fecha:   {fechas[opcion2 - 1]}")
+
+    print("")
     ImprimirMatriz(matriz)
 
     print("")
+    print("-" * 50)
+    
     asiento = input("Seleccione un asiento disponible: ")
     
     numero = int(asiento[:-1])

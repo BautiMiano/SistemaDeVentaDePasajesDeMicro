@@ -17,10 +17,17 @@ def asientos():
 
 def ImprimirMatriz(matriz):
 
-    print(*matriz[0])
+    print("")
+    print("     ASIENTOS")
+    print("    A B   C D")
+    print("   -----------")
 
     for f in range(1, len(matriz)):
-        print(*matriz[f])
+        print(f"{f:>2}  {matriz[f][1]} {matriz[f][2]}   {matriz[f][4]} {matriz[f][5]}")
+
+    print("")
+    print("O = Disponible")
+    print("X = Ocupado")
 
 def RellenarMatriz(matriz):
 
