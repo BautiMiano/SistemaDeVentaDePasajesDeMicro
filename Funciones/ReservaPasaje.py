@@ -25,7 +25,7 @@ def VerReserva(usuarioActual):
         print("")
         return
         
-    print(f"{'N°':<5}{'DESTINO':<25}{'FECHA':<15}{'ASIENTO':>10}")
+    print(f"{'N°':<5}{'DESTINO':<25}{'FECHA':<15}{'ASIENTO':>10}{'Precio':>10}")
     print("-" * 65)
 
     numReservas = 1
@@ -35,8 +35,9 @@ def VerReserva(usuarioActual):
             destino = reservas[i][1]
             fecha = reservas[i][2]
             asiento = reservas[i][3]
+            precio = reservas[i][4]
 
-            print(f"{numReservas:<5}{destino:<25}{fecha:<15}{asiento:>10}")
+            print(f"{numReservas:<5}{destino:<25}{fecha:<15}{asiento:>10}{precio:>10}")
             numReservas += 1
 
 
@@ -59,7 +60,7 @@ def CancelarReserva(usuarioActual):
         print("")
         return
 
-    print(f"{'N°':<5}{'DESTINO':<25}{'FECHA':<15}{'ASIENTO':>10}")
+    print(f"{'N°':<5}{'DESTINO':<25}{'FECHA':<15}{'ASIENTO':>10}{'Precio':>10}")
     print("-" * 65)
 
 
@@ -70,7 +71,8 @@ def CancelarReserva(usuarioActual):
             destino = reservas[i][1]
             fecha = reservas[i][2]
             asiento = reservas[i][3]
-            print(f"{numeroReserva:<5}{destino:<25}{fecha:<15}{asiento:>10}")
+            precio = reservas[i][4]
+            print(f"{numeroReserva:<5}{destino:<25}{fecha:<15}{asiento:>10}{precio:>10}")
             numeroReserva += 1
 
 
@@ -95,6 +97,8 @@ def CancelarReserva(usuarioActual):
 
                 asiento = reserva[3]
 
+                precio = reserva[4]
+
                 numero = int(asiento[:-1])
                 letra = asiento[-1].upper() 
 
@@ -107,3 +111,4 @@ def CancelarReserva(usuarioActual):
                 print("")
 
             numeroReserva += 1
+

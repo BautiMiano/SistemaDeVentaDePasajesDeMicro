@@ -1,5 +1,7 @@
 from Funciones.Asientos import asientos, ImprimirMatriz, RellenarMatriz, ElegirAsiento, matriz
 from Funciones.ReservaPasaje import AgregarReserva
+from Datos.Precio import km_destinos
+
 def VentaPasajes(usuarioActual):
     print("=" * 50)
     print("COMPRA DE PASAJE".center(50))
@@ -36,6 +38,9 @@ def VentaPasajes(usuarioActual):
 
     opcion1 = int(opcion1)
     opcion2 = int(opcion2)
+
+    precio = Calculo_precio(km_destinos, opcion1)
+
     print("")
     print("-" * 50)
     print("ASIENTOS DISPONIBLES".center(50))
@@ -43,6 +48,7 @@ def VentaPasajes(usuarioActual):
 
     print(f"Destino: {destinos[opcion1 - 1]}")
     print(f"Fecha:   {fechas[opcion2 - 1]}")
+    print(f"Precio:  ${precio}")
 
     print("")
     ImprimirMatriz(matriz)
@@ -76,10 +82,15 @@ def VentaPasajes(usuarioActual):
          resultado = ElegirAsiento(numero, letra)
     asiento = str(numero)+letra
 
-    reserva = [usuarioActual, destinos[opcion1 - 1], fechas[opcion2 - 1], asiento] 
+    reserva = [usuarioActual, destinos[opcion1 - 1], fechas[opcion2 - 1], asiento, precio] 
     AgregarReserva(reserva)
-    return reserva
+    return reserva, opcion1
 
+def Calculo_precio(km_destinos, opcion1):
+     PRECIO_KILOMETRO = 120
+     PrecioPasaje = PRECIO_KILOMETRO * km_destinos[opcion1 - 1]
+     return PrecioPasaje
+     
 
 
 destinos = ["Mar del Plata", "Pinamar", "Cobos", "Villa Gesel", "San Bernardo"]
