@@ -37,11 +37,7 @@ def VerReserva(usuarioActual):
             asiento = reservas[i][3]
             precio = reservas[i][4]
 
-<<<<<<< HEAD
-            print(f"{numReservas:<5}{destino:<25}{fecha:<15}{asiento:>10}{"$":>4}{precio}")
-=======
             print(f"{numReservas:<5}{destino:<25}{fecha:<15}{asiento:>10} {"$":>4}{precio}")
->>>>>>> Bauti
             numReservas += 1
 
 
