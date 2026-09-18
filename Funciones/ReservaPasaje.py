@@ -6,12 +6,20 @@ def AgregarReserva(reserva):
     return
 
 
-def VerReserva():
+def VerReserva(usuarioActual):
     print("=" * 65)
     print("MIS RESERVAS".center(65))
     print("=" * 65)
 
-    if len(reservas) == 0:
+    tieneReservas = False
+
+    for i in range(len(reservas)):
+        if reservas[i][0] == usuarioActual:
+            tieneReservas = True
+            break
+
+
+    if tieneReservas == False:
         print("")
         print("No hay reservas realizadas.".center(65))
         print("")
@@ -20,19 +28,32 @@ def VerReserva():
     print(f"{'N°':<5}{'DESTINO':<25}{'FECHA':<15}{'ASIENTO':>10}")
     print("-" * 65)
 
+    numReservas = 1
+
     for i in range(len(reservas)):
-        destino = reservas[i][0]
-        fecha = reservas[i][1]
-        asiento = reservas[i][2]
+        if reservas[i][0] == usuarioActual:
+            destino = reservas[i][1]
+            fecha = reservas[i][2]
+            asiento = reservas[i][3]
 
-        print(f"{i + 1:<5}{destino:<25}{fecha:<15}{asiento:>10}")
+            print(f"{numReservas:<5}{destino:<25}{fecha:<15}{asiento:>10}")
+            numReservas += 1
 
-def CancelarReserva():
+
+
+def CancelarReserva(usuarioActual):
     print("=" * 65)
     print("CANCELAR RESERVA".center(65))
     print("=" * 65)
 
-    if len(reservas) == 0:
+    tieneReservas = False
+
+    for i in range(len(reservas)):
+        if reservas[i][0] == usuarioActual:
+            tieneReservas = True
+            break
+
+    if tieneReservas == False:
         print("")
         print("No hay reservas para cancelar.".center(65))
         print("")
@@ -41,29 +62,48 @@ def CancelarReserva():
     print(f"{'N°':<5}{'DESTINO':<25}{'FECHA':<15}{'ASIENTO':>10}")
     print("-" * 65)
 
-    for i in range(len(reservas)):
-        destino = reservas[i][0]
-        fecha = reservas[i][1]
-        asiento = reservas[i][2]
 
-        print(f"{i + 1:<5}{destino:<25}{fecha:<15}{asiento:>10}")
+    numeroReserva = 1
+
+    for i in range(len(reservas)):
+        if reservas[i][0] == usuarioActual:
+            destino = reservas[i][1]
+            fecha = reservas[i][2]
+            asiento = reservas[i][3]
+            print(f"{numeroReserva:<5}{destino:<25}{fecha:<15}{asiento:>10}")
+            numeroReserva += 1
+
+
+
 
     print("-" * 65)
 
-    opcion = int(input("Ingrese la reserva que queres cancelar: "))
+    opcion = input("Ingrese la reserva que queres cancelar: ")
+    while not opcion.isdigit() or int(opcion) < 1 or int(opcion) >= numeroReserva:
+        print("ERROR: Opcion invalida.")
+        opcion = input("Ingrese la reserva que queres cancelar: ")
+    opcion = int(opcion)
 
-    reserva = reservas[opcion - 1]
+    numeroReserva = 1
 
-    asiento = reserva[2]
+    for i in range(len(reservas)):
+        if reservas[i][0] == usuarioActual:
 
+            if numeroReserva == opcion:
 
-    numero = int(asiento[:-1])
-    letra = asiento[-1].upper()
+                reserva = reservas[i]
 
-    ModificarAsiento(numero, letra)
+                asiento = reserva[3]
 
-    reservas.remove(reserva)
+                numero = int(asiento[:-1])
+                letra = asiento[-1].upper() 
 
-    print("")
-    print("Reserva cancelada correctamente.".center(65))
-    print("")
+                ModificarAsiento(numero, letra)
+
+                reservas.remove(reserva)
+
+                print("")
+                print("Reserva cancelada correctamente.".center(65))
+                print("")
+
+            numeroReserva += 1

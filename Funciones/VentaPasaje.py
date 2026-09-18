@@ -1,6 +1,6 @@
 from Funciones.Asientos import asientos, ImprimirMatriz, RellenarMatriz, ElegirAsiento, matriz
 from Funciones.ReservaPasaje import AgregarReserva
-def VentaPasajes():
+def VentaPasajes(usuarioActual):
     print("=" * 50)
     print("COMPRA DE PASAJE".center(50))
     print("=" * 50)
@@ -55,7 +55,10 @@ def VentaPasajes():
     while not (asiento[:-1].isdigit() and asiento[-1].isalpha()):
         print("Formato de asiento inválido. Por favor, ingrese un asiento válido (por ejemplo, 1A).")
         asiento = input("Seleccione un asiento disponible: ")
-    
+
+    while not (asiento[:-1].isdigit() and asiento[-1].upper() in ["A", "B", "C", "D"]) or int(asiento[:-1]) < 1 or int(asiento[:-1]) > 10:
+        print("Formato de asiento inválido. Por favor, ingrese un asiento válido (por ejemplo, 1A).")
+        asiento = input("Seleccione un asiento disponible: ")
     numero = int(asiento[:-1])
     letra = asiento[-1].upper()
 
@@ -71,9 +74,9 @@ def VentaPasajes():
          numero = int(asiento[:-1])
          letra = asiento[-1].upper()
          resultado = ElegirAsiento(numero, letra)
+    asiento = str(numero)+letra
 
-
-    reserva = [destinos[opcion1 - 1], fechas[opcion2 - 1], asiento] 
+    reserva = [usuarioActual, destinos[opcion1 - 1], fechas[opcion2 - 1], asiento] 
     AgregarReserva(reserva)
     return reserva
 

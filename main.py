@@ -11,19 +11,20 @@ def main():
         opcion = menu_inicio()
         if opcion.isdigit():
             if opcion == "1":
-                if login():
+                usuarioActual = login()
+                if usuarioActual:
 
                     while True:
                         opcion2= menu_principal()
 
                         if opcion2 == "1":
-                            VentaPasajes()
+                            VentaPasajes(usuarioActual)
 
                         elif opcion2 == "2":
-                            VerReserva()
+                            VerReserva(usuarioActual)
 
                         elif opcion2 == "3":
-                            CancelarReserva()
+                            CancelarReserva(usuarioActual)
 
                         elif opcion2 == "4":
                             print("Cerrando sesion...")
