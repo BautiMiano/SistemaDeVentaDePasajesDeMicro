@@ -5,5 +5,4 @@ def Menu():
     print("3 - Cancelar reserva")
     print("4 - Cerrar sesión")
     opcion = input("Eliga una opcion: ")
-    opcion = str(opcion)
     return opcion

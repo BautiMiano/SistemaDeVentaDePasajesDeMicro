@@ -44,6 +44,9 @@ def RellenarMatriz(matriz):
 
 def ElegirAsiento(x, y):
 
+    if x < 1 or x >= len(matriz):
+        print("Fila inválida. Por favor, seleccione una fila válida.")
+        return 0
     if y == "A":
         y = 1
     elif y == "B":
@@ -52,6 +55,9 @@ def ElegirAsiento(x, y):
         y = 4
     elif y == "D":
         y = 5
+    else:
+        print("Asiento no encontrado")
+        return 0
 
     if matriz[x][y] == "X":
         print("Asiento ocupado")
