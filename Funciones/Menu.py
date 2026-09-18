@@ -9,7 +9,11 @@ def menu_inicio():
     print("")
     print("-" * 45)
 
+<<<<<<< HEAD
     opcion = int(input("Seleccione una opcion: "))
+=======
+    opcion = input("Seleccione una opcion: ")
+>>>>>>> origin/Bauti
     print("")
     return opcion
 
@@ -24,6 +28,10 @@ def menu_principal():
     print("4 - Cerrar sesión")
     print("")
     print("-" * 45)
+<<<<<<< HEAD
     opcion = int(input("Seleccione una opcion: "))
+=======
+    opcion = input("Seleccione una opcion: ")
+>>>>>>> origin/Bauti
     print("")
     return opcion

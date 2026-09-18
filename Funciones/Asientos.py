@@ -102,4 +102,3 @@ def ModificarAsiento(x, y):
         print("Ese asiento ya está libre")  
 
 RellenarMatriz(matriz)
-

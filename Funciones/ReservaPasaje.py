@@ -66,5 +66,9 @@ def CancelarReserva():
 
     print("")
     print("Reserva cancelada correctamente.".center(65))
+<<<<<<< HEAD
     print("")
 
+=======
+    print("")
+>>>>>>> origin/Bauti

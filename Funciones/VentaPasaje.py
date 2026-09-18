@@ -14,6 +14,7 @@ def VentaPasajes():
 
     print("-" * 50)
 
+<<<<<<< HEAD
     opcion1 = int(input("Seleccione un destino: "))
 
     print("")
@@ -36,12 +37,49 @@ def VentaPasajes():
     print(f"Fecha:   {fechas[opcion2 - 1]}")
 
     print("")
+=======
+    opcion1 = input("Seleccione un destino: ")
+    while not opcion1.isdigit() or int(opcion1) < 1 or int(opcion1) > len(destinos):
+        print("ERROR: Opcion invalida. Por favor, seleccione un destino válido.")
+        opcion1 = input("Seleccione un destino: ")
+
+    print("")
+    print("FECHAS DISPONIBLES".center(50))
+    print("-" * 50)
+
+    for i in range(len(fechas)):
+            print(f"{i + 1:>2} - {fechas[i]}")
+
+    print("-" * 50)
+
+    opcion2 = input("Seleccione una fecha: ")
+
+    while not opcion2.isdigit() or int(opcion2) < 1 or  int (opcion2) > len(fechas):
+        print("ERROR: Opcion invalida. Por favor, seleccione una fecha válida.")
+        opcion2 = input("Seleccione una fecha: ")
+
+    opcion1 = int(opcion1)
+    opcion2 = int(opcion2)
+    print("")
+    print("-" * 50)
+    print("ASIENTOS DISPONIBLES".center(50))
+    print("-" * 50)
+
+    print(f"Destino: {destinos[opcion1 - 1]}")
+    print(f"Fecha:   {fechas[opcion2 - 1]}")
+
+    print("")
+>>>>>>> origin/Bauti
     ImprimirMatriz(matriz)
 
     print("")
     print("-" * 50)
     
     asiento = input("Seleccione un asiento disponible: ")
+
+    while not (asiento[:-1].isdigit() and asiento[-1].isalpha()):
+        print("Formato de asiento inválido. Por favor, ingrese un asiento válido (por ejemplo, 1A).")
+        asiento = input("Seleccione un asiento disponible: ")
     
     numero = int(asiento[:-1])
     letra = asiento[-1].upper()
@@ -51,6 +89,9 @@ def VentaPasajes():
 
     while resultado == 0 :
          asiento = input("Seleccione un asiento disponible: ")
+         while not (asiento[:-1].isdigit() and asiento[-1].isalpha()):
+                print("Formato de asiento inválido. Por favor, ingrese un asiento válido (por ejemplo, 1A).")
+                asiento = input("Seleccione un asiento disponible: ")
 
          numero = int(asiento[:-1])
          letra = asiento[-1].upper()
