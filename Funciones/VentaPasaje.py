@@ -1,5 +1,6 @@
 from Funciones.Asientos import asientos, ImprimirMatriz, RellenarMatriz, ElegirAsiento, matriz
 from Funciones.ReservaPasaje import AgregarReserva
+from Datos.Precio import km_destinos
 def VentaPasajes():
     print("=" * 50)
     print("COMPRA DE PASAJE".center(50))
@@ -14,30 +15,6 @@ def VentaPasajes():
 
     print("-" * 50)
 
-<<<<<<< HEAD
-    opcion1 = int(input("Seleccione un destino: "))
-
-    print("")
-    print("FECHAS DISPONIBLES".center(50))
-    print("-" * 50)
-
-    for i in range(len(fechas)):
-            print(f"{i + 1:>2} - {fechas[i]}")
-
-    print("-" * 50)
-
-    opcion2 = int(input("Seleccione una fecha: "))
-
-    print("")
-    print("-" * 50)
-    print("ASIENTOS DISPONIBLES".center(50))
-    print("-" * 50)
-
-    print(f"Destino: {destinos[opcion1 - 1]}")
-    print(f"Fecha:   {fechas[opcion2 - 1]}")
-
-    print("")
-=======
     opcion1 = input("Seleccione un destino: ")
     while not opcion1.isdigit() or int(opcion1) < 1 or int(opcion1) > len(destinos):
         print("ERROR: Opcion invalida. Por favor, seleccione un destino válido.")
@@ -60,6 +37,9 @@ def VentaPasajes():
 
     opcion1 = int(opcion1)
     opcion2 = int(opcion2)
+
+    precio = Calculo_precio(km_destinos, opcion1)
+
     print("")
     print("-" * 50)
     print("ASIENTOS DISPONIBLES".center(50))
@@ -67,9 +47,9 @@ def VentaPasajes():
 
     print(f"Destino: {destinos[opcion1 - 1]}")
     print(f"Fecha:   {fechas[opcion2 - 1]}")
+    print(f"Precio:  ${precio}")
 
     print("")
->>>>>>> origin/Bauti
     ImprimirMatriz(matriz)
 
     print("")
@@ -100,8 +80,13 @@ def VentaPasajes():
 
     reserva = [destinos[opcion1 - 1], fechas[opcion2 - 1], asiento] 
     AgregarReserva(reserva)
-    return reserva
+    return reserva, opcion1
 
+def Calculo_precio(km_destinos, opcion1):
+     PRECIO_KILOMETRO = 120
+     PrecioPasaje = PRECIO_KILOMETRO * km_destinos[opcion1 - 1]
+     return PrecioPasaje
+     
 
 
 destinos = ["Mar del Plata", "Pinamar", "Cobos", "Villa Gesel", "San Bernardo"]
