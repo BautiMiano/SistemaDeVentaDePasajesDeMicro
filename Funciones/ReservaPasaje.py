@@ -72,7 +72,7 @@ def CancelarReserva(usuarioActual):
             fecha = reservas[i][2]
             asiento = reservas[i][3]
             precio = reservas[i][4]
-            print(f"{numeroReserva:<5}{destino:<25}{fecha:<15}{asiento:>10}{precio:>10}")
+            print(f"{numeroReserva:<5}{destino:<25}{fecha:<15}{asiento:>10}{'$':>4}{precio}")
             numeroReserva += 1
 
 

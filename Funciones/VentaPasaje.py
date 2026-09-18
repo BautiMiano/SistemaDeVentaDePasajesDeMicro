@@ -76,6 +76,9 @@ def VentaPasajes(usuarioActual):
          while not (asiento[:-1].isdigit() and asiento[-1].isalpha()):
                 print("Formato de asiento inválido. Por favor, ingrese un asiento válido (por ejemplo, 1A).")
                 asiento = input("Seleccione un asiento disponible: ")
+         while not (asiento[:-1].isdigit() and asiento[-1].upper() in ["A", "B", "C", "D"]) or int(asiento[:-1]) < 1 or int(asiento[:-1]) > 10:
+                print("Formato de asiento inválido. Por favor, ingrese un asiento válido (por ejemplo, 1A).")
+                asiento = input("Seleccione un asiento disponible: ")
 
          numero = int(asiento[:-1])
          letra = asiento[-1].upper()
