@@ -1,19 +1,30 @@
 from Funciones.Asientos import asientos, ImprimirMatriz, RellenarMatriz, ElegirAsiento, matriz
 from Funciones.ReservaPasaje import AgregarReserva
 def VentaPasajes():
-    print("Venta de pasajes")
-    print(" ")
-    print("---Destinos---")
+    print("=" * 50)
+    print("COMPRA DE PASAJE".center(50))
+    print("=" * 50)
+    print("")
+
+    print("DESTINOS".center(50))
+    print("-" * 50)
+
     for i in range(len(destinos)):
-        print(i+1,".",destinos[i])
-    print(" ")
+        print(f"{i + 1:>2} - {destinos[i]}")
+
+    print("-" * 50)
+
     opcion1 = int(input("Seleccione un destino: "))
 
-    print(" ")
-    print("---Fechas---")
-    for i in range(len(fechas)):
-            print(i+1,".",fechas[i])
     print("")
+    print("FECHAS DISPONIBLES".center(50))
+    print("-" * 50)
+
+    for i in range(len(fechas)):
+            print(f"{i + 1:>2} - {fechas[i]}")
+
+    print("-" * 50)
+    
     opcion2 = int(input("Seleccione una fecha: "))
 
     print("")
