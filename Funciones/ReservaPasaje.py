@@ -7,9 +7,9 @@ def AgregarReserva(reserva):
 
 
 def VerReserva(usuarioActual):
-    print("=" * 65)
+    print("=" * 66)
     print("MIS RESERVAS".center(65))
-    print("=" * 65)
+    print("=" * 66)
 
     tieneReservas = False
 
@@ -26,7 +26,7 @@ def VerReserva(usuarioActual):
         return
         
     print(f"{'N°':<5}{'DESTINO':<25}{'FECHA':<15}{'ASIENTO':>10}{'Precio':>10}")
-    print("-" * 65)
+    print("-" * 66)
 
     numReservas = 1
 
@@ -37,15 +37,19 @@ def VerReserva(usuarioActual):
             asiento = reservas[i][3]
             precio = reservas[i][4]
 
+<<<<<<< HEAD
             print(f"{numReservas:<5}{destino:<25}{fecha:<15}{asiento:>10}{"$":>4}{precio}")
+=======
+            print(f"{numReservas:<5}{destino:<25}{fecha:<15}{asiento:>10} {"$":>4}{precio}")
+>>>>>>> Bauti
             numReservas += 1
 
 
 
 def CancelarReserva(usuarioActual):
-    print("=" * 65)
-    print("CANCELAR RESERVA".center(65))
-    print("=" * 65)
+    print("=" * 66)
+    print("CANCELAR RESERVA".center(66))
+    print("=" * 66)
 
     tieneReservas = False
 
