@@ -8,12 +8,19 @@ def registro():
 
     usuario = input("Ingrese un Nombre de Usuario: ").strip()
 
-    while usuario in usuarios:
-        usuario = input("Ya existe el usuario, Ingrese uno nuevo: ").strip()
+    while usuario == "" or usuario in usuarios:
+        if usuario == "":
+            usuario = input("El usuario no puede estar vacío. Ingrese uno nuevo: ").strip()
+        else:
+            usuario = input("Ya existe el usuario, ingrese uno nuevo: ").strip()
 
     usuarios.append(usuario)
 
     contrasena = input("Ingrese una Contraseña: ")
+
+    while contrasena.strip() == "":
+        contrasena = input("La contraseña no puede estar vacía. Ingrese una nueva: ")
+
     contrasenas.append(contrasena)
 
     print("")

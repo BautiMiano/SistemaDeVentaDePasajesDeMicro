@@ -1,4 +1,4 @@
-from Funciones.Asientos import asientos, ImprimirMatriz, RellenarMatriz, ElegirAsiento, matriz
+from Funciones.Asientos import ImprimirMatriz, ElegirAsiento, matriz
 from Funciones.ReservaPasaje import AgregarReserva
 from Datos.Precio import km_destinos
 

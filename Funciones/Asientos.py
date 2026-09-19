@@ -67,23 +67,6 @@ def ElegirAsiento(x, y):
         print("Asiento reservado correctamente")
         return 1
 
-def CancelarAsiento(x, y):
-
-    if y == "A":
-        y = 1
-    elif y == "B":
-        y = 2
-    elif y == "C":
-        y = 4
-    elif y == "D":
-        y = 5
-
-    if matriz[x][y] == "X":
-        matriz[x][y] = "O"
-        print("Pasaje cancelado correctamente")
-    else:
-        print("Ese asiento está libre")
-
 def ModificarAsiento(x, y):
 
     if y == "A":
