@@ -1,45 +1,8 @@
-from Menu import  menu_principal, menu_consultas, menu_ventas, menu_viajes
-from Pasajes import AgregarReserva, VerVentas, BuscarVenta, ModificarVenta, CancelarVenta, VentasPorDestino, VentasPorFecha,VentasPorUsuario
-from Funciones.Asientos import ImprimirMatriz, matriz, ElegirAsiento, CancelarAsiento,ModificarAsiento
+from Funciones.VentaPasaje import VentaPasajes
+from Menu import menu_inicio, menu_principal
+from Funciones.ReservaPasaje import VerReserva, CancelarReserva
+from Funciones.Registro import registro, login
 
-
-# def main():
-
-#     while True:
-#         try:
-#             opcion = int(menu_principal())
-#             if opcion == 1:
-#                 AgregarReserva()
-#             if opcion == 2:
-#                 VerVentas()
-#             if opcion == 3:
-#                 BuscarVenta()
-#             if opcion == 4:
-#                 ModificarVenta()
-#             if opcion == 5:
-#                 CancelarVenta()
-#             if opcion == 6:
-#                 ImprimirMatriz(matriz)
-#             if opcion == 7:
-#                 while True:
-#                     opcion_consulta = int(consultas())
-#                     if opcion_consulta == 1:
-#                         VentasPorDestino()
-#                     if opcion_consulta == 2:
-#                         VentasPorFecha()
-#                     if opcion_consulta == 3:
-#                         VentasPorUsuario()
-#                     if opcion_consulta == 4:
-#                         break
-#             if opcion == 8:
-#                 print("Saliendo del sistema...")
-#                 break
-            
-
-#         except ValueError:
-#             print("Error: Ingrese un número válido.")
-
-# main()
 
 def main():
 

@@ -1,6 +1,6 @@
 from Funciones.Asientos import ImprimirMatriz, ElegirAsiento, matriz
 from Funciones.ReservaPasaje import AgregarReserva
-from Datos.Precio import km_destinos
+from Datos import km_destinos
 
 def VentaPasajes(usuarioActual):
     print("=" * 50)
