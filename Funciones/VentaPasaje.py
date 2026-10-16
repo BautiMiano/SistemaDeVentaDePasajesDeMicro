@@ -93,8 +93,6 @@ def Calculo_precio(km_destinos, opcion1):
      PRECIO_KILOMETRO = 120
      PrecioPasaje = PRECIO_KILOMETRO * km_destinos[opcion1 - 1]
      return PrecioPasaje
-     
-
 
 destinos = ["Mar del Plata", "Pinamar", "Cobos", "Villa Gesel", "San Bernardo"]
 fechas = ["7/12/26","14/12/26","21/12/26","28/12/26","4/1/27","11/1/27","18/1/27"]    

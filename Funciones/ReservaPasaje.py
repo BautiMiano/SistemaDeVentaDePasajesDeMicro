@@ -5,7 +5,6 @@ def AgregarReserva(reserva):
     reservas.append(reserva)
     return
 
-
 def VerReserva(usuarioActual):
     print("=" * 66)
     print("MIS RESERVAS".center(65))
@@ -39,8 +38,6 @@ def VerReserva(usuarioActual):
 
             print(f"{numReservas:<5}{destino:<25}{fecha:<15}{asiento:>10} {"$":>4}{precio}")
             numReservas += 1
-
-
 
 def CancelarReserva(usuarioActual):
     print("=" * 66)
