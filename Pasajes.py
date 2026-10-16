@@ -30,8 +30,6 @@ for patente in patentes:
 
 ###############################
 viajes = []
-global id_viaje_automatico
-id_viaje_automatico = 1
 
 viajes_programados = [
     {
@@ -49,6 +47,7 @@ viajes_programados = [
 ]
 
 for precarga in viajes_programados:
+    id_viaje_automatico = len(viajes) + 1
     viaje = {
         "id": id_viaje_automatico,
         "salida": "Buenos Aires",
@@ -59,9 +58,68 @@ for precarga in viajes_programados:
         "asientos": CrearMatriz()
     }
     viajes.append(viaje)
-    id_viaje_automatico += 1
 
 ############################# Funciones extras #############################
+
+def validarFechasDOS():
+    fecha = input("Ingrese la fecha del viaje (DD/MM/AAAA): ")
+    while True:
+        try:
+            partes = fecha.split("/")
+            if len(partes) != 3:
+                print("Error: use el formato DD/MM/AAAA.")
+                fecha = input("Ingrese la fecha del viaje (DD/MM/AAAA): ")
+                continue
+
+            if len(partes[0]) != 2 or len(partes[1]) != 2 or len(partes[2]) != 4:
+                print("Error formato numerico: ingrese la fecha en el formato correcto DD/MM/AAAA 00/00/0000.")
+                fecha = input("Ingresiguale la fecha del viaje (DD/MM/AAAA): ")
+                continue
+
+            try:
+                dia = int(partes[0])
+            except ValueError:
+                print("Error de formato: ingrese día con números.")
+                fecha = input("Ingrese la fecha del viaje (DD/MM/AAAA): ")
+                continue
+
+            try:
+                mes = int(partes[1])
+            except ValueError:
+                print("Error de formato: ingrese mes con números.")
+                fecha = input("Ingrese la fecha del viaje (DD/MM/AAAA): ")
+                continue
+
+            try:
+                anio = int(partes[2])
+            except ValueError:
+                print("Error de formato: ingrese año con números.")
+                fecha = input("Ingrese la fecha del viaje (DD/MM/AAAA): ")
+                continue
+
+            if mes < 1 or mes > 12:
+                print("Error: el mes debe estar entre 1 y 12.")
+            else:
+                dias_por_mes = {
+                    1: 31, 2: 28, 3: 31, 4: 30,
+                    5: 31, 6: 30, 7: 31, 8: 31,
+                    9: 30, 10: 31, 11: 30, 12: 31
+                }
+
+                if anio % 4 == 0 and (anio % 100 != 0 or anio % 400 == 0):
+                    dias_por_mes[2] = 29
+
+                if dia < 1 or dia > dias_por_mes[mes]:
+                    print("Error: el día no es válido para ese mes.")
+                else:
+                    break
+
+            fecha = input("Ingrese la fecha del viaje (DD/MM/AAAA): ")            
+
+        except ValueError:
+            print("Error: ingrese día, mes y año con números.")
+            fecha = input("Ingrese la fecha del viaje (DD/MM/AAAA): ")
+    return fecha
 
 def ValidarFechas():
     fecha = input("Ingrese la fecha del viaje (DD/MM/AAAA): ")
@@ -162,6 +220,7 @@ def RegistrarViaje():
             print("Error: esa patente no existe.")
         patente = input("Ingrese otra patente: ").strip().upper()
     estado = "programado"
+    id_viaje_automatico = len(viajes) + 1
     viaje = {
             "id": id_viaje_automatico,
             "salida": "Buenos Aires",
@@ -173,4 +232,12 @@ def RegistrarViaje():
         }
     viajes.append(viaje)
     id_viaje_automatico += 1
+
+def VerViajes():
+    print("=" * 50)
+    print("VIAJES PROGRAMADOS".center(50))
+    print("=" * 50)
+    for viaje in viajes:
+        print(f"ID: {viaje['id']}, Salida: {viaje['salida']}, Destino: {viaje['destino']}, Fecha: {viaje['fecha']}, Patente: {viaje['patente']}, Estado: {viaje['estado']}")
+
     
