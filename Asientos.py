@@ -8,8 +8,6 @@ def CrearMatriz():
     RellenarMatriz(matriz)
     return matriz
 
-
-
 def RellenarMatriz(matriz):
     for f in range(FILAS + 1):
         for c in range(COLUMNAS):
@@ -25,7 +23,6 @@ def RellenarMatriz(matriz):
                 matriz[f][5] = "D"
             else:
                 matriz[f][c] = "O"
-
 
 # def asientos():
 #     x = random.randint(0,1)
@@ -48,11 +45,6 @@ def ImprimirMatriz(matriz):
     print("")
     print("O = Disponible")
     print("X = Ocupado")
-
-
-
-
-
 
 def ElegirAsiento(matriz, asiento):
     try:
@@ -193,5 +185,3 @@ def OcuparAsiento(matriz, asiento):
     except ValueError:
         print("Formato inválido. Ingrese un asiento como 1A o 10D.")
         return 0
-
-
