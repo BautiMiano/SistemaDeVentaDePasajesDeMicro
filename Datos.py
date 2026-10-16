@@ -1,0 +1,4 @@
+km_destinos = [415, 355, 385, 372, 345]
+reservas = []
+usuarios =[]
+contrasenas = []

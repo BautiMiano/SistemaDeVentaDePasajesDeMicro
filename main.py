@@ -1,48 +1,93 @@
-from Funciones.VentaPasaje import VentaPasajes
-from Funciones.Menu import menu_inicio, menu_principal
-from Funciones.ReservaPasaje import VerReserva, CancelarReserva
-from Funciones.Login import login
-from Funciones.Registro import registro
+from Menu import  menu_principal, menu_consultas, menu_ventas, menu_viajes
+from Pasajes import AgregarReserva, VerVentas, BuscarVenta, ModificarVenta, CancelarVenta, VentasPorDestino, VentasPorFecha,VentasPorUsuario
+from Funciones.Asientos import ImprimirMatriz, matriz, ElegirAsiento, CancelarAsiento,ModificarAsiento
 
+
+# def main():
+
+#     while True:
+#         try:
+#             opcion = int(menu_principal())
+#             if opcion == 1:
+#                 AgregarReserva()
+#             if opcion == 2:
+#                 VerVentas()
+#             if opcion == 3:
+#                 BuscarVenta()
+#             if opcion == 4:
+#                 ModificarVenta()
+#             if opcion == 5:
+#                 CancelarVenta()
+#             if opcion == 6:
+#                 ImprimirMatriz(matriz)
+#             if opcion == 7:
+#                 while True:
+#                     opcion_consulta = int(consultas())
+#                     if opcion_consulta == 1:
+#                         VentasPorDestino()
+#                     if opcion_consulta == 2:
+#                         VentasPorFecha()
+#                     if opcion_consulta == 3:
+#                         VentasPorUsuario()
+#                     if opcion_consulta == 4:
+#                         break
+#             if opcion == 8:
+#                 print("Saliendo del sistema...")
+#                 break
+            
+
+#         except ValueError:
+#             print("Error: Ingrese un número válido.")
+
+# main()
 
 def main():
 
     while True:
-        opcion = menu_inicio()
-        if opcion.isdigit():
-            if opcion == "1":
-                usuarioActual = login()
-                if usuarioActual:
+        try:
+            opcion = int(menu_principal())
 
-                    while True:
-                        opcion2= menu_principal()
+            if opcion == 1:
+                opcion = int(menu_ventas())
 
-                        if opcion2 == "1":
-                            VentaPasajes(usuarioActual)
+                if opcion == 1:
+                    
+                if opcion == 2:
 
-                        elif opcion2 == "2":
-                            VerReserva(usuarioActual)
+                if opcion == 3:
 
-                        elif opcion2 == "3":
-                            CancelarReserva(usuarioActual)
+                if opcion == 4:
 
-                        elif opcion2 == "4":
-                            print("Cerrando sesion...")
-                            break
-                        else:
-                            print("opcion invalida")
+                if opcion == 5:
 
-            elif opcion == "2":
-                registro()
-            elif opcion == "3":
-                print("Saliendo...")
-                break
+                else:
+                    print("Saliendo...")
+                    break
+
+            elif opcion == 2:
+                opcion = int(menu_consultas())
+
+                if opcion == 1:
+
+                if opcion == 2:
+
+                if opcion == 3:
+
+                else:
+
+            elif opcion == 3:
+                opcion = int(menu_viajes())
+
+                if opcion == 1:
+
+                if opcion == 2:
+
+                if opcion == 3:
+
+                else:
+
             else:
-                print("opcion invalida")
-    
-        else:
-            print("opcion invalida")
-        
+                print("Saliendo...")
 
-
-main()
+        except ValueError:
+            print("Error: Ingrese un número válido.")

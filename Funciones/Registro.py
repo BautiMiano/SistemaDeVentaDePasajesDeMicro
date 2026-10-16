@@ -1,4 +1,4 @@
-from Datos.Usuarios import usuarios, contrasenas
+from Datos import usuarios, contrasenas
 
 def registro():
     print("=" * 45)
@@ -29,3 +29,31 @@ def registro():
     print("")
     
     return
+
+def login():
+
+
+    print("=" * 45)
+    print("INICIO DE SESIÓN".center(45))
+    print("=" * 45)
+    print("")
+
+    usuario = input("Ingrese su nombre de usuario: ").strip()
+    contrasena = input("Ingrese su contraseña: ").strip()
+
+    print("")
+    
+    for i in range(len(usuarios)):
+        if usuario == usuarios[i]:
+            if contrasena == contrasenas[i]:
+                print("Usted a ingresado correctamente!".center(45))
+                print("")
+                return usuario
+            else:
+                print("Contraseña incorrecta!".center(45))
+                print("")
+                return False
+    print("Usuario no Encontrado".center(45))
+        
+    print("")
+    return False            

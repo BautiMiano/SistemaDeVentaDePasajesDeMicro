@@ -1,5 +1,5 @@
-from Datos.Reservas import reservas
-from Funciones.Asientos import ModificarAsiento
+from Datos import reservas
+from Asientos import ModificarAsiento
 
 def AgregarReserva(reserva):
     reservas.append(reserva)
@@ -72,7 +72,7 @@ def CancelarReserva(usuarioActual):
             fecha = reservas[i][2]
             asiento = reservas[i][3]
             precio = reservas[i][4]
-            print(f"{numeroReserva:<5}{destino:<25}{fecha:<15}{asiento:>10}{'$':>4}{precio}")
+            print(f"{numeroReserva:<5}{destino:<25}{fecha:<15}{asiento:>10}{precio:>10}")
             numeroReserva += 1
 
 
