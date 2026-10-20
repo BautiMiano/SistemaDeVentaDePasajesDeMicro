@@ -24,14 +24,6 @@ def RellenarMatriz(matriz):
             else:
                 matriz[f][c] = "O"
 
-# def asientos():
-#     x = random.randint(0,1)
-#     if x == 0:
-#         estado = "X" #Estado X significa ocupado
-#     else:
-#         estado = "O" #Estado O significa libre
-#     return estado
-
 def ImprimirMatriz(matriz):
 
     print("")
@@ -113,42 +105,6 @@ def CancelarAsiento(matriz,asiento):
     except ValueError:
         print("Formato inválido. Ingrese un asiento como 1A o 10D.")
         return 0
-
-# def ModificarAsiento(asiento):
-
-#     try:
-#         asiento = asiento.upper().strip()
-#         x = int(asiento[:-1])
-#         y = asiento[-1]
-
-#         if x < 1 or x > FILAS:
-#             print("Número de fila inválido.")
-#             return 0
-
-#         if y == "A":
-#             y = 1
-#         elif y == "B":
-#             y = 2
-#         elif y == "C":
-#             y = 4
-#         elif y == "D":
-#             y = 5
-#         else:
-#             print("Letra de asiento inválida.")
-#             return 0
-
-#         if matriz[x][y] == "X":
-#             matriz[x][y] = "O"
-#             print("Asiento liberado correctamente.")
-#             return 1
-#         else:
-#             print("Ese asiento ya está libre.")
-#             return 0
-
-#     except ValueError:
-#         print("Formato inválido. Ingrese un asiento como 1A o 10D.")
-#         return 0
-
 
 def OcuparAsiento(matriz, asiento):
     try:
