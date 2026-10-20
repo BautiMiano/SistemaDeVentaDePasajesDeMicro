@@ -1,5 +1,5 @@
 from Datos import reservas
-from Asientos import ModificarAsiento
+#from Asientos import ModificarAsiento
 
 def AgregarReserva(reserva):
     reservas.append(reserva)

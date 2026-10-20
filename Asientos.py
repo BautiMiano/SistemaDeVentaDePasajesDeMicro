@@ -114,8 +114,6 @@ def CancelarAsiento(matriz,asiento):
         print("Formato inválido. Ingrese un asiento como 1A o 10D.")
         return 0
 
-
-
 # def ModificarAsiento(asiento):
 
 #     try:
