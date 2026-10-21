@@ -1,7 +1,8 @@
 from Funciones.VentaPasaje import VentaPasajes
-from Menu import menu_principal, menu_consultas, menu_ventas, menu_viajes
+from Menu import menu_principal, menu_consultas, menu_ventas, menu_viajes, menu_micros
 from Funciones.ReservaPasaje import VerReserva, CancelarReserva, AgregarReserva
 from Funciones.Registro import registro, login
+from Pasajes import RegistrarViaje, VerViajes, RegistrarMicro, DarBajaMicro, VerMicros, VerDestinos
 
 
 def main():
@@ -9,19 +10,21 @@ def main():
     while True:
         try:
 
-            if opcion == 1:
+            if opcion == 1: #MENU VENTAS
                 opcion = int(menu_ventas())
 
                 if opcion == 1:
                     #Registrar venta de pasaje
                     AgregarReserva()
+
                 if opcion == 2:
                     #Ver ventas
-                    VerReserva()
+                    print("No disponible")
 
                 if opcion == 3:
                     #Buscar ventas
                     print("No disponible")
+
                 if opcion == 4:
                     #Modificar ventas
                     print("No disponible")
@@ -29,10 +32,11 @@ def main():
                 if opcion == 5:
                     #Cancelar ventas
                     CancelarReserva()
+
                 else:
                     opcion = int(menu_principal())
 
-            elif opcion == 2:
+            elif opcion == 2: #MENU CONSULTAS
                 opcion = int(menu_consultas())
 
                 if opcion == 1:
@@ -50,25 +54,48 @@ def main():
                 else:
                     opcion = int(menu_principal())
 
-            elif opcion == 3:
+            elif opcion == 3: #MENU VIAJES
                 opcion = int(menu_viajes())
 
                 if opcion == 1:
                     #Consultar disponibilidad
-                    print("No disponible")
+                    VerViajes()
 
                 if opcion == 2:
                     #Agregar destinos
-                    print("No disponible")
+                    RegistrarViaje()
 
                 if opcion == 3:
+                    #Ver destinos
+                    VerDestinos()
+
+                if opcion == 4:
                     #Eliminar destinos
                     print("No disponible")
 
                 else:
                     opcion = int(menu_principal())
+
+            elif opcion == 4: #MENU MICROS
+                opcion = int(menu_micros())
+                if opcion == 1:
+                    #Ver micros
+                    VerMicros()
+
+                if opcion == 2:
+                    #Registrar micros
+                    RegistrarMicro()
+
+                if opcion == 3:
+                    #Dar de baja
+                    DarBajaMicro()
+
+                else:
+                    opcion = int(menu_principal())
+
             else:
                 print("Saliendo...")
+                break
 
         except ValueError:
             print("Error: Ingrese un número válido.")

@@ -1,4 +1,4 @@
-from Asientos import asientos, CrearMatriz
+from Asientos import CrearMatriz
 import re
 import time
 ##################################################
@@ -205,6 +205,7 @@ def DarBajaMicro():
         for numero, micro in enumerate(micros, start = 1):
             print(f"{numero}. {micro['patente']}")
         Sel_micro = input("Seleccione el micro (ingrese el número): ")
+        print("Ingrese X para salir")
         if Sel_micro.upper() == "X":
             return 
         while not Sel_micro.isdigit() or int(Sel_micro) < 1 or int(Sel_micro) > len(micros):

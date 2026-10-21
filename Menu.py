@@ -6,7 +6,8 @@ def menu_principal():
     print("1 - Ventas")
     print("2 - Consultas")
     print("3 - Viajes")
-    print("4 - Salir")
+    print("4 - Micros")
+    print("5 - Salir")
 
     print("")
     print("-" * 45)
@@ -56,6 +57,22 @@ def menu_viajes():
     print("1 - Consultar disponibilidad")
     print("2 - Agregar destinos")
     print("3 - Eliminar destinos")
+    print("4 - volver atras")
+    print("")
+    
+    print("="*45)
+    opcion = input("Seleccione una opción: ")
+    print("")
+    return opcion
+
+def menu_micros():
+    print("="*45)
+    print("Viajes".center(45))
+    print("="*45)
+    print("")
+    print("1 - Ver micros")
+    print("2 - Registrar micros")
+    print("3 - Dar micro de baja")
     print("4 - volver atras")
     print("")
     
