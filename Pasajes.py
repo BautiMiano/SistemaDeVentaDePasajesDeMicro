@@ -219,15 +219,15 @@ def DarBajaMicro():
                 tiene_viajes = True
                 break
         if tiene_viajes:
-            print("-" * 50,"\n")
+            print("-" * 50)
             print("Denegado, el micro seleccionado tiene al menos un viaje programado")
             print("Seleccione otro micro o ingrese X para salir")
-            print("\n-" * 50)
+            print("-" * 50)
         else:
-            print("-" * 50,"\n")
+            print("-" * 50)
             print("Micro identificado, baja realizada.")
             print(f"Patente eliminada: {patente}")
-            print("\n-" * 50)
+            print("-" * 50)
             micros.pop(int(Sel_micro) - 1)
             patentes.remove(patente)    
             if not micros:
@@ -249,7 +249,6 @@ def VerMicros():
         print("-"*30)
     
 ############################## Viajes ##################################
-
 def RegistrarViaje():
     print("Destinos disponibles")
     for numero, (destino, distancia) in enumerate(distancias.items(), start = 1):
@@ -261,15 +260,23 @@ def RegistrarViaje():
     destino = list(distancias.keys())[int(Sel_destino) - 1]
     micros_disponibles = MicrosPorDestinos(destino)
     if not micros_disponibles:
-        return
+        print("Seleccione otro destino.")
+        return RegistrarViaje()
     for numero, micro in enumerate(micros_disponibles, start = 1):
         print(f"{numero}. {micro['patente']}")
     Sel_micro = input("Seleccione el micro (ingrese el número): ")
     while not Sel_micro.isdigit() or int(Sel_micro) < 1 or int(Sel_micro) > len(micros_disponibles):
         print("Error: opción inválida.")
         Sel_micro = input("Seleccione el micro (ingrese el número): ")
-    patente = micros_disponibles[int(Sel_micro) - 1]["patente"]        
+    patente = micros_disponibles[int(Sel_micro) - 1]["patente"]            
     fecha = ValidarFechas()
+    
+    for viaje in viajes:
+        if(viaje["patente"] == patente and viaje["fecha"] == fecha):
+            print("El micro que selecciono ya tiene un viaje asignado ese dia")
+            print("Seleccione un micro o fecha diferente")
+            return RegistrarViaje()  
+
     precio = tarifaPorKm * distancias[destino]
     estado = "programado"
     id_viaje_automatico = len(viajes) + 1
