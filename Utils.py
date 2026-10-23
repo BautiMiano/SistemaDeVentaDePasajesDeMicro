@@ -103,14 +103,14 @@ def menu_ventas():
     print("")
     return opcion
 #OK
-def menu_consultas():
+def menu_informes():
     print("="*45)
     print("CONSULTAS".center(45))
     print("="*45)
     print("")
-    print("1 - Consultar ventas por destino")
-    print("2 - Consultar ventas por fecha")
-    print("3 - Consultar ventas por usuario")
+    print("1 - Informe ventas por destino.")
+    print("2 - Informe ventas por fecha.")
+    print("3 - Informe la recaudación total.")
     print("4 - volver atras")
     print("")
 
@@ -662,6 +662,15 @@ def OcuparAsiento(matriz, asiento):
         print("Formato inválido. Ingrese un asiento como 1A o 10D.")
         return 0
 
+def ContarAsientosOcupados(asientos):
+    ocupado = 0
+
+    for fila in asientos:
+        for asiento in fila:
+            if asiento == "X":
+                ocupado +=1
+    return ocupado
+
 ######################################  Ventas ###############################
 
 def RegistrarVenta():
@@ -850,4 +859,76 @@ def ValidarFechas():
             fecha = input("Ingrese la fecha del viaje (DD/MM/AAAA): ")
     return fecha
 
-############################################################################
+########################################################################################
+
+######################################  Informes ###############################
+
+def InformeVentasPorDestino():
+    recaudacionPorDestino = {}
+
+    for viaje in viajes:
+        destino = viaje["destino"]
+
+        asientosOcupados = ContarAsientosOcupados(viaje["asientos"])
+
+        kilometros = distancias[destino]
+
+        recaudacion = asientosOcupados * kilometros * TARIFAPORKM
+
+        if destino in recaudacionPorDestino:
+            recaudacionPorDestino[destino] += recaudacion
+        else:
+            recaudacionPorDestino[destino] = recaudacion
+
+    print("=" * 50)
+    print("INFORME DE VENTAS POR DESTINO".center(50))
+    print("=" * 50)
+
+    for destino in recaudacionPorDestino:
+        print(f"Destino: {destino}")
+        print(f"Recaudación: ${recaudacionPorDestino[destino]}")
+        print("-" * 50)
+
+def InformeVentasPorFecha():
+    recaudacionPorFecha = {}
+
+    for viaje in viajes:
+        fecha = viaje["fecha"]
+        destino = viaje ["destino"]
+
+        asientosOcupados = ContarAsientosOcupados(viaje ["asientos"])\
+
+        kilometros = distancias[destino]
+
+        recaudacion = asientosOcupados * kilometros * TARIFAPORKM
+
+        if fecha in recaudacionPorFecha:
+            recaudacionPorFecha[fecha] += recaudacion
+        else:
+            recaudacionPorFecha[fecha] = recaudacion
+
+    print("=" * 50)
+    print("INFORME DE VENTAS POR FECHA".center(50))
+    print("=" * 50)
+
+    for fecha in recaudacionPorFecha:
+        print(f"Fecha: {fecha}")
+        print(f"Recaudación: ${recaudacionPorFecha[fecha]}")
+        print("-" * 50)
+
+def InformeRecaudacionTotal():
+    recaudacionTotal = 0
+    for viaje in viajes:
+        destino = viaje["destino"]
+        asientosOcupados = ContarAsientosOcupados(viaje["asientos"])
+        kilometros = distancias[destino]
+        recaudacion = asientosOcupados * kilometros * TARIFAPORKM
+        recaudacionTotal += recaudacion
+
+    print("=" * 50)
+    print("INFORME DE RECAUDACIÓN TOTAL".center(50))
+    print("=" * 50)
+    print(f"Recaudación Total: ${recaudacionTotal}")
+    print("-" * 50)
+
+
