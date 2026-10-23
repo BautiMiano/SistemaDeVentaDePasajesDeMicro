@@ -1,9 +1,9 @@
-from Funciones.VentaPasaje import VentaPasajes
-from Menu import menu_principal, menu_consultas, menu_ventas, menu_viajes, menu_micros
-from Funciones.ReservaPasaje import VerReserva, CancelarReserva, AgregarReserva
-from Funciones.Registro import registro, login
-from Pasajes import RegistrarViaje, VerViajes, RegistrarMicro, DarBajaMicro, VerMicros, VerDestinos
-
+from Utils import (RegistrarViaje, VerViajes, RegistrarMicro, DarBajaMicro, 
+                   VerMicros, VerDestinos, menu_principal, menu_consultas, 
+                   menu_ventas, menu_viajes, menu_micros, RegistrarVenta, 
+                   AgregarDestino, CargarDatos, CrearMatriz, ImprimirMatriz,
+                   matriz
+    )
 
 def main():
     
@@ -27,11 +27,12 @@ def main():
 
                     if opcion == 1:
                         #Registrar venta de pasaje
-                        AgregarReserva()
+                        RegistrarVenta()
 
                     elif opcion == 2:
                         #Ver ventas
-                        print("No disponible")
+                        matriz = CrearMatriz()
+                        ImprimirMatriz(matriz)
 
                     elif opcion == 3:
                         #Buscar ventas
@@ -87,15 +88,15 @@ def main():
 
                     elif opcion == 2:
                         #Agregar destinos
-                        RegistrarViaje()
+                        AgregarDestino()
 
                     elif opcion == 3:
-                        #Ver destinos
-                        VerDestinos()
-
-                    elif opcion == 4:
                         #Eliminar destinos
                         print("No disponible")
+
+                    elif opcion == 4:
+                        #Ver destinos
+                        VerDestinos()
 
                     else:
                         break
@@ -131,4 +132,6 @@ def main():
         except ValueError:
             print("Error: Ingrese un número válido.")
 
+
+CargarDatos()
 main()
