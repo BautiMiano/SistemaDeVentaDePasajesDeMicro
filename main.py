@@ -147,6 +147,7 @@ def main():
 
         except ValueError:
             print("Error: Ingrese un número válido.")
+            continue
 
 
 CargarDatos()
