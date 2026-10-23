@@ -2,7 +2,7 @@ from Utils import (RegistrarViaje, VerViajes, RegistrarMicro, DarBajaMicro,
                    VerMicros, VerDestinos, menu_principal, menu_consultas, 
                    menu_ventas, menu_viajes, menu_micros, RegistrarVenta, 
                    AgregarDestino, CargarDatos, CrearMatriz, ImprimirMatriz,
-                   matriz
+                   matriz, menu_destinos
     )
 
 def main():
@@ -11,7 +11,7 @@ def main():
         try:
             opcion = int(menu_principal())
 
-            if opcion < 1 or opcion > 5:
+            if opcion < 1 or opcion > 6:
                 print("Error: Ingrese un numero válido.")
                 continue
 
@@ -78,25 +78,19 @@ def main():
                 while True:
                     opcion = int(menu_viajes())
 
-                    if opcion < 1 or opcion > 5:
+                    if opcion < 1 or opcion > 4:
                         print("Error: Ingrese un numero válido.")
                         continue
 
                     if opcion == 1:
                         #Consultar disponibilidad
-                        VerViajes()
-
-                    elif opcion == 2:
-                        #Agregar destinos
-                        AgregarDestino()
-
-                    elif opcion == 3:
-                        #Eliminar destinos
                         print("No disponible")
 
-                    elif opcion == 4:
-                        #Ver destinos
-                        VerDestinos()
+                    elif opcion == 2:
+                        RegistrarViaje()  
+
+                    elif opcion == 3:
+                        VerViajes()
 
                     else:
                         break
@@ -124,6 +118,29 @@ def main():
 
                     else:
                         break
+
+            elif opcion == 5: #MENU DESTINOS
+                    while True:
+                        opcion = int(menu_destinos())
+    
+                        if opcion < 1 or opcion > 4:
+                            print("Error: Ingrese un numero válido.")
+                            continue
+    
+                        if opcion == 1:
+                            #Ver destinos
+                            VerDestinos()
+    
+                        elif opcion == 2:
+                            #Agregar destinos
+                            AgregarDestino()
+    
+                        elif opcion == 3:
+                            #Eliminar destinos
+                            print("No disponible")    
+
+                        else:
+                            break
 
             else:
                 print("Saliendo...")

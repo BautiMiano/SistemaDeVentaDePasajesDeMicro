@@ -75,7 +75,8 @@ def menu_principal():
     print("2 - Consultas")
     print("3 - Viajes")
     print("4 - Micros")
-    print("5 - Salir")
+    print("5 - Destinos")
+    print("6 - Salir")
 
     print("")
     print("-" * 45)
@@ -123,10 +124,9 @@ def menu_viajes():
     print("="*45)
     print("")
     print("1 - Consultar disponibilidad")
-    print("2 - Agregar destinos")
-    print("3 - Eliminar destinos")
-    print("4 - Ver destinos")
-    print("5 - volver atras")
+    print("2 - Registrar viaje")
+    print("3 - Ver viajes")
+    print("4 - volver atras")
     print("")
     
     print("="*45)
@@ -142,6 +142,22 @@ def menu_micros():
     print("1 - Ver micros")
     print("2 - Registrar micros")
     print("3 - Dar micro de baja")
+    print("4 - volver atras")
+    print("")
+    
+    print("="*45)
+    opcion = input("Seleccione una opción: ")
+    print("")
+    return opcion
+
+def menu_destinos():
+    print("="*45)
+    print("Destinos".center(45))
+    print("="*45)
+    print("")
+    print("1 - Ver destinos")
+    print("2 - Agregar destinos")
+    print("3 - Eliminar destinos")
     print("4 - volver atras")
     print("")
     
@@ -243,7 +259,7 @@ def VerMicros():
             print("- Sin viajes asignados")
 
         print("-" * 30)
-
+#CREO QUE ES PARA BORRAR
 def MicrosPorDestinos(destino):
     micros_disponibles = []
     for micro in micros:
@@ -307,18 +323,87 @@ def VerDestinos():
 
 ############################## Viajes ##################################
 
-#seleccionar destino -> seleccionar fecha -> asignarle un micro(un micro no 
-# puede tener 2 viajes un mismo dia) -> CrearMatriz() -> guardar datos
+#FUNCIONANDO, ARREGLAR: UN MICRO NO PUEDE TENER 2 VIAJES UN MISMO DIA
 def RegistrarViaje():
-    print("mañana lo hago")
+    viaje = {}
 
+    if len(viajes) == 0:
+        viaje["id"] = 1
+    else:
+        viaje["id"] = viajes[-1]["id"] + 1
+
+    try:
+
+        while True:
+
+            VerDestinos()
+            print("")
+            #CHEQUEAR SI VIMOS .keys()
+            destinos = list(distancias.keys())
+            
+            opcion = int(input("Seleccione una opcion: "))
+
+            if opcion < 0 or opcion > len(destinos):
+                print("Error. Fuera de rango.")
+                continue
+
+            destino_elegido = destinos[opcion - 1]
+
+            viaje["destino"] = destino_elegido
+            break
+
+        while True:
+            VerMicros()
+
+            patente = input("Ingrese la patente del micro: ").strip().upper()
+
+            micro_elegido = None
+
+            for micro in micros:
+                if micro["patente"] == patente:
+                    micro_elegido = micro
+                    break
+
+            if micro_elegido is None:
+                print("Error: esa patente no está registrada.")
+                continue
+
+            viaje["patente"] = patente
+
+            break
+
+        fecha = ValidarFechas()
+        viaje["fecha"] = fecha
+
+        matriz = CrearMatriz()
+        viaje["asientos"] = matriz
+
+        viajes.append(viaje)
+        GuardarDatos()
+
+        print("Viaje registrado correctamente.")
+        
+    except ValueError:
+        print("Error. Caracter invalido")
+#A CHEQUEAR
 def VerViajes():
     print("=" * 50)
     print("VIAJES PROGRAMADOS".center(50))
     print("=" * 50)
-    for viaje in viajes:
-        print(f"ID: {viaje['id']}, Salida: {viaje['salida']}, Destino: {viaje['destino']}, Fecha: {viaje['fecha']}, Patente: {viaje['patente']}, Estado: {viaje['estado']}")
 
+    if not viajes:
+        print("No hay viajes programados.")
+        return
+
+    for viaje in viajes:
+        print(f"ID: {viaje['id']}")
+        #print(f"Salida: {viaje['salida']}")
+        print(f"Destino: {viaje['destino']}")
+        print(f"Fecha: {viaje['fecha']}")
+        print(f"Patente: {viaje['patente']}")
+        #print(f"Estado: {viaje['estado']}")
+        print("-" * 50)
+#A CHEQUEAR
 def Seleccionar_Destinos():
 
     destinos_agregados = []
@@ -344,7 +429,7 @@ def Seleccionar_Destinos():
     return 
 
 ############################## Asientos ##################################
-
+#OK
 def CrearMatriz():
     for f in range(FILAS + 1):
         matriz.append([0] * COLUMNAS)
@@ -368,7 +453,7 @@ def CrearMatriz():
                     asientos_ocupados = asientos_ocupados + 1
 
     return matriz
-    
+#OK    
 def ImprimirMatriz(matriz):
 
     print("")
@@ -382,7 +467,7 @@ def ImprimirMatriz(matriz):
     print("")
     print("O = Disponible")
     print("X = Ocupado")        
-
+#CHEQUEAR
 def ElegirAsiento(matriz, asiento):
     try:
         asiento = asiento.upper().strip()
@@ -415,7 +500,7 @@ def ElegirAsiento(matriz, asiento):
     except ValueError:
         print("Formato inválido. Ingrese un asiento como 1A o 10D.")
         return 0
-
+#CHEQUEAR
 def CancelarAsiento(matriz,asiento):
 
     try:
@@ -450,7 +535,7 @@ def CancelarAsiento(matriz,asiento):
     except ValueError:
         print("Formato inválido. Ingrese un asiento como 1A o 10D.")
         return 0
-
+#CHEQUEAR
 def OcuparAsiento(matriz, asiento):
 
     try:
@@ -489,97 +574,10 @@ def OcuparAsiento(matriz, asiento):
 ######################################  Ventas ###############################
 
 def RegistrarVenta():
-
-    # 1. Obtener los destinos con viajes programados
-    destinos = []
-
-    for viaje in viajes:
-        if viaje["estado"] == "programado":
-            if viaje["destino"] not in destinos:
-                destinos.append(viaje["destino"])
-
-    if not destinos:
-        print("No hay destinos disponibles.")
-        return None
-
-    # 2. Seleccionar destino
-    print("\nSELECCIONAR DESTINO")
-
-    for i, destino in enumerate(destinos, start=1):
-        print(f"{i}. {destino}")
-
-    while True:
-        opcion = input("Seleccione un destino (X para cancelar): ").strip()
-
-        if opcion.upper() == "X":
-            return None
-
-        if opcion.isdigit() and 1 <= int(opcion) <= len(destinos):
-            destino_elegido = destinos[int(opcion) - 1]
-            break
-
-        print("Opción inválida.")
-
-    # 3. Obtener los viajes disponibles para ese destino
-    viajes_destino = []
-
-    for viaje in viajes:
-        if (
-            viaje["destino"] == destino_elegido
-            and viaje["estado"] == "programado"
-        ):
-            viajes_destino.append(viaje)
-
-    if not viajes_destino:
-        print("No hay viajes disponibles para ese destino.")
-        return None
-
-    # 4. Mostrar fechas disponibles para el destino
-    print(f"\nFECHAS DISPONIBLES PARA {destino_elegido.upper()}")
-
-    for i, viaje in enumerate(viajes_destino, start=1):
-        print(f"{i}. {viaje['fecha']}")
-
-    while True:
-        opcion = input("Seleccione una fecha (X para cancelar): ").strip()
-
-        if opcion.upper() == "X":
-            return None
-
-        if opcion.isdigit() and 1 <= int(opcion) <= len(viajes_destino):
-            viaje_elegido = viajes_destino[int(opcion) - 1]
-            break
-
-        print("Opción inválida.")
-
-    # 5. Mostrar los asientos del viaje elegido
-    matriz = viaje_elegido["asientos"]
-    ImprimirMatriz(matriz)
-
-    # 6. Seleccionar y ocupar un asiento
-    while True:
-        asiento = input(
-            "Seleccione un asiento (ejemplo: 2A, X para cancelar): "
-        ).strip().upper()
-
-        if asiento == "X":
-            return None
-
-        if OcuparAsiento(matriz, asiento):
-            break
-
-        print("Asiento inválido u ocupado. Intente nuevamente.")
-
-    # 7. Devolver los datos de la venta
-    venta = [
-        viaje_elegido["fecha"],
-        viaje_elegido["destino"],
-        asiento,
-        viaje_elegido["precio"],
-        viaje_elegido["patente"]
-    ]
-
-    return venta
+    #Selecciona un destino -> Selecciona un fecha disponible para ese destino
+    #se selecciona un asiento(debe actualizar estado del asiento) -> se guardan los datos
+    #se muestra un resumen.
+    return
 
 ############################# Funciones extras #############################
 
@@ -634,13 +632,21 @@ def ValidarFechas():
                 if dia < 1 or dia > dias_por_mes[mes]:
                     print("Error: el día no es válido para ese mes.")
                 else:
+
                     fecha_actual = time.localtime()
+
                     dia_actual = fecha_actual.tm_mday
                     mes_actual = fecha_actual.tm_mon
                     anio_actual = fecha_actual.tm_year
 
-                    if anio < anio_actual or (anio == anio_actual and mes < mes_actual) or (anio == anio_actual and mes == mes_actual and dia < dia_actual):
-                        print("Error, no se pueden ingresar fechas anteriores a hoy.")
+                    # Comprobar que la fecha no sea anterior a hoy
+                    if (anio, mes, dia) < (anio_actual, mes_actual, dia_actual):
+                        print("Error: no se pueden ingresar fechas anteriores a hoy.")
+
+                    # Comprobar que la fecha no supere un año desde hoy
+                    elif (anio, mes, dia) > (anio_actual + 1, mes_actual, dia_actual):
+                        print("Error: solo se pueden registrar viajes hasta un año desde hoy.")
+
                     else:
                         break
 
@@ -650,19 +656,5 @@ def ValidarFechas():
             print("Error: ingrese día, mes y año con números.")
             fecha = input("Ingrese la fecha del viaje (DD/MM/AAAA): ")
     return fecha
-
-
-def BuscarViajePorMicroFecha(viajes, patente, fecha, indice=0):
-
-    if indice >= len(viajes):
-        return None
-
-    viaje = viajes[indice]
-
-    if viaje["patente"] == patente and viaje["fecha"] == fecha:
-        return viaje
-
-    return BuscarViajePorMicroFecha(viajes, patente, fecha, indice + 1)
-
 
 ########################################################################################
