@@ -1,9 +1,11 @@
 from Utils import (RegistrarViaje, VerViajes, RegistrarMicro, DarBajaMicro, 
-                   VerMicros, VerDestinos, menu_principal, menu_consultas, 
+                   VerMicros, VerDestinos, menu_informes, menu_principal,  
                    menu_ventas, menu_viajes, menu_micros, RegistrarVenta, 
                    AgregarDestino, CargarDatos, CrearMatriz, ImprimirMatriz,
-                    menu_destinos
-    )
+                   menu_destinos, Disponibilidad, EliminarDestino,InformeVentasPorDestino, 
+                   InformeVentasPorFecha, InformeRecaudacionTotal)
+
+
 
 def main():
     
@@ -49,10 +51,10 @@ def main():
                     else:
                         break
 
-            elif opcion == 2: #MENU CONSULTAS
+            elif opcion == 2: #MENU Informes
 
                 while True:
-                    opcion = int(menu_consultas())
+                    opcion = int(menu_informes())
 
                     if opcion < 1 or opcion > 4:
                         print("Error: Ingrese un numero válido.")
@@ -60,15 +62,14 @@ def main():
                     
                     if opcion == 1:
                         #Ventas por destino
-                        print("No disponible")
+                        InformeVentasPorDestino()
 
                     elif opcion == 2:
                         #Ventas por fecha
-                        print("No disponible")
-
+                        InformeVentasPorFecha()
                     elif opcion == 3:
                         #Ventas por usuario
-                        print("No disponible")
+                        InformeRecaudacionTotal()
 
                     else:
                         break
@@ -84,7 +85,7 @@ def main():
 
                     if opcion == 1:
                         #Consultar disponibilidad
-                        print("No disponible")
+                        Disponibilidad()
 
                     elif opcion == 2:
                         RegistrarViaje()  
@@ -137,7 +138,7 @@ def main():
     
                         elif opcion == 3:
                             #Eliminar destinos
-                            print("No disponible")    
+                            EliminarDestino()  
 
                         else:
                             break
