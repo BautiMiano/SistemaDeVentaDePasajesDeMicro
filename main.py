@@ -2,8 +2,7 @@ from Utils import (RegistrarViaje, VerViajes, RegistrarMicro, DarBajaMicro,
                    VerMicros, VerDestinos, menu_principal, menu_consultas, 
                    menu_ventas, menu_viajes, menu_micros, RegistrarVenta, 
                    AgregarDestino, CargarDatos, CrearMatriz, ImprimirMatriz,
-                   matriz, menu_destinos
-    )
+                   menu_destinos, Disponibilidad, EliminarDestino)
 
 def main():
     
@@ -84,7 +83,7 @@ def main():
 
                     if opcion == 1:
                         #Consultar disponibilidad
-                        print("No disponible")
+                        Disponibilidad()
 
                     elif opcion == 2:
                         RegistrarViaje()  
@@ -137,7 +136,7 @@ def main():
     
                         elif opcion == 3:
                             #Eliminar destinos
-                            print("No disponible")    
+                            EliminarDestino()  
 
                         else:
                             break

@@ -1,5 +1,6 @@
 import re, time, random, json, os
-from Datos import distancias, micros, patentes, viajes, ventas, matriz, FILAS, COLUMNAS, TARIFAPORKM
+from Datos import (distancias, micros, patentes, viajes, ventas, 
+                   FILAS, COLUMNAS, TARIFAPORKM)
 
 ARCHIVO_JSON = os.path.join(os.path.dirname(os.path.abspath(__file__)),"datos.json")
 
@@ -188,45 +189,53 @@ def RegistrarMicro():
     patentes.add(patente)
     GuardarDatos()
     print("Micro registrado correctamente")
-#MODIFICAR (dejar para el final)
+#OK
 def DarBajaMicro():
-    if not micros:
+    print("=" * 50)
+    print("DAR DE BAJA MICRO".center(50))
+    print("=" * 50)
+
+    if len(micros) == 0:
         print("No hay micros registrados.")
         return
+
+    print("\nMICROS REGISTRADOS")
+
+    for i in range(len(micros)):
+        print(f"{i + 1} - Patente: {micros[i]['patente']}")
+
     while True:
-        print("Menu para dar micros de baja")
-        for numero, micro in enumerate(micros, start = 1):
-            print(f"{numero}. {micro['patente']}")
-        Sel_micro = input("Seleccione el micro (ingrese el número): ")
-        print("Ingrese X para salir")
-        if Sel_micro.upper() == "X":
-            return 
-        while not Sel_micro.isdigit() or int(Sel_micro) < 1 or int(Sel_micro) > len(micros):
-            print("Error: opción inválida.")
-            Sel_micro = input("Seleccione el micro (ingrese el número): ")
-            if Sel_micro.upper() == "X":
-                return
-        patente = micros[int(Sel_micro) - 1]["patente"]
-        tiene_viajes = False
-        for viaje in viajes:
-            if viaje["patente"] == patente and viaje["estado"] == "programado":
-                tiene_viajes = True
-                break
-        if tiene_viajes:
-            print("-" * 50,"\n")
-            print("Denegado, el micro seleccionado tiene al menos un viaje programado")
-            print("Seleccione otro micro o ingrese X para salir")
-            print("\n-" * 50)
-        else:
-            print("-" * 50,"\n")
-            print("Micro identificado, baja realizada.")
-            print(f"Patente eliminada: {patente}")
-            print("\n-" * 50)
-            micros.pop(int(Sel_micro) - 1)
-            patentes.remove(patente)    
-            if not micros:
-                print("No quedan micros registrados.")
-                return
+        try:
+            opcion = int(input("Seleccione el micro a dar de baja: "))
+
+            if opcion < 1 or opcion > len(micros):
+                print("Error: opción fuera de rango.")
+                continue
+
+            break
+
+        except ValueError:
+            print("Error: debe ingresar un número.")
+
+    patente = micros[opcion - 1]["patente"]
+
+    micros.pop(opcion - 1)
+
+    if patente in patentes:
+        patentes.remove(patente)
+
+    viajes_nuevos = []
+
+    for viaje in viajes:
+        if viaje["patente"] != patente:
+            viajes_nuevos.append(viaje)
+
+    viajes[:] = viajes_nuevos
+
+    GuardarDatos()
+
+    print(f"Micro con patente {patente} dado de baja correctamente.")
+    print("También se eliminaron sus viajes asociados.")
 #OK 
 def VerMicros():
 
@@ -319,7 +328,46 @@ def VerDestinos():
         print(f"{i}. {destino} - {distancia} km")
 
     print("=" * 40)
-#AGREGAR FUNCION PARA ELIMINAR DESTINOS (dejar para el final)
+#OK
+def EliminarDestino():
+    print("=" * 50)
+    print("ELIMINAR DESTINO".center(50))
+    print("=" * 50)
+
+    if len(distancias) == 0:
+        print("No hay destinos registrados.")
+        return
+
+    VerDestinos()
+
+    destinos = list(distancias.keys())
+
+    while True:
+        try:
+            opcion = int(input("Seleccione el destino a eliminar: "))
+
+            if opcion < 1 or opcion > len(destinos):
+                print("Error: opción fuera de rango.")
+                continue
+
+            break
+
+        except ValueError:
+            print("Error: debe ingresar un número.")
+
+    destino = destinos[opcion - 1]
+
+    distancias.pop(destino)
+
+    viajes[:] = [
+        viaje for viaje in viajes
+        if viaje["destino"] != destino
+    ]
+
+    GuardarDatos()
+
+    print(f"Destino '{destino}' eliminado correctamente.")
+    print("También se eliminaron sus viajes asociados.")
 
 ############################## Viajes ##################################
 
@@ -343,7 +391,7 @@ def RegistrarViaje():
             
             opcion = int(input("Seleccione una opcion: "))
 
-            if opcion < 0 or opcion > len(destinos):
+            if opcion < 1 or opcion > len(destinos):
                 print("Error. Fuera de rango.")
                 continue
 
@@ -428,29 +476,70 @@ def Seleccionar_Destinos():
             print("Ya esta agendado el destino, intente con otro")
     return 
 
+def Disponibilidad():
+    print("=" * 50)
+    print("CONSULTAR DISPONIBILIDAD".center(50))
+    print("=" * 50)
+
+    if len(viajes) == 0:
+        print("No hay viajes registrados.")
+        return
+
+    print("\nVIAJES DISPONIBLES")
+
+    for i in range(len(viajes)):
+        viaje = viajes[i]
+        print(f"{i + 1} - Destino: {viaje['destino']} | "
+              f"Fecha: {viaje['fecha']} | "
+              f"Patente: {viaje['patente']}")
+
+    while True:
+        try:
+            opcion = int(input("\nSeleccione un viaje: "))
+
+            if opcion < 1 or opcion > len(viajes):
+                print("Error: opción fuera de rango.")
+                continue
+
+            break
+
+        except ValueError:
+            print("Error: debe ingresar un número.")
+
+    viaje = viajes[opcion - 1]
+
+    print("\n" + "=" * 50)
+    print(f"DESTINO: {viaje['destino']}")
+    print(f"FECHA: {viaje['fecha']}")
+    print(f"PATENTE: {viaje['patente']}")
+    print("=" * 50)
+
+    ImprimirMatriz(viaje["asientos"])
+
 ############################## Asientos ##################################
 #OK
 def CrearMatriz():
-    for f in range(FILAS + 1):
+    matriz = []
+    asientos_libres = 0
+    asientos_ocupados = 0
+
+    for f in range(FILAS):
         matriz.append([0] * COLUMNAS)
 
-    for f in range(FILAS + 1):
+    for f in range(FILAS):
         for c in range(COLUMNAS):
 
-            if c == 2:
-                continue
-            else:
-                estado = random.randint(0, 1)
-                asientos_libres = 0
-                asientos_ocupados = 0
 
-                if estado == 0: #O = Libre
-                    matriz[f][c] = "O"
-                    asientos_libres = asientos_libres + 1
-                    
-                else:
-                    matriz[f][c] = "X" #X = ocupado
-                    asientos_ocupados = asientos_ocupados + 1
+            estado = random.randint(0, 1)
+
+            if estado == 0: #O = Libre
+                matriz[f][c] = "O"
+                asientos_libres = asientos_libres + 1
+                
+            else:
+                matriz[f][c] = "X" #X = ocupado
+                asientos_ocupados = asientos_ocupados + 1
+
 
     return matriz
 #OK    
@@ -461,8 +550,8 @@ def ImprimirMatriz(matriz):
     print("    A B   C D")
     print("   -----------")
 
-    for f in range(0, len(matriz)):
-        print(f"{f:>2}  {matriz[f][0]} {matriz[f][1]}   {matriz[f][2]} {matriz[f][3]}")
+    for f in range(len(matriz)):
+        print(f"{f+1:>2}  {matriz[f][0]} {matriz[f][1]}   {matriz[f][2]} {matriz[f][3]}")
 
     print("")
     print("O = Disponible")

@@ -2,7 +2,6 @@ distancias = {}
 
 micros = []
 patentes = set()
-matriz = []
 
 viajes = []
 ventas = []
