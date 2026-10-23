@@ -1,9 +1,9 @@
 from Utils import (RegistrarViaje, VerViajes, RegistrarMicro, DarBajaMicro, 
                    VerMicros, VerDestinos, menu_informes, menu_principal,  
                    menu_ventas, menu_viajes, menu_micros, RegistrarVenta, 
-                   AgregarDestino, CargarDatos, CrearMatriz, ImprimirMatriz,
-                   menu_destinos, Disponibilidad, EliminarDestino,InformeVentasPorDestino, 
-                   InformeVentasPorFecha, InformeRecaudacionTotal)
+                   AgregarDestino, CargarDatos,                    menu_destinos, Disponibilidad, EliminarDestino,InformeVentasPorDestino, 
+                   InformeVentasPorFecha, InformeRecaudacionTotal,VerVentas)
+
 
 
 
@@ -33,8 +33,7 @@ def main():
 
                     elif opcion == 2:
                         #Ver ventas
-                        matriz = CrearMatriz()
-                        ImprimirMatriz(matriz)
+                        VerVentas()
 
                     elif opcion == 3:
                         #Buscar ventas
@@ -149,6 +148,7 @@ def main():
 
         except ValueError:
             print("Error: Ingrese un número válido.")
+            continue
 
 
 CargarDatos()
