@@ -2,7 +2,7 @@ from Utils import (RegistrarViaje, VerViajes, RegistrarMicro, DarBajaMicro,
                    VerMicros, VerDestinos, menu_principal, menu_consultas, 
                    menu_ventas, menu_viajes, menu_micros, RegistrarVenta, 
                    AgregarDestino, CargarDatos, CrearMatriz, ImprimirMatriz,
-                   menu_destinos, Disponibilidad, EliminarDestino)
+                   menu_destinos, Disponibilidad, EliminarDestino, VerVentas)
 
 def main():
     
@@ -30,8 +30,7 @@ def main():
 
                     elif opcion == 2:
                         #Ver ventas
-                        matriz = CrearMatriz()
-                        ImprimirMatriz(matriz)
+                        VerVentas()
 
                     elif opcion == 3:
                         #Buscar ventas

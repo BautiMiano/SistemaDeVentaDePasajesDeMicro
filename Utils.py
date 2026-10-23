@@ -728,8 +728,6 @@ def RegistrarVenta():
     ImprimirMatriz(matriz)
     asiento_elegido = ElegirAsiento(matriz)
 
-    GuardarDatos()
-
     precio = distancias[viaje_elegido["destino"]] * TARIFAPORKM
 
     print("\n" + "=" * 40)
@@ -740,6 +738,39 @@ def RegistrarVenta():
     print(f"Asiento: {asiento_elegido}")
     print(f"Precio: ${precio}")
     print("=" * 40)
+
+    venta = {
+    "destino": viaje_elegido["destino"],
+    "fecha": viaje_elegido["fecha"],
+    "patente": viaje_elegido["patente"],
+    "asiento": asiento_elegido,
+    "precio": precio
+}
+
+    ventas.append(venta)
+    GuardarDatos()
+
+    print("Venta registrada correctamente.")
+
+def VerVentas():
+    print("=" * 50)
+    print("VENTAS REGISTRADAS".center(50))
+    print("=" * 50)
+
+    if len(ventas) == 0:
+        print("No hay ventas registradas.")
+        return
+
+    for i in range(len(ventas)):
+        venta = ventas[i]
+
+        print(f"Venta N°: {i + 1}")
+        print(f"Destino: {venta['destino']}")
+        print(f"Fecha: {venta['fecha']}")
+        print(f"Patente: {venta['patente']}")
+        print(f"Asiento: {venta['asiento']}")
+        print(f"Precio: ${venta['precio']}")
+        print("-" * 50)
 
 ############################# Funciones extras #############################
 
