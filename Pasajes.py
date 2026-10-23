@@ -1,4 +1,4 @@
-from Asientos import asientos, CrearMatriz
+from Asientos import asientos, CrearMatriz, ImprimirMatriz, Contar_Asientos_Libres
 import re
 import time
 ##################################################
@@ -6,8 +6,8 @@ micros = [
     {"patente": "AF617ES", "destinos": ["Mar del Plata", "Pinamar"]},
     {"patente": "AG817ES", "destinos": ["Villa Gesell"]},
     {"patente": "AC427ES", "destinos": ["Cobos"]},
-    {"patente": "AA852ES", "destinos": ["San Bernando"]},
-    {"patente": "AB951ES", "destinos": ["Mar del Plata", "San Bernando"]}
+    {"patente": "AA852ES", "destinos": ["San Bernardo"]},
+    {"patente": "AB951ES", "destinos": ["Mar del Plata", "San Bernardo"]}
 ]
 ventas = []
 
@@ -22,7 +22,7 @@ distancias = {
 }
 
 patentes = {
-    "AF617ES",
+    "AF617ES", 
     "AG817ES",
     "AC427ES",
     "AA852ES",
@@ -138,7 +138,7 @@ def VerDestinos():
     for numero, (destino, distancia) in enumerate(distancias.items(), start = 1):
         print(f"{numero}. {destino} - {distancia} km")
 
-def Seleccionar_Destinos():
+def Agrupar_Destinos():
     destinos_agregados = []
     while True:
         for numero, (destino, distancia) in enumerate(distancias.items(), start = 1):
@@ -186,7 +186,7 @@ def RegistrarMicro():
             print("Error: esa patente ya está registrada.")
         patente = input("Ingrese otra patente: ").strip().upper()
 
-    micro_destinos = Seleccionar_Destinos()
+    micro_destinos = Agrupar_Destinos()
 
     micro = {
         "patente" : patente,
@@ -247,10 +247,8 @@ def VerMicros():
         for destino in micro["destinos"]:
             print(f"- {destino}")
         print("-"*30)
-    
-############################## Viajes ##################################
-def RegistrarViaje():
-    print("Destinos disponibles")
+
+def SeleccionarDestino():
     for numero, (destino, distancia) in enumerate(distancias.items(), start = 1):
         print(f"{numero}. {destino} - {distancia} km")
     Sel_destino = input("Seleccione el destino (ingrese el número): ")
@@ -258,6 +256,11 @@ def RegistrarViaje():
         print("Error: opción inválida.")
         Sel_destino = input("Seleccione el destino (ingrese el número): ")
     destino = list(distancias.keys())[int(Sel_destino) - 1]
+    return destino
+
+############################## Viajes ##################################
+def RegistrarViaje():
+    destino = SeleccionarDestino()
     micros_disponibles = MicrosPorDestinos(destino)
     if not micros_disponibles:
         print("Seleccione otro destino.")
@@ -272,7 +275,7 @@ def RegistrarViaje():
     fecha = ValidarFechas()
     
     for viaje in viajes:
-        if(viaje["patente"] == patente and viaje["fecha"] == fecha):
+        if(viaje["patente"] == patente and viaje["fecha"] == fecha) and viaje["estado"] == "programado":
             print("El micro que selecciono ya tiene un viaje asignado ese dia")
             print("Seleccione un micro o fecha diferente")
             return RegistrarViaje()  
@@ -293,8 +296,50 @@ def RegistrarViaje():
     viajes.append(viaje)
 
 def VerViajes():
+    if not viajes:
+        print("No hay viajes programados")
+        return
     print("=" * 50)
     print("VIAJES PROGRAMADOS".center(50))
     print("=" * 50)
     for viaje in viajes:
-        print(f"ID: {viaje['id']}, Salida: {viaje['salida']}, Destino: {viaje['destino']}, Fecha: {viaje['fecha']}, Patente: {viaje['patente']}, Estado: {viaje['estado']}")
+        print(f"ID: {viaje['id']}, Salida: {viaje['salida']}, Destino: {viaje['destino']}, Fecha: {viaje['fecha']}, Patente: {viaje['patente']}, {viaje['precio']}, Estado: {viaje['estado']}")
+
+def VerAsientosDeViaje(idViaje):
+    encontrado = False
+    for viaje in viajes:
+        if viaje["id"] == idViaje:
+            encontrado = True
+            asientos_micro = viaje["asientos"]
+            ImprimirMatriz(asientos_micro)
+    if not encontrado:
+        print("No se encontro un viaje con ese ID.")
+
+def ComprobarViajes():
+    for numero, viaje in enumerate(viajes, start = 1):
+        print(f"{numero}. ID: {viaje['id']}")
+    sel_viaje = input("Ingrese el numero de opcion de viaje: ").upper()    
+    while not sel_viaje.isdigit() or int(sel_viaje) < 1 or int(sel_viaje) > len(viajes):
+        for numero, viaje in enumerate(viajes, start = 1):
+            print(f"{numero}. ID: {viaje['id']}")
+        sel_viaje = input("Ingrese el numero de opcion de viaje: ").upper()
+    id_viaje = viajes[int(sel_viaje) - 1]["id"]
+    VerAsientosDeViaje(id_viaje)
+
+################################################# Ventas ###########################################################
+
+def ActualizarTarifa():
+    try:
+        global tarifaPorKm
+        tarifaPorKm = float(input("Ingrese la nueva tarifa: "))
+    except(ValueError):
+        print("Error, ingrese un valor numerico")
+        ActualizarTarifa()
+
+def registrarVenta():
+    print("Registrando venta")
+    destino = SeleccionarDestino()
+    for viaje in viajes:
+        asientos_libres = Contar_Asientos_Libres(viaje["asientos"])
+        if viaje["destino"] == destino and viaje["estado"] == "programado":
+            print(f"Pantete: {viaje['patente']} - {viaje['fecha']} - total de asientos disponibles: {asientos_libres}")

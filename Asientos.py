@@ -139,3 +139,12 @@ def OcuparAsiento(matriz, asiento):
     except ValueError:
         print("Formato inválido. Ingrese un asiento como 1A o 10D.")
         return 0
+
+def Contar_Asientos_Libres(asientos):
+    asientos_libres = 0
+    for fil in range(1, FILAS + 1):
+        for col in range(COLUMNAS):
+            if col != 0 and col != 3:
+                if asientos[fil][col] == "O":
+                    asientos_libres += 1
+    return asientos_libres
