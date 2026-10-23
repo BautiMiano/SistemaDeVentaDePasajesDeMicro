@@ -661,20 +661,14 @@ def OcuparAsiento(matriz, asiento):
         return 0
 
     
-def ContarAsientosOcupados(asientos, fila=0, columna=0):
-    if fila == len(asientos):
-        return 0
+def ContarAsientosOcupados(asientos):
+    ocupado = 0
 
-    if asientos[fila][columna] == "X":
-        ocupados = 1
-    else:
-        ocupados = 0
-
-    if columna == len(asientos[fila]) - 1:
-        return ocupados + ContarAsientosOcupados(asientos, fila + 1, 0)
-
-    return ocupados + ContarAsientosOcupados(asientos, fila, columna + 1)
-
+    for fila in asientos:
+        for asiento in fila:
+            if asiento == "X":
+                ocupado +=1
+    return ocupado
 
 ######################################  Ventas ###############################
 
