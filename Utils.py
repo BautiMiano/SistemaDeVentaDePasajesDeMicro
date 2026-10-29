@@ -1,5 +1,5 @@
 import re, time, random, json, os
-from Datos import (distancias, micros, patentes, viajes, ventas, 
+from Datos import (distancias, micros, patentes, viajes, ventas, nombres, apellidos,
                    FILAS, COLUMNAS, TARIFAPORKM)
 
 ARCHIVO_JSON = os.path.join(os.path.dirname(os.path.abspath(__file__)),"datos.json")
@@ -425,6 +425,7 @@ def RegistrarViaje():
         viaje["fecha"] = fecha
 
         matriz = CrearMatriz()
+        matriz = CrearVenta(destino_elegido, fecha, matriz, patente, viaje["id"])
         viaje["asientos"] = matriz
 
         viajes.append(viaje)
@@ -520,26 +521,9 @@ def Disponibilidad():
 #OK
 def CrearMatriz():
     matriz = []
-    asientos_libres = 0
-    asientos_ocupados = 0
 
     for f in range(FILAS):
-        matriz.append([0] * COLUMNAS)
-
-    for f in range(FILAS):
-        for c in range(COLUMNAS):
-
-
-            estado = random.randint(0, 1)
-
-            if estado == 0: #O = Libre
-                matriz[f][c] = "O"
-                asientos_libres = asientos_libres + 1
-                
-            else:
-                matriz[f][c] = "X" #X = ocupado
-                asientos_ocupados = asientos_ocupados + 1
-
+        matriz.append(["O"] * COLUMNAS)
 
     return matriz
 #OK    
@@ -671,8 +655,8 @@ def ContarAsientosOcupados(asientos):
                 ocupado +=1
     return ocupado
 
-######################################  Ventas ###############################
-
+#####################################  Ventas ###############################
+#TIENE QUE PERMITIR INGRESAR EL NOMBRE Y APELLIDO
 def RegistrarVenta():
     #Selecciona un destino -> Selecciona un fecha disponible para ese destino
     #se selecciona un asiento(debe actualizar estado del asiento) -> se guardan los datos
@@ -761,6 +745,41 @@ def RegistrarVenta():
 
     print("Venta registrada correctamente.")
 
+def CrearVenta(destino, fecha, matriz, patente, viaje_id):
+    precio = distancias[destino] * TARIFAPORKM
+    letras = ["A", "B", "C", "D"]
+
+
+    for f in range(len(matriz)):
+        for c in range(len(matriz[f])):
+
+            estado = random.randint(0, 1)
+
+            if estado == 1:
+                matriz[f][c] = "X"
+                asiento = str(f + 1) + letras[c]
+
+                nombre = nombres[random.randint(0, len(nombres) - 1)]
+                apellido = apellidos[random.randint(0, len(apellidos) - 1)]
+
+                venta = {
+                    "viaje_id": viaje_id,
+                    "nombre": nombre,
+                    "apellido": apellido,
+                    "destino": destino,
+                    "fecha": fecha,
+                    "patente": patente,
+                    "asiento": asiento,
+                    "precio": precio
+                }
+
+                ventas.append(venta)
+                
+            else:
+                matriz[f][c] = "O"
+
+    return matriz
+
 def VerVentas():
     print("=" * 50)
     print("VENTAS REGISTRADAS".center(50))
@@ -776,8 +795,9 @@ def VerVentas():
         print(f"Venta N°: {i + 1}")
         print(f"Destino: {venta['destino']}")
         print(f"Fecha: {venta['fecha']}")
-        print(f"Patente: {venta['patente']}")
+        print(f"Nombre: {venta['nombre']} {venta['apellido']}")
         print(f"Asiento: {venta['asiento']}")
+        print(f"Patente: {venta['patente']}")
         print(f"Precio: ${venta['precio']}")
         print("-" * 50)
 
@@ -858,8 +878,6 @@ def ValidarFechas():
             print("Error: ingrese día, mes y año con números.")
             fecha = input("Ingrese la fecha del viaje (DD/MM/AAAA): ")
     return fecha
-
-########################################################################################
 
 ######################################  Informes ###############################
 
