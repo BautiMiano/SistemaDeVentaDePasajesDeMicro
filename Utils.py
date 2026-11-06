@@ -662,7 +662,6 @@ def OcuparAsiento(matriz, asiento):
         print("Formato inválido. Ingrese un asiento como 1A o 10D.")
         return 0
 
-    
 def ContarAsientosOcupados(asientos):
     ocupado = 0
 

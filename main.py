@@ -1,7 +1,7 @@
 from Utils import (RegistrarViaje, VerViajes, RegistrarMicro, DarBajaMicro, 
                    VerMicros, VerDestinos, menu_informes, menu_principal,  
                    menu_ventas, menu_viajes, menu_micros, RegistrarVenta, 
-                   AgregarDestino, CargarDatos,                    menu_destinos, Disponibilidad, EliminarDestino,InformeVentasPorDestino, 
+                   AgregarDestino, CargarDatos,menu_destinos, Disponibilidad, EliminarDestino,InformeVentasPorDestino, 
                    InformeVentasPorFecha, InformeRecaudacionTotal,VerVentas)
 
 
