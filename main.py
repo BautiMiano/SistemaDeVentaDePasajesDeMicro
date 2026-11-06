@@ -87,7 +87,7 @@ def main():
                         Disponibilidad()
 
                     elif opcion == 2:
-                        RegistrarViaje()  
+                        RegistrarViaje() 
 
                     elif opcion == 3:
                         VerViajes()
