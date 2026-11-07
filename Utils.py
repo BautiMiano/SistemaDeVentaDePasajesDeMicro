@@ -96,7 +96,7 @@ def menu_ventas():
     print("")
     print("1 - Registrar venta de pasaje")
     print("2 - Ver ventas ")
-    print("3 - Buscar venta")
+    print("3 - Buscar venta de pasajero")
     print("4 - Modificar venta")
     print("5 - Cancelar venta")
     print("6 - volver atras")
@@ -556,7 +556,6 @@ def ModificarVenta():
         return
 
     print("\n1 - Cambiar asiento")
-    print("2 - Modificar datos del pasajero")
     print("0 - Volver")
     opcion = PedirOpcion("Seleccione una opción: ", 0, 2)
 
@@ -586,12 +585,7 @@ def ModificarVenta():
             print("No se encontraron los datos de este pasajero.")
             return
 
-        pasajero = pasajeros[dni]
-        print(f"Datos actuales: {pasajero['nombre']} {pasajero['apellido']} - Tel: {pasajero['telefono']}")
-        pasajero["nombre"] = PedirTexto("nombre")
-        pasajero["apellido"] = PedirTexto("apellido")
-        pasajero["telefono"] = PedirTelefono()
-        print("Datos del pasajero actualizados.")
+
 
     GuardarDatos()
 

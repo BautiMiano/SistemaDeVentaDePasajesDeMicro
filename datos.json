@@ -43,15 +43,15 @@
         }
     ],
     "patentes": [
-        "AF567LM",
-        "AH345QR",
-        "AJ678ST",
-        "AB123AB",
-        "AB123CD",
         "AC456EF",
+        "AK901VW",
+        "AB123CD",
+        "AJ678ST",
         "AE234JK",
         "AG890NP",
-        "AK901VW"
+        "AH345QR",
+        "AB123AB",
+        "AF567LM"
     ],
     "viajes": [
         {
@@ -129,7 +129,7 @@
             "fecha": "19/02/2027",
             "asientos": [
                 [
-                    "X",
+                    "O",
                     "X",
                     "X",
                     "X"
@@ -466,15 +466,6 @@
     "ventas": [
         {
             "viaje_id": 2,
-            "dni": "44816273",
-            "destino": "Mar Del Plata",
-            "fecha": "19/02/2027",
-            "patente": "AK901VW",
-            "asiento": "1A",
-            "precio": 40000
-        },
-        {
-            "viaje_id": 2,
             "dni": "12345678",
             "destino": "Mar Del Plata",
             "fecha": "19/02/2027",
@@ -609,9 +600,9 @@
     ],
     "pasajeros": {
         "44816273": {
-            "nombre": "Nicolas",
+            "nombre": "Bautista",
             "apellido": "Miano",
-            "telefono": "12345678"
+            "telefono": "1166470739"
         },
         "12345678": {
             "nombre": "Joaquin",
