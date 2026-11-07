@@ -1,5 +1,5 @@
 import re, time, random, json, os
-from Datos import (distancias, micros, patentes, viajes, ventas, nombres, apellidos,
+from Datos import (distancias, micros, patentes, viajes, ventas, pasajeros,
                    FILAS, COLUMNAS, TARIFAPORKM)
 
 ARCHIVO_JSON = os.path.join(os.path.dirname(os.path.abspath(__file__)),"datos.json")
@@ -12,12 +12,13 @@ def GuardarDatos():
         "micros": micros,
         "patentes": list(patentes),
         "viajes": viajes,
-        "ventas": ventas
+        "ventas": ventas,
+        "pasajeros": pasajeros,
     }
 
     try:
         arch = open(ARCHIVO_JSON, "wt", encoding="UTF8")
-        json.dump(datos, arch)
+        json.dump(datos, arch,indent=4)
         print("Datos guardados correctamente.")
 
     except OSError as mensaje:
@@ -63,6 +64,9 @@ def CargarDatos():
     ventas.clear()
     ventas.extend(datos.get("ventas", []))
 
+    pasajeros.clear()
+    pasajeros.update(datos.get("pasajeros", {}))
+
     print("Datos cargados correctamente.")
 
 ############################## Menu ##################################
@@ -91,7 +95,7 @@ def menu_ventas():
     print("=" * 45)
     print("")
     print("1 - Registrar venta de pasaje")
-    print("2 - Ver ventas")
+    print("2 - Ver ventas ")
     print("3 - Buscar venta")
     print("4 - Modificar venta")
     print("5 - Cancelar venta")
@@ -134,10 +138,10 @@ def menu_viajes():
     opcion = input("Seleccione una opción: ")
     print("")
     return opcion
-#OK
+
 def menu_micros():
     print("="*45)
-    print("Viajes".center(45))
+    print("MICROS".center(45))
     print("="*45)
     print("")
     print("1 - Ver micros")
@@ -150,7 +154,7 @@ def menu_micros():
     opcion = input("Seleccione una opción: ")
     print("")
     return opcion
-#OK
+
 def menu_destinos():
     print("="*45)
     print("Destinos".center(45))
@@ -172,14 +176,14 @@ def menu_destinos():
 def RegistrarMicro():
     patente = input("Ingrese la patente del micro: ").upper().strip()
     while not re.match(r"^[A-Z]{2}[0-9]{3}[A-Z]{2}$", patente):
-        print("Error, no se ingreso el formato valido")
+        print("Error, no se ingreso el formato valido (ab123cd).")
         patente = input("Ingrese otra patente: ").strip().upper()
 
     while patente == "" or patente in patentes:
-        if patente == "":
-            print("Error: la patente no puede estar vacía.")
+        if patente in patentes:
+          print("Error: esa patente ya está registrada.")
         else:
-            print("Error: esa patente ya está registrada.")
+          print("Error: formato inválido (ej. AB123CD).")
         patente = input("Ingrese otra patente: ").strip().upper()
 
     micro = {
@@ -189,7 +193,8 @@ def RegistrarMicro():
     patentes.add(patente)
     GuardarDatos()
     print("Micro registrado correctamente")
-#OK
+
+
 def DarBajaMicro():
     print("=" * 50)
     print("DAR DE BAJA MICRO".center(50))
@@ -204,18 +209,14 @@ def DarBajaMicro():
     for i in range(len(micros)):
         print(f"{i + 1} - Patente: {micros[i]['patente']}")
 
-    while True:
-        try:
-            opcion = int(input("Seleccione el micro a dar de baja: "))
+    opcion = PedirOpcion("Seleccione el micro a dar de baja (0 para volver): ", 0, len(micros))
+    if opcion == 0:
+        return
 
-            if opcion < 1 or opcion > len(micros):
-                print("Error: opción fuera de rango.")
-                continue
-
-            break
-
-        except ValueError:
-            print("Error: debe ingresar un número.")
+    confirmar = input(f"¿Está seguro que desea dar de baja el micro {micros[opcion - 1]['patente']}? (S/N): ").strip().upper()
+    if confirmar != "S":
+        print("Operación cancelada.")
+        return
 
     patente = micros[opcion - 1]["patente"]
 
@@ -230,13 +231,22 @@ def DarBajaMicro():
         if viaje["patente"] != patente:
             viajes_nuevos.append(viaje)
 
+    ids_eliminados = []
+    viajes_nuevos = []
+
+    for viaje in viajes:
+        if viaje["patente"] != patente:
+            viajes_nuevos.append(viaje)
+
     viajes[:] = viajes_nuevos
+    EliminarVentasDeViajes(ids_eliminados)
 
     GuardarDatos()
 
     print(f"Micro con patente {patente} dado de baja correctamente.")
     print("También se eliminaron sus viajes asociados.")
-#OK 
+
+
 def VerMicros():
 
     if not micros:
@@ -344,6 +354,10 @@ def EliminarDestino():
 
     while True:
         try:
+            confirmar= input("¿Está seguro que desea eliminar un destino? (S/N): ").strip().upper()
+            if confirmar != "S":
+                print("Operación cancelada.")
+                return
             opcion = int(input("Seleccione el destino a eliminar: "))
 
             if opcion < 1 or opcion > len(destinos):
@@ -359,10 +373,14 @@ def EliminarDestino():
 
     distancias.pop(destino)
 
-    viajes[:] = [
-        viaje for viaje in viajes
-        if viaje["destino"] != destino
-    ]
+    ids_eliminados = []
+    for viaje in viajes:
+        if viaje["destino"] == destino:
+            ids_eliminados.append(viaje["id"])
+
+    viajes[:] = [viaje for viaje in viajes if viaje["destino"] != destino]
+
+    EliminarVentasDeViajes(ids_eliminados)
 
     GuardarDatos()
 
@@ -374,68 +392,56 @@ def EliminarDestino():
 #FUNCIONANDO, ARREGLAR: UN MICRO NO PUEDE TENER 2 VIAJES UN MISMO DIA,
 # SE PUEDE AGREGAR ELEGIR EL LUGAR DE SALIDA
 def RegistrarViaje():
-    viaje = {}
+    if len(distancias) == 0:
+        print("Primero tiene que registrar al menos un destino.")
+        return
+    if len(micros) == 0:
+        print("Primero tiene que registrar al menos un micro.")
+        return
 
+    VerDestinos()
+    destinos = list(distancias.keys())
+    opcion = PedirOpcion("Seleccione un destino (0 para volver): ", 0, len(destinos))
+    if opcion == 0:
+        return
+    destino_elegido = destinos[opcion - 1]
+
+    VerMicros()
+    patente = input("Ingrese la patente del micro: ").strip().upper()
+    while patente not in patentes:
+        print("Error: esa patente no está registrada.")
+        patente = input("Ingrese la patente del micro: ").strip().upper()
+
+    fecha = ValidarFechas()
+
+    for viaje in viajes:
+        if viaje["patente"] == patente and viaje["fecha"] == fecha:
+            print(f"Error: el micro {patente} ya tiene un viaje el {fecha}.")
+            return
+
+    viaje = {
+        "id": NuevoIdViaje(),
+        "destino": destino_elegido,
+        "patente": patente,
+        "fecha": fecha,
+        "asientos": CrearMatriz()
+    }
+
+    viajes.append(viaje)
+    GuardarDatos()
+    print(f"Viaje registrado correctamente con ID {viaje['id']}.")
+
+def NuevoIdViaje():
     if len(viajes) == 0:
-        viaje["id"] = 1
-    else:
-        viaje["id"] = viajes[-1]["id"] + 1
+        return 1
+    mayor = 0
+    for viaje in viajes:
+        if viaje["id"] > mayor:
+            mayor = viaje["id"]
+    return mayor + 1
 
-    try:
 
-        while True:
 
-            VerDestinos()
-            print("")
-
-            destinos = list(distancias.keys())
-            
-            opcion = int(input("Seleccione una opcion: "))
-
-            if opcion < 1 or opcion > len(destinos):
-                print("Error. Fuera de rango.")
-                continue
-
-            destino_elegido = destinos[opcion - 1]
-
-            viaje["destino"] = destino_elegido
-            break
-
-        while True:
-            VerMicros()
-
-            patente = input("Ingrese la patente del micro: ").strip().upper()
-
-            micro_elegido = None
-
-            for micro in micros:
-                if micro["patente"] == patente:
-                    micro_elegido = micro
-                    break
-
-            if micro_elegido is None:
-                print("Error: esa patente no está registrada.")
-                continue
-
-            viaje["patente"] = patente
-
-            break
-
-        fecha = ValidarFechas()
-        viaje["fecha"] = fecha
-
-        matriz = CrearMatriz()
-        matriz = CrearVenta(destino_elegido, fecha, matriz, patente, viaje["id"])
-        viaje["asientos"] = matriz
-
-        viajes.append(viaje)
-        GuardarDatos()
-
-        print("Viaje registrado correctamente.")
-        
-    except ValueError:
-        print("Error. Caracter invalido")
-#OK
 def VerViajes():
     print("=" * 50)
     print("VIAJES PROGRAMADOS".center(50))
@@ -452,7 +458,7 @@ def VerViajes():
         print(f"Fecha: {viaje['fecha']}")
         print(f"Patente: {viaje['patente']}")
         print("-" * 50)
-#A CHEQUEAR
+
 def Seleccionar_Destinos():
 
     destinos_agregados = []
@@ -476,7 +482,7 @@ def Seleccionar_Destinos():
         else:
             print("Ya esta agendado el destino, intente con otro")
     return 
-#OK
+
 def Disponibilidad():
     print("=" * 50)
     print("CONSULTAR DISPONIBILIDAD".center(50))
@@ -517,6 +523,154 @@ def Disponibilidad():
 
     ImprimirMatriz(viaje["asientos"])
 
+def CancelarVenta():
+    print("=" * 50)
+    print("CANCELAR VENTA".center(50))
+    print("=" * 50)
+
+    venta = SeleccionarVenta()
+    if len(venta) == 0:
+        return
+
+    confirmar = input(f"¿Cancelar el asiento {venta['asiento']} a {venta['destino']} "
+                      f"del {venta['fecha']}? (S/N): ").strip().upper()
+    if confirmar != "S":
+        print("Operación cancelada. La venta sigue vigente.")
+        return
+
+    indice_viaje = BuscarViajePorId(venta.get("viaje_id", -1))
+    if indice_viaje != -1:
+        CancelarAsiento(viajes[indice_viaje]["asientos"], venta["asiento"])
+
+    ventas.remove(venta)
+    GuardarDatos()
+    print("Venta cancelada correctamente. El asiento quedó libre.")
+
+def ModificarVenta():
+    print("=" * 50)
+    print("MODIFICAR VENTA".center(50))
+    print("=" * 50)
+
+    venta = SeleccionarVenta()
+    if len(venta) == 0:
+        return
+
+    print("\n1 - Cambiar asiento")
+    print("2 - Modificar datos del pasajero")
+    print("0 - Volver")
+    opcion = PedirOpcion("Seleccione una opción: ", 0, 2)
+
+    if opcion == 0:
+        return
+
+    if opcion == 1:
+        indice_viaje = BuscarViajePorId(venta.get("viaje_id", -1))
+        if indice_viaje == -1:
+            print("No se encontró el viaje de esta venta.")
+            return
+
+        matriz = viajes[indice_viaje]["asientos"]
+        ImprimirMatriz(matriz)
+        print(f"Asiento actual: {venta['asiento']}")
+
+        asiento_nuevo, fila, columna = ElegirAsiento(matriz)
+
+        CancelarAsiento(matriz, venta["asiento"])
+        matriz[fila][columna] = "X"
+        venta["asiento"] = asiento_nuevo
+        print(f"Asiento cambiado a {asiento_nuevo}.")
+
+    else:
+        dni = venta.get("dni", "")
+        if dni not in pasajeros:
+            print("No se encontraron los datos de este pasajero.")
+            return
+
+        pasajero = pasajeros[dni]
+        print(f"Datos actuales: {pasajero['nombre']} {pasajero['apellido']} - Tel: {pasajero['telefono']}")
+        pasajero["nombre"] = PedirTexto("nombre")
+        pasajero["apellido"] = PedirTexto("apellido")
+        pasajero["telefono"] = PedirTelefono()
+        print("Datos del pasajero actualizados.")
+
+    GuardarDatos()
+
+def BuscarVenta():
+    print("=" * 50)
+    print("BUSCAR VENTAS POR DNI".center(50))
+    print("=" * 50)
+
+    dni = PedirDNI()
+    encontradas = BuscarVentasPorDNI(dni)
+
+    if len(encontradas) == 0:
+        print("No hay ventas para ese DNI.")
+        return
+
+    if dni in pasajeros:
+        pasajero = pasajeros[dni]
+        print(f"\nPasajero: {pasajero['nombre']} {pasajero['apellido']} - Tel: {pasajero['telefono']}")
+    
+    for venta in encontradas:
+        print("-" * 50)
+        print(f"Viaje ID: {venta.get('viaje_id', '-')}")
+        print(f"Destino: {venta['destino']}")
+        print(f"Fecha: {venta['fecha']}")
+        print(f"Asiento: {venta['asiento']}")
+        print(f"Precio: ${venta['precio']}")
+
+def VerVentas():
+    print("=" * 50)
+    print("VENTAS REGISTRADAS".center(50))
+    print("=" * 50)
+
+    if len(ventas) == 0:
+        print("No hay ventas registradas.")
+        return
+
+    for i in range(len(ventas)):
+        venta = ventas[i]
+        dni = venta.get("dni", "-")
+
+        if dni in pasajeros:
+            pasajero = pasajeros[dni]
+            nombre_completo = f"{pasajero['nombre']} {pasajero['apellido']}"
+        else:
+            nombre_completo = "Pasajero desconocido"
+
+        print(f"Venta N°: {i + 1}")
+        print(f"Pasajero: {nombre_completo} (DNI {dni})")
+        print(f"Destino: {venta['destino']}")
+        print(f"Fecha: {venta['fecha']}")
+        print(f"Asiento: {venta['asiento']}")
+        print(f"Patente: {venta['patente']}")
+        print(f"Precio: ${venta['precio']}")
+        print("-" * 50)
+
+def BuscarVentasPorDNI(dni, indice=0):
+    if indice == len(ventas):
+        return []
+
+    resto = BuscarVentasPorDNI(dni, indice + 1)
+
+    if ventas[indice].get("dni") == dni:
+        return [ventas[indice]] + resto
+    return resto
+
+def EliminarVentasDeViajes(ids_eliminados):
+    ventas[:] = [
+        venta for venta in ventas
+        if venta.get("viaje_id") not in ids_eliminados
+    ]
+
+
+
+def BuscarViajePorId(viaje_id):
+    for i in range(len(viajes)):
+        if viajes[i]["id"] == viaje_id:
+            return i
+    return -1
+
 ############################## Asientos ##################################
 #OK
 def CrearMatriz():
@@ -540,77 +694,52 @@ def ImprimirMatriz(matriz):
     print("")
     print("O = Disponible")
     print("X = Ocupado")        
-#OK
+
 def ElegirAsiento(matriz):
     while True:
-        try:
-                asiento = input("Ingrese el asiento (ej. 1A o 10D): ").upper().strip()
-                x = int(asiento[:-1])
-                y = asiento[-1]
+        asiento = input("Ingrese el asiento (ej. 1A o 10D): ").upper().strip()
+        fila, columna = ConvertirAsiento(asiento)
 
-                if x < 1 or x > FILAS:
-                    print("El número de fila es inválido.")
-                    continue
-
-                if y == "A":
-                    y = 0
-                elif y == "B":
-                    y = 1
-                elif y == "C":
-                    y = 2
-                elif y == "D":
-                    y = 3
-                else:
-                    print("La letra del asiento es inválida.")
-                    continue
-
-                if matriz[x - 1][y] == "X":
-                    print("El asiento seleccionado ya está ocupado.")
-                    continue
-            
-                print(f"El asiento {asiento} está disponible.")
-                matriz[x - 1][y] = "X"
-                return asiento
-
-        except ValueError:
-            print("Formato inválido. Ingrese un asiento como 1A o 10D.")
+        if fila == -1:
+            print(f"Asiento inválido. Use una fila del 1 al {FILAS} y una letra de A a D.")
             continue
-#CHEQUEAR
-def CancelarAsiento(matriz,asiento):
+
+        if matriz[fila][columna] == "X":
+            print("El asiento seleccionado ya está ocupado.")
+            continue
+
+        return asiento, fila, columna
+
+
+def ConvertirAsiento(asiento):
+    letras = "ABCD"
+    asiento = asiento.upper().strip()
 
     try:
-        asiento = asiento.upper().strip()
-        x = int(asiento[:-1])
-        y = asiento[-1]
+        fila = int(asiento[:-1])
+        columna = letras.index(asiento[-1])
+    except (ValueError, IndexError):
+        return -1,-1
+    
+    if fila < 1 or fila > FILAS:
+        return -1,-1
 
-        if x < 1 or x > FILAS:
-            print("Número de fila inválido.")
-            return 0
+    return fila - 1, columna
 
-        if y == "A":
-            y = 1
-        elif y == "B":
-            y = 2
-        elif y == "C":
-            y = 4
-        elif y == "D":
-            y = 5
-        else:
-            print("Letra de asiento inválida.")
-            return 0
+def CancelarAsiento(matriz, asiento):
+    fila, columna = ConvertirAsiento(asiento)
 
-        if matriz[x][y] == "X":
-            matriz[x][y] = "O"
-            print("Asiento cancelado correctamente.")
-            return 1
-        else:
-            print("Ese asiento ya está libre.")
-            return 0
+    if fila == -1:
+        print("Asiento inválido.")
+        return False
 
-    except ValueError:
-        print("Formato inválido. Ingrese un asiento como 1A o 10D.")
-        return 0
-#CHEQUEAR
+    if matriz[fila][columna] == "O":
+        print("Ese asiento ya está libre.")
+        return False
+
+    matriz[fila][columna] = "O"
+    return True
+
 def OcuparAsiento(matriz, asiento):
 
     try:
@@ -656,151 +785,118 @@ def ContarAsientosOcupados(asientos):
     return ocupado
 
 #####################################  Ventas ###############################
-#TIENE QUE PERMITIR INGRESAR EL NOMBRE Y APELLIDO
-def RegistrarVenta():
-    #Selecciona un destino -> Selecciona un fecha disponible para ese destino
-    #se selecciona un asiento(debe actualizar estado del asiento) -> se guardan los datos
-    #se muestra un resumen.
-
-    while True:
-        VerDestinos()
-        print("")
-
-        destinos = list(distancias.keys())
-                    
-        opcion = int(input("Seleccione una opcion: "))
-
-        if opcion < 1 or opcion > len(destinos):
-            print("Error. Fuera de rango.")
-            continue
-        
-        destino_elegido = destinos[opcion - 1]
-
-        print("\nVIAJES PARA", destino_elegido.upper())
-
-        viajes_destino = []
-
-        for viaje in viajes:
-            if viaje["destino"] == destino_elegido:
-                viajes_destino.append(viaje)
-
-        if len(viajes_destino) == 0:
-            print("No hay viajes registrados para ese destino.")
-            continue
-
-        for i in range(len(viajes_destino)):
-            viaje = viajes_destino[i]
-            print(f"{i + 1} - ID: {viaje['id']} | "
-                f"Fecha: {viaje['fecha']} | "
-                f"Patente: {viaje['patente']}")
-
-        break
-        
+def PedirOpcion(mensaje, minimo, maximo):
     while True:
         try:
-            opcion_viaje = int(input("\nSeleccione un viaje: "))
-
-            if opcion_viaje < 1 or opcion_viaje > len(viajes_destino):
-                print("Error: opción fuera de rango.")
+            opcion = int(input(mensaje))
+            if opcion < minimo or opcion > maximo:
+                print(f"Error: ingrese un número entre {minimo} y {maximo}.")
                 continue
-
-            break
-
+            return opcion
         except ValueError:
             print("Error: debe ingresar un número.")
 
+
+def RegistrarVenta():
+    if len(viajes) == 0:
+        print("No hay viajes registrados. Primero registre un viaje.")
+        return
+
+    destinos_con_viajes = []
+    for viaje in viajes:
+        if viaje["destino"] not in destinos_con_viajes:
+            destinos_con_viajes.append(viaje["destino"])
+
+    print("\nDESTINOS CON VIAJES PROGRAMADOS")
+    for i in range(len(destinos_con_viajes)):
+        print(f"{i + 1} - {destinos_con_viajes[i]}")
+
+    opcion = PedirOpcion("\nSeleccione un destino (0 para volver): ", 0, len(destinos_con_viajes))
+    if opcion == 0:
+        return
+    destino_elegido = destinos_con_viajes[opcion - 1]
+
+    viajes_destino = []
+    for viaje in viajes:
+        if viaje["destino"] == destino_elegido:
+            viajes_destino.append(viaje)
+
+    print("\nVIAJES PARA", destino_elegido.upper())
+    for i in range(len(viajes_destino)):
+        viaje = viajes_destino[i]
+        libres = FILAS * COLUMNAS - ContarAsientosOcupados(viaje["asientos"])
+        print(f"{i + 1} - ID: {viaje['id']} | Fecha: {viaje['fecha']} | "
+              f"Micro: {viaje['patente']} | Libres: {libres}")
+
+    opcion_viaje = PedirOpcion("\nSeleccione un viaje (0 para volver): ", 0, len(viajes_destino))
+
+    if opcion_viaje == 0:
+        return
     viaje_elegido = viajes_destino[opcion_viaje - 1]
 
-    print("\nViaje seleccionado correctamente.")
-    print(f"Destino: {viaje_elegido['destino']}")
-    print(f"Fecha: {viaje_elegido['fecha']}")
-    print(f"Patente: {viaje_elegido['patente']}")
-
     matriz = viaje_elegido["asientos"]
+    if ContarAsientosOcupados(matriz) == FILAS * COLUMNAS:
+        print("Ese viaje no tiene asientos disponibles.")
+        return
 
     ImprimirMatriz(matriz)
-    asiento_elegido = ElegirAsiento(matriz)
+    asiento, fila, columna = ElegirAsiento(matriz)
 
-    precio = distancias[viaje_elegido["destino"]] * TARIFAPORKM
+    print("\nDATOS DEL PASAJERO")
+    dni = ObtenerPasajero()
+
+    precio = distancias[destino_elegido] * TARIFAPORKM
+    pasajero = pasajeros[dni]
 
     print("\n" + "=" * 40)
     print("RESUMEN DE LA VENTA".center(40))
     print("=" * 40)
-    print(f"Destino: {viaje_elegido['destino']}")
+    print(f"Pasajero: {pasajero['nombre']} {pasajero['apellido']} (DNI {dni})")
+    print(f"Destino: {destino_elegido}")
     print(f"Fecha: {viaje_elegido['fecha']}")
-    print(f"Asiento: {asiento_elegido}")
+    print(f"Asiento: {asiento}")
     print(f"Precio: ${precio}")
     print("=" * 40)
 
-    venta = {
-    "destino": viaje_elegido["destino"],
-    "fecha": viaje_elegido["fecha"],
-    "patente": viaje_elegido["patente"],
-    "asiento": asiento_elegido,
-    "precio": precio
-}
-
-    ventas.append(venta)
-    GuardarDatos()
-
-    print("Venta registrada correctamente.")
-
-def CrearVenta(destino, fecha, matriz, patente, viaje_id):
-    precio = distancias[destino] * TARIFAPORKM
-    letras = ["A", "B", "C", "D"]
-
-
-    for f in range(len(matriz)):
-        for c in range(len(matriz[f])):
-
-            estado = random.randint(0, 1)
-
-            if estado == 1:
-                matriz[f][c] = "X"
-                asiento = str(f + 1) + letras[c]
-
-                nombre = nombres[random.randint(0, len(nombres) - 1)]
-                apellido = apellidos[random.randint(0, len(apellidos) - 1)]
-
-                venta = {
-                    "viaje_id": viaje_id,
-                    "nombre": nombre,
-                    "apellido": apellido,
-                    "destino": destino,
-                    "fecha": fecha,
-                    "patente": patente,
-                    "asiento": asiento,
-                    "precio": precio
-                }
-
-                ventas.append(venta)
-                
-            else:
-                matriz[f][c] = "O"
-
-    return matriz
-
-def VerVentas():
-    print("=" * 50)
-    print("VENTAS REGISTRADAS".center(50))
-    print("=" * 50)
-
-    if len(ventas) == 0:
-        print("No hay ventas registradas.")
+    confirmar = input("¿Confirmar la venta? (S/N): ").strip().upper()
+    if confirmar != "S":
+        print("Venta cancelada. El asiento sigue libre.")
         return
 
-    for i in range(len(ventas)):
-        venta = ventas[i]
+    matriz[fila][columna] = "X"
 
-        print(f"Venta N°: {i + 1}")
-        print(f"Destino: {venta['destino']}")
-        print(f"Fecha: {venta['fecha']}")
-        print(f"Nombre: {venta['nombre']} {venta['apellido']}")
-        print(f"Asiento: {venta['asiento']}")
-        print(f"Patente: {venta['patente']}")
-        print(f"Precio: ${venta['precio']}")
-        print("-" * 50)
+    venta = {
+        "viaje_id": viaje_elegido["id"],
+        "dni": dni,
+        "destino": destino_elegido,
+        "fecha": viaje_elegido["fecha"],
+        "patente": viaje_elegido["patente"],
+        "asiento": asiento,
+        "precio": precio
+    }
+    ventas.append(venta)
+    GuardarDatos()
+    print("Venta registrada correctamente.")
 
+
+def SeleccionarVenta():
+    dni = PedirDNI()
+    encontradas = BuscarVentasPorDNI(dni)
+
+    if len(encontradas) == 0:
+        print("No hay ventas para ese DNI.")
+        return {}
+
+    print("\nVENTAS DEL PASAJERO")
+    for i in range(len(encontradas)):
+        venta = encontradas[i]
+        print(f"{i + 1} - Viaje ID: {venta.get('viaje_id', '-')} | {venta['destino']} | "
+              f"Fecha: {venta['fecha']} | Asiento: {venta['asiento']}")
+
+    opcion = PedirOpcion("\nSeleccione la venta (0 para volver): ", 0, len(encontradas))
+    if opcion == 0:
+        return {}
+    return encontradas[opcion - 1]
 ############################# Funciones extras #############################
 
 def ValidarFechas():
@@ -883,70 +979,104 @@ def ValidarFechas():
 
 def InformeVentasPorDestino():
     recaudacionPorDestino = {}
-
-    for viaje in viajes:
-        destino = viaje["destino"]
-
-        asientosOcupados = ContarAsientosOcupados(viaje["asientos"])
-
-        kilometros = distancias[destino]
-
-        recaudacion = asientosOcupados * kilometros * TARIFAPORKM
-
+    for venta in ventas:
+        destino = venta["destino"]
         if destino in recaudacionPorDestino:
-            recaudacionPorDestino[destino] += recaudacion
+            recaudacionPorDestino[destino] += venta["precio"]
         else:
-            recaudacionPorDestino[destino] = recaudacion
+            recaudacionPorDestino[destino] = venta["precio"]
 
     print("=" * 50)
     print("INFORME DE VENTAS POR DESTINO".center(50))
     print("=" * 50)
+
+    if len(recaudacionPorDestino) == 0:
+        print("No hay ventas registradas.")
+        return
 
     for destino in recaudacionPorDestino:
         print(f"Destino: {destino}")
         print(f"Recaudación: ${recaudacionPorDestino[destino]}")
         print("-" * 50)
 
+
 def InformeVentasPorFecha():
     recaudacionPorFecha = {}
-
-    for viaje in viajes:
-        fecha = viaje["fecha"]
-        destino = viaje ["destino"]
-
-        asientosOcupados = ContarAsientosOcupados(viaje ["asientos"])\
-
-        kilometros = distancias[destino]
-
-        recaudacion = asientosOcupados * kilometros * TARIFAPORKM
-
+    for venta in ventas:
+        fecha = venta["fecha"]
         if fecha in recaudacionPorFecha:
-            recaudacionPorFecha[fecha] += recaudacion
+            recaudacionPorFecha[fecha] += venta["precio"]
         else:
-            recaudacionPorFecha[fecha] = recaudacion
+            recaudacionPorFecha[fecha] = venta["precio"]
 
     print("=" * 50)
     print("INFORME DE VENTAS POR FECHA".center(50))
     print("=" * 50)
+
+    if len(recaudacionPorFecha) == 0:
+        print("No hay ventas registradas.")
+        return
 
     for fecha in recaudacionPorFecha:
         print(f"Fecha: {fecha}")
         print(f"Recaudación: ${recaudacionPorFecha[fecha]}")
         print("-" * 50)
 
+
 def InformeRecaudacionTotal():
     recaudacionTotal = 0
-    for viaje in viajes:
-        destino = viaje["destino"]
-        asientosOcupados = ContarAsientosOcupados(viaje["asientos"])
-        kilometros = distancias[destino]
-        recaudacion = asientosOcupados * kilometros * TARIFAPORKM
-        recaudacionTotal += recaudacion
+    for venta in ventas:
+        recaudacionTotal += venta["precio"]
 
     print("=" * 50)
     print("INFORME DE RECAUDACIÓN TOTAL".center(50))
     print("=" * 50)
+    print(f"Cantidad de pasajes vendidos: {len(ventas)}")
     print(f"Recaudación Total: ${recaudacionTotal}")
     print("-" * 50)
+############################## Pasajeros ##################################
+
+def PedirDNI():
+    dni = input("Ingrese el DNI del pasajero: ").strip()
+    while not re.match(r"^[0-9]{7,8}$", dni):
+        print("Error: el DNI debe tener 7 u 8 números, sin puntos.")
+        dni = input("Ingrese el DNI del pasajero: ").strip()
+    return dni
+
+
+def PedirTexto(campo):
+    texto = " ".join(input(f"Ingrese el {campo} del pasajero: ").split()).title()
+    while not re.match(r"^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$", texto):
+        print(f"Error: el {campo} solo puede tener letras y no puede estar vacío.")
+        texto = " ".join(input(f"Ingrese el {campo} del pasajero: ").split()).title()
+    return texto
+
+
+def PedirTelefono():
+    telefono = input("Ingrese el teléfono del pasajero: ").strip()
+    while not re.match(r"^[0-9]{8,13}$", telefono):
+        print("Error: el teléfono debe tener entre 8 y 13 números.")
+        telefono = input("Ingrese el teléfono del pasajero: ").strip()
+    return telefono
+
+def ObtenerPasajero():
+    dni = PedirDNI()
+
+    if dni in pasajeros:
+        pasajero = pasajeros[dni]
+        print(f"Pasajero ya registrado: {pasajero['nombre']} {pasajero['apellido']}")
+        return dni
+
+    print("Pasajero nuevo, complete sus datos.")
+    nombre = PedirTexto("nombre")
+    apellido = PedirTexto("apellido")
+    telefono = PedirTelefono()
+
+    pasajeros[dni] = {
+        "nombre": nombre,
+        "apellido": apellido,
+        "telefono": telefono
+    }
+    return dni
 
 

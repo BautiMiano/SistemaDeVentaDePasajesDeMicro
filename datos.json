@@ -1,1 +1,657 @@
-{"distancias": {"Mar Del Plata": 400, "Rosario": 300, "La Plata": 60, "Santa Fe": 475, "Parana": 500, "Mendoza": 1050, "San Luis": 825, "Salta": 1600, "Santa Rosa": 650, "Cordoba": 800, "Jujuy": 900}, "micros": [{"patente": "AB123CD"}, {"patente": "AC456EF"}, {"patente": "AE234JK"}, {"patente": "AF567LM"}, {"patente": "AG890NP"}, {"patente": "AH345QR"}, {"patente": "AJ678ST"}, {"patente": "AK901VW"}], "patentes": ["AJ678ST", "AF567LM", "AK901VW", "AC456EF", "AG890NP", "AE234JK", "AH345QR", "AB123CD"], "viajes": [{"id": 1, "destino": "Mar Del Plata", "patente": "AK901VW", "fecha": "28/11/2026", "asientos": [["O", "O", "O", "O"], ["O", "O", "O", "O"], ["O", "O", "O", "O"], ["O", "O", "O", "O"], ["O", "O", "O", "O"], ["O", "O", "O", "O"], ["O", "O", "O", "O"], ["O", "O", "O", "O"], ["O", "O", "O", "O"], ["O", "O", "O", "O"]]}, {"id": 2, "destino": "Mar Del Plata", "patente": "AK901VW", "fecha": "19/02/2027", "asientos": [["X", "X", "X", "O"], ["X", "X", "O", "O"], ["X", "O", "X", "X"], ["O", "O", "O", "X"], ["X", "X", "O", "X"], ["X", "X", "O", "X"], ["O", "X", "O", "X"], ["X", "O", "X", "O"], ["X", "O", "X", "X"], ["X", "O", "X", "X"]]}], "ventas": [{"viaje_id": 2, "nombre": "Joaquin", "apellido": "Gomez", "destino": "Mar Del Plata", "fecha": "19/02/2027", "patente": "AK901VW", "asiento": "1A", "precio": 40000}, {"viaje_id": 2, "nombre": "Ignacio", "apellido": "Ruiz", "destino": "Mar Del Plata", "fecha": "19/02/2027", "patente": "AK901VW", "asiento": "1B", "precio": 40000}, {"viaje_id": 2, "nombre": "Matias", "apellido": "Castro", "destino": "Mar Del Plata", "fecha": "19/02/2027", "patente": "AK901VW", "asiento": "1C", "precio": 40000}, {"viaje_id": 2, "nombre": "Mateo", "apellido": "Romero", "destino": "Mar Del Plata", "fecha": "19/02/2027", "patente": "AK901VW", "asiento": "2A", "precio": 40000}, {"viaje_id": 2, "nombre": "Matias", "apellido": "Castro", "destino": "Mar Del Plata", "fecha": "19/02/2027", "patente": "AK901VW", "asiento": "2B", "precio": 40000}, {"viaje_id": 2, "nombre": "Bruno", "apellido": "Gomez", "destino": "Mar Del Plata", "fecha": "19/02/2027", "patente": "AK901VW", "asiento": "3A", "precio": 40000}, {"viaje_id": 2, "nombre": "Martin", "apellido": "Gomez", "destino": "Mar Del Plata", "fecha": "19/02/2027", "patente": "AK901VW", "asiento": "3C", "precio": 40000}, {"viaje_id": 2, "nombre": "Lautaro", "apellido": "Fernandez", "destino": "Mar Del Plata", "fecha": "19/02/2027", "patente": "AK901VW", "asiento": "3D", "precio": 40000}, {"viaje_id": 2, "nombre": "Benjamin", "apellido": "Diaz", "destino": "Mar Del Plata", "fecha": "19/02/2027", "patente": "AK901VW", "asiento": "4D", "precio": 40000}, {"viaje_id": 2, "nombre": "Facundo", "apellido": "Rodriguez", "destino": "Mar Del Plata", "fecha": "19/02/2027", "patente": "AK901VW", "asiento": "5A", "precio": 40000}, {"viaje_id": 2, "nombre": "Lucas", "apellido": "Diaz", "destino": "Mar Del Plata", "fecha": "19/02/2027", "patente": "AK901VW", "asiento": "5B", "precio": 40000}, {"viaje_id": 2, "nombre": "Bruno", "apellido": "Ramirez", "destino": "Mar Del Plata", "fecha": "19/02/2027", "patente": "AK901VW", "asiento": "5D", "precio": 40000}, {"viaje_id": 2, "nombre": "Santiago", "apellido": "Sanchez", "destino": "Mar Del Plata", "fecha": "19/02/2027", "patente": "AK901VW", "asiento": "6A", "precio": 40000}, {"viaje_id": 2, "nombre": "Matias", "apellido": "Gomez", "destino": "Mar Del Plata", "fecha": "19/02/2027", "patente": "AK901VW", "asiento": "6B", "precio": 40000}, {"viaje_id": 2, "nombre": "Tomas", "apellido": "Ramirez", "destino": "Mar Del Plata", "fecha": "19/02/2027", "patente": "AK901VW", "asiento": "6D", "precio": 40000}, {"viaje_id": 2, "nombre": "Bruno", "apellido": "Medina", "destino": "Mar Del Plata", "fecha": "19/02/2027", "patente": "AK901VW", "asiento": "7B", "precio": 40000}, {"viaje_id": 2, "nombre": "Juan", "apellido": "Lopez", "destino": "Mar Del Plata", "fecha": "19/02/2027", "patente": "AK901VW", "asiento": "7D", "precio": 40000}, {"viaje_id": 2, "nombre": "Franco", "apellido": "Diaz", "destino": "Mar Del Plata", "fecha": "19/02/2027", "patente": "AK901VW", "asiento": "8A", "precio": 40000}, {"viaje_id": 2, "nombre": "Benjamin", "apellido": "Perez", "destino": "Mar Del Plata", "fecha": "19/02/2027", "patente": "AK901VW", "asiento": "8C", "precio": 40000}, {"viaje_id": 2, "nombre": "Mateo", "apellido": "Herrera", "destino": "Mar Del Plata", "fecha": "19/02/2027", "patente": "AK901VW", "asiento": "9A", "precio": 40000}, {"viaje_id": 2, "nombre": "Franco", "apellido": "Alvarez", "destino": "Mar Del Plata", "fecha": "19/02/2027", "patente": "AK901VW", "asiento": "9C", "precio": 40000}, {"viaje_id": 2, "nombre": "Federico", "apellido": "Alvarez", "destino": "Mar Del Plata", "fecha": "19/02/2027", "patente": "AK901VW", "asiento": "9D", "precio": 40000}, {"viaje_id": 2, "nombre": "Gabriel", "apellido": "Sanchez", "destino": "Mar Del Plata", "fecha": "19/02/2027", "patente": "AK901VW", "asiento": "10A", "precio": 40000}, {"viaje_id": 2, "nombre": "Santiago", "apellido": "Ruiz", "destino": "Mar Del Plata", "fecha": "19/02/2027", "patente": "AK901VW", "asiento": "10C", "precio": 40000}, {"viaje_id": 2, "nombre": "Martin", "apellido": "Rodriguez", "destino": "Mar Del Plata", "fecha": "19/02/2027", "patente": "AK901VW", "asiento": "10D", "precio": 40000}]}
+{
+    "distancias": {
+        "Mar Del Plata": 400,
+        "Rosario": 300,
+        "La Plata": 60,
+        "Santa Fe": 475,
+        "Parana": 500,
+        "Mendoza": 1050,
+        "San Luis": 825,
+        "Salta": 1600,
+        "Santa Rosa": 650,
+        "Cordoba": 800,
+        "Jujuy": 900,
+        "Tandil": 350
+    },
+    "micros": [
+        {
+            "patente": "AB123CD"
+        },
+        {
+            "patente": "AC456EF"
+        },
+        {
+            "patente": "AE234JK"
+        },
+        {
+            "patente": "AF567LM"
+        },
+        {
+            "patente": "AG890NP"
+        },
+        {
+            "patente": "AH345QR"
+        },
+        {
+            "patente": "AJ678ST"
+        },
+        {
+            "patente": "AK901VW"
+        },
+        {
+            "patente": "AB123AB"
+        }
+    ],
+    "patentes": [
+        "AF567LM",
+        "AH345QR",
+        "AJ678ST",
+        "AB123AB",
+        "AB123CD",
+        "AC456EF",
+        "AE234JK",
+        "AG890NP",
+        "AK901VW"
+    ],
+    "viajes": [
+        {
+            "id": 1,
+            "destino": "Mar Del Plata",
+            "patente": "AK901VW",
+            "fecha": "28/11/2026",
+            "asientos": [
+                [
+                    "O",
+                    "O",
+                    "O",
+                    "O"
+                ],
+                [
+                    "O",
+                    "O",
+                    "O",
+                    "O"
+                ],
+                [
+                    "O",
+                    "O",
+                    "O",
+                    "O"
+                ],
+                [
+                    "O",
+                    "O",
+                    "O",
+                    "O"
+                ],
+                [
+                    "O",
+                    "O",
+                    "O",
+                    "O"
+                ],
+                [
+                    "O",
+                    "O",
+                    "O",
+                    "O"
+                ],
+                [
+                    "O",
+                    "O",
+                    "O",
+                    "O"
+                ],
+                [
+                    "O",
+                    "O",
+                    "O",
+                    "O"
+                ],
+                [
+                    "X",
+                    "O",
+                    "O",
+                    "O"
+                ],
+                [
+                    "X",
+                    "X",
+                    "X",
+                    "X"
+                ]
+            ]
+        },
+        {
+            "id": 2,
+            "destino": "Mar Del Plata",
+            "patente": "AK901VW",
+            "fecha": "19/02/2027",
+            "asientos": [
+                [
+                    "X",
+                    "X",
+                    "X",
+                    "X"
+                ],
+                [
+                    "X",
+                    "X",
+                    "X",
+                    "O"
+                ],
+                [
+                    "X",
+                    "O",
+                    "X",
+                    "X"
+                ],
+                [
+                    "X",
+                    "O",
+                    "O",
+                    "X"
+                ],
+                [
+                    "X",
+                    "X",
+                    "O",
+                    "X"
+                ],
+                [
+                    "X",
+                    "X",
+                    "O",
+                    "X"
+                ],
+                [
+                    "O",
+                    "X",
+                    "O",
+                    "X"
+                ],
+                [
+                    "X",
+                    "O",
+                    "X",
+                    "O"
+                ],
+                [
+                    "X",
+                    "X",
+                    "X",
+                    "X"
+                ],
+                [
+                    "X",
+                    "X",
+                    "X",
+                    "X"
+                ]
+            ]
+        },
+        {
+            "id": 3,
+            "destino": "Mar Del Plata",
+            "patente": "AH345QR",
+            "fecha": "06/05/2027",
+            "asientos": [
+                [
+                    "O",
+                    "O",
+                    "O",
+                    "O"
+                ],
+                [
+                    "X",
+                    "O",
+                    "O",
+                    "X"
+                ],
+                [
+                    "X",
+                    "X",
+                    "X",
+                    "X"
+                ],
+                [
+                    "O",
+                    "O",
+                    "O",
+                    "X"
+                ],
+                [
+                    "X",
+                    "O",
+                    "O",
+                    "O"
+                ],
+                [
+                    "O",
+                    "X",
+                    "O",
+                    "O"
+                ],
+                [
+                    "O",
+                    "X",
+                    "X",
+                    "X"
+                ],
+                [
+                    "X",
+                    "O",
+                    "X",
+                    "O"
+                ],
+                [
+                    "X",
+                    "O",
+                    "X",
+                    "O"
+                ],
+                [
+                    "X",
+                    "O",
+                    "X",
+                    "X"
+                ]
+            ]
+        },
+        {
+            "id": 4,
+            "destino": "Mar Del Plata",
+            "patente": "AK901VW",
+            "fecha": "06/05/2027",
+            "asientos": [
+                [
+                    "O",
+                    "O",
+                    "O",
+                    "O"
+                ],
+                [
+                    "O",
+                    "O",
+                    "O",
+                    "O"
+                ],
+                [
+                    "O",
+                    "O",
+                    "O",
+                    "O"
+                ],
+                [
+                    "O",
+                    "O",
+                    "O",
+                    "O"
+                ],
+                [
+                    "O",
+                    "O",
+                    "O",
+                    "O"
+                ],
+                [
+                    "O",
+                    "O",
+                    "O",
+                    "O"
+                ],
+                [
+                    "O",
+                    "O",
+                    "O",
+                    "O"
+                ],
+                [
+                    "O",
+                    "O",
+                    "O",
+                    "O"
+                ],
+                [
+                    "O",
+                    "O",
+                    "O",
+                    "O"
+                ],
+                [
+                    "X",
+                    "O",
+                    "O",
+                    "O"
+                ]
+            ]
+        },
+        {
+            "id": 5,
+            "destino": "Jujuy",
+            "patente": "AJ678ST",
+            "fecha": "07/11/2026",
+            "asientos": [
+                [
+                    "X",
+                    "O",
+                    "O",
+                    "O"
+                ],
+                [
+                    "O",
+                    "O",
+                    "O",
+                    "O"
+                ],
+                [
+                    "O",
+                    "O",
+                    "O",
+                    "O"
+                ],
+                [
+                    "O",
+                    "O",
+                    "O",
+                    "O"
+                ],
+                [
+                    "O",
+                    "O",
+                    "O",
+                    "O"
+                ],
+                [
+                    "O",
+                    "O",
+                    "O",
+                    "O"
+                ],
+                [
+                    "O",
+                    "O",
+                    "O",
+                    "O"
+                ],
+                [
+                    "O",
+                    "O",
+                    "O",
+                    "O"
+                ],
+                [
+                    "O",
+                    "O",
+                    "O",
+                    "O"
+                ],
+                [
+                    "X",
+                    "X",
+                    "X",
+                    "O"
+                ]
+            ]
+        },
+        {
+            "id": 6,
+            "destino": "Cordoba",
+            "patente": "AG890NP",
+            "fecha": "07/11/2026",
+            "asientos": [
+                [
+                    "O",
+                    "O",
+                    "O",
+                    "O"
+                ],
+                [
+                    "O",
+                    "O",
+                    "O",
+                    "O"
+                ],
+                [
+                    "O",
+                    "O",
+                    "O",
+                    "O"
+                ],
+                [
+                    "O",
+                    "O",
+                    "O",
+                    "O"
+                ],
+                [
+                    "O",
+                    "O",
+                    "O",
+                    "O"
+                ],
+                [
+                    "O",
+                    "O",
+                    "O",
+                    "O"
+                ],
+                [
+                    "O",
+                    "O",
+                    "O",
+                    "O"
+                ],
+                [
+                    "O",
+                    "O",
+                    "O",
+                    "O"
+                ],
+                [
+                    "O",
+                    "O",
+                    "O",
+                    "O"
+                ],
+                [
+                    "X",
+                    "O",
+                    "O",
+                    "O"
+                ]
+            ]
+        }
+    ],
+    "ventas": [
+        {
+            "viaje_id": 2,
+            "dni": "44816273",
+            "destino": "Mar Del Plata",
+            "fecha": "19/02/2027",
+            "patente": "AK901VW",
+            "asiento": "1A",
+            "precio": 40000
+        },
+        {
+            "viaje_id": 2,
+            "dni": "12345678",
+            "destino": "Mar Del Plata",
+            "fecha": "19/02/2027",
+            "patente": "AK901VW",
+            "asiento": "1B",
+            "precio": 40000
+        },
+        {
+            "viaje_id": 2,
+            "dni": "23456789",
+            "destino": "Mar Del Plata",
+            "fecha": "19/02/2027",
+            "patente": "AK901VW",
+            "asiento": "1C",
+            "precio": 40000
+        },
+        {
+            "viaje_id": 2,
+            "dni": "34567890",
+            "destino": "Mar Del Plata",
+            "fecha": "19/02/2027",
+            "patente": "AK901VW",
+            "asiento": "1D",
+            "precio": 40000
+        },
+        {
+            "viaje_id": 2,
+            "dni": "45678901",
+            "destino": "Mar Del Plata",
+            "fecha": "19/02/2027",
+            "patente": "AK901VW",
+            "asiento": "2A",
+            "precio": 40000
+        },
+        {
+            "viaje_id": 2,
+            "dni": "56789012",
+            "destino": "Mar Del Plata",
+            "fecha": "19/02/2027",
+            "patente": "AK901VW",
+            "asiento": "2B",
+            "precio": 40000
+        },
+        {
+            "destino": "Mar Del Plata",
+            "fecha": "28/11/2026",
+            "patente": "AK901VW",
+            "asiento": "10D",
+            "precio": 40000
+        },
+        {
+            "viaje_id": 4,
+            "dni": "44816273",
+            "destino": "Mar Del Plata",
+            "fecha": "06/05/2027",
+            "patente": "AK901VW",
+            "asiento": "10A",
+            "precio": 40000
+        },
+        {
+            "viaje_id": 5,
+            "dni": "44816273",
+            "destino": "Jujuy",
+            "fecha": "07/11/2026",
+            "patente": "AJ678ST",
+            "asiento": "10A",
+            "precio": 90000
+        },
+        {
+            "viaje_id": 5,
+            "dni": "44816273",
+            "destino": "Jujuy",
+            "fecha": "07/11/2026",
+            "patente": "AJ678ST",
+            "asiento": "1A",
+            "precio": 90000
+        },
+        {
+            "viaje_id": 5,
+            "dni": "15935785",
+            "destino": "Jujuy",
+            "fecha": "07/11/2026",
+            "patente": "AJ678ST",
+            "asiento": "10B",
+            "precio": 90000
+        },
+        {
+            "viaje_id": 6,
+            "dni": "44816273",
+            "destino": "Cordoba",
+            "fecha": "07/11/2026",
+            "patente": "AG890NP",
+            "asiento": "10A",
+            "precio": 80000
+        },
+        {
+            "viaje_id": 2,
+            "dni": "21925181",
+            "destino": "Mar Del Plata",
+            "fecha": "19/02/2027",
+            "patente": "AK901VW",
+            "asiento": "4A",
+            "precio": 40000
+        },
+        {
+            "viaje_id": 1,
+            "dni": "44816273",
+            "destino": "Mar Del Plata",
+            "fecha": "28/11/2026",
+            "patente": "AK901VW",
+            "asiento": "9A",
+            "precio": 40000
+        },
+        {
+            "viaje_id": 5,
+            "dni": "44816273",
+            "destino": "Jujuy",
+            "fecha": "07/11/2026",
+            "patente": "AJ678ST",
+            "asiento": "10C",
+            "precio": 90000
+        },
+        {
+            "viaje_id": 2,
+            "dni": "21925181",
+            "destino": "Mar Del Plata",
+            "fecha": "19/02/2027",
+            "patente": "AK901VW",
+            "asiento": "2C",
+            "precio": 40000
+        }
+    ],
+    "pasajeros": {
+        "44816273": {
+            "nombre": "Nicolas",
+            "apellido": "Miano",
+            "telefono": "12345678"
+        },
+        "12345678": {
+            "nombre": "Joaquin",
+            "apellido": "Gomez",
+            "telefono": "123456789"
+        },
+        "23456789": {
+            "nombre": "Ignacio",
+            "apellido": "Ruiz",
+            "telefono": "987654321"
+        },
+        "34567890": {
+            "nombre": "Matias",
+            "apellido": "Castro",
+            "telefono": "456789012"
+        },
+        "45678901": {
+            "nombre": "Mateo",
+            "apellido": "Romero",
+            "telefono": "567890123"
+        },
+        "15975385": {
+            "nombre": "Pedro",
+            "apellido": "Pedro",
+            "telefono": "12345678"
+        },
+        "15935785": {
+            "nombre": "Hola",
+            "apellido": "Hola",
+            "telefono": "147258369"
+        },
+        "21925181": {
+            "nombre": "Diego",
+            "apellido": "Miano",
+            "telefono": "1553031937"
+        },
+        "44216253": {
+            "nombre": "Bautista",
+            "apellido": "Miano",
+            "telefono": "78945612"
+        }
+    }
+}
