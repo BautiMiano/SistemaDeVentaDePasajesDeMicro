@@ -3,7 +3,9 @@ from Utils import (RegistrarViaje, VerViajes, RegistrarMicro, DarBajaMicro,
                    menu_ventas, menu_viajes, menu_micros, RegistrarVenta, 
                    AgregarDestino, CargarDatos,menu_destinos, Disponibilidad,
                      EliminarDestino,InformeVentasPorDestino, 
-                   InformeVentasPorFecha, InformeRecaudacionTotal, VerVentas)
+                   InformeVentasPorFecha, InformeRecaudacionTotal, VerVentas,
+                   GestionarVenta
+                   )
 
 
 
@@ -13,7 +15,7 @@ def main():
         try:
             opcion = int(menu_principal())
 
-            if opcion < 1 or opcion > 6:
+            if opcion < 1 or opcion > 4:
                 print("Error: Ingrese un numero válido.")
                 continue
 
@@ -36,21 +38,13 @@ def main():
                         VerVentas()
 
                     elif opcion == 3:
-                        #Buscar ventas
-                        print("No disponible")
-
-                    elif opcion == 4:
-                        #Modificar ventas
-                        print("No disponible")
-
-                    elif opcion == 5:
-                        #Cancelar ventas
-                        print("No disponible")
+                        #Gestionar ventas
+                        GestionarVenta()
 
                     else:
                         break
 
-            elif opcion == 2: #MENU Informes
+            elif opcion == 2: #MENU INFORMES
 
                 while True:
                     opcion = int(menu_informes())

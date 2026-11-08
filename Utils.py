@@ -1,6 +1,6 @@
 import re, time, random, json, os
-from Datos import (distancias, micros, patentes, viajes, ventas, nombres, apellidos,
-                   FILAS, COLUMNAS, TARIFAPORKM)
+from Datos import (distancias, micros, patentes, viajes, ventas, nombres,
+                    apellidos, FILAS, COLUMNAS, TARIFAPORKM)
 
 ARCHIVO_JSON = os.path.join(os.path.dirname(os.path.abspath(__file__)),"datos.json")
 
@@ -93,9 +93,7 @@ def menu_ventas():
     print("1 - Registrar venta de pasaje")
     print("2 - Ver ventas")
     print("3 - Buscar venta")
-    print("4 - Modificar venta")
-    print("5 - Cancelar venta")
-    print("6 - volver atras")
+    print("4 - Volver atras")
     print("")
 
     print("="*45)
@@ -166,7 +164,21 @@ def menu_destinos():
     opcion = input("Seleccione una opción: ")
     print("")
     return opcion
+#OK
+def menu_gestion_venta():
 
+    print("="*45)
+    print("Seleccione una opcion".center(45))
+    print("="*45)
+    print("")
+    print("1. Cancelar venta")
+    print("2. Modificar asiento")
+    print("3. Volver al menu")
+
+    print("="*45)
+    opcion = input("Seleccione una opción: ").strip()
+    print("")
+    return opcion
 ############################## Micros ##################################
 #OK
 def RegistrarMicro():
@@ -268,17 +280,6 @@ def VerMicros():
             print("- Sin viajes asignados")
 
         print("-" * 30)
-#CREO QUE ES PARA BORRAR
-def MicrosPorDestinos(destino):
-    micros_disponibles = []
-    for micro in micros:
-        if destino in micro["destinos"]:
-            micros_disponibles.append(micro)
-
-    if not micros_disponibles:
-        print("No hay micros para ese destino")
-        return []
-    return micros_disponibles
 
 ############################## Destinos ##################################
 #OK
@@ -576,76 +577,26 @@ def ElegirAsiento(matriz):
             print("Formato inválido. Ingrese un asiento como 1A o 10D.")
             continue
 #CHEQUEAR
-def CancelarAsiento(matriz,asiento):
+def LiberarAsiento(matriz,asiento):
 
-    try:
-        asiento = asiento.upper().strip()
-        x = int(asiento[:-1])
-        y = asiento[-1]
+    x = int(asiento[:-1]) - 1
+    y = asiento[-1]
 
-        if x < 1 or x > FILAS:
-            print("Número de fila inválido.")
-            return 0
+    if y == "A":
+        y = 0
+    elif y == "B":
+        y = 1
+    elif y == "C":
+        y = 2
+    else:
+        y = 3
 
-        if y == "A":
-            y = 1
-        elif y == "B":
-            y = 2
-        elif y == "C":
-            y = 4
-        elif y == "D":
-            y = 5
-        else:
-            print("Letra de asiento inválida.")
-            return 0
+    matriz[x][y] = "O"
 
-        if matriz[x][y] == "X":
-            matriz[x][y] = "O"
-            print("Asiento cancelado correctamente.")
-            return 1
-        else:
-            print("Ese asiento ya está libre.")
-            return 0
+    print("asiento liberado correctamente")
 
-    except ValueError:
-        print("Formato inválido. Ingrese un asiento como 1A o 10D.")
-        return 0
+    return   
 #CHEQUEAR
-def OcuparAsiento(matriz, asiento):
-
-    try:
-        asiento = asiento.upper().strip()
-        x = int(asiento[:-1])
-        y = asiento[-1]
-
-        if x < 1 or x > FILAS:
-            print("Número de fila inválido.")
-            return 0
-
-        if y == "A":
-            y = 1
-        elif y == "B":
-            y = 2
-        elif y == "C":
-            y = 4
-        elif y == "D":
-            y = 5
-        else:
-            print("Letra de asiento inválida.")
-            return 0
-
-        if matriz[x][y] == "X":
-            print("El asiento ya está ocupado.")
-            return 0
-
-        matriz[x][y] = "X"
-        print(f"El asiento {asiento} fue ocupado correctamente.")
-        return 1
-
-    except ValueError:
-        print("Formato inválido. Ingrese un asiento como 1A o 10D.")
-        return 0
-
 def ContarAsientosOcupados(asientos):
     ocupado = 0
 
@@ -655,8 +606,23 @@ def ContarAsientosOcupados(asientos):
                 ocupado +=1
     return ocupado
 
+def CambiarAsiento(venta, matriz):
+    asiento_anterior = venta["asiento"]
+
+    LiberarAsiento(matriz, asiento_anterior)
+
+    print("Seleccione el nuevo asiento:")
+    ImprimirMatriz(matriz)
+
+    nuevo_asiento = ElegirAsiento(matriz)
+
+    venta["asiento"] = nuevo_asiento
+
+    GuardarDatos()
+
+    print("Asiento modificado correctamente.")
 #####################################  Ventas ###############################
-#TIENE QUE PERMITIR INGRESAR EL NOMBRE Y APELLIDO
+#OK
 def RegistrarVenta():
     #Selecciona un destino -> Selecciona un fecha disponible para ese destino
     #se selecciona un asiento(debe actualizar estado del asiento) -> se guardan los datos
@@ -723,19 +689,26 @@ def RegistrarVenta():
 
     precio = distancias[viaje_elegido["destino"]] * TARIFAPORKM
 
+    nombre = IngresarNombre()
+
+
+
     print("\n" + "=" * 40)
     print("RESUMEN DE LA VENTA".center(40))
     print("=" * 40)
     print(f"Destino: {viaje_elegido['destino']}")
     print(f"Fecha: {viaje_elegido['fecha']}")
+    print(f"Nombre: {nombre} {apellido}")
     print(f"Asiento: {asiento_elegido}")
     print(f"Precio: ${precio}")
     print("=" * 40)
 
     venta = {
+    "viaje_id": viaje_elegido["id"],
     "destino": viaje_elegido["destino"],
     "fecha": viaje_elegido["fecha"],
     "patente": viaje_elegido["patente"],
+    "nombre": nombre,
     "asiento": asiento_elegido,
     "precio": precio
 }
@@ -744,7 +717,7 @@ def RegistrarVenta():
     GuardarDatos()
 
     print("Venta registrada correctamente.")
-
+#OK
 def CrearVenta(destino, fecha, matriz, patente, viaje_id):
     precio = distancias[destino] * TARIFAPORKM
     letras = ["A", "B", "C", "D"]
@@ -764,8 +737,7 @@ def CrearVenta(destino, fecha, matriz, patente, viaje_id):
 
                 venta = {
                     "viaje_id": viaje_id,
-                    "nombre": nombre,
-                    "apellido": apellido,
+                    "nombre": nombre + " " + apellido,
                     "destino": destino,
                     "fecha": fecha,
                     "patente": patente,
@@ -779,7 +751,7 @@ def CrearVenta(destino, fecha, matriz, patente, viaje_id):
                 matriz[f][c] = "O"
 
     return matriz
-
+#OK
 def VerVentas():
     print("=" * 50)
     print("VENTAS REGISTRADAS".center(50))
@@ -795,12 +767,90 @@ def VerVentas():
         print(f"Venta N°: {i + 1}")
         print(f"Destino: {venta['destino']}")
         print(f"Fecha: {venta['fecha']}")
-        print(f"Nombre: {venta['nombre']} {venta['apellido']}")
+        print(f"Nombre: {venta['nombre']}")
         print(f"Asiento: {venta['asiento']}")
         print(f"Patente: {venta['patente']}")
         print(f"Precio: ${venta['precio']}")
         print("-" * 50)
+#Debe eliminar la venta y liberar el asiento
+def CancelarVenta(venta, matriz):
+    asiento = venta["asiento"]
 
+    LiberarAsiento(matriz, asiento)
+
+    ventas.remove(venta)
+
+    GuardarDatos()
+
+    print("Venta cancelada correctamente.")
+#CHEQUEAR
+def BuscarVenta(viaje_id, asiento, i=0):
+
+    if i == len(ventas):
+        return None
+
+    if ventas[i]["viaje_id"] == viaje_id and ventas[i]["asiento"] == asiento:
+        return ventas[i]
+
+    return BuscarVenta(viaje_id, asiento, i + 1)
+#CHEQUEAR
+def GestionarVenta():
+
+    VerViajes()
+
+    if not viajes:
+        return
+
+    try:
+        id_elegido = int(input("Seleccione el ID del viaje: "))
+    except ValueError:
+        print("Debe ingresar un número.")
+        return
+
+    viaje_elegido = None
+
+    for viaje in viajes:
+        if viaje["id"] == id_elegido:
+            viaje_elegido = viaje
+            break
+
+    if viaje_elegido == None:
+        print("ID no válido.")
+        return
+
+    matriz = viaje_elegido["asientos"]
+
+    ImprimirMatriz(matriz)
+
+    asiento = input("Ingrese el asiento que desea buscar (Ejemplo 3B): ").upper().strip()
+
+    venta = BuscarVenta(viaje_elegido["id"], asiento)
+
+    if venta == None:
+        print("No se encontraron ventas para este asiento.")
+        return
+
+    print("\nVenta encontrada:")
+    print(f"Pasajero: {venta['nombre']} {venta['apellido']}")
+    print(f"Asiento: {venta['asiento']}")
+    print(f"Destino: {venta['destino']}")
+    print(f"Fecha: {venta['fecha']}")
+
+    opcion = menu_gestion_venta()
+
+    if opcion == 1:
+        CancelarVenta(venta, matriz)
+
+    elif opcion == 2:
+        CambiarAsiento(venta, matriz)
+
+    elif opcion == 3:
+        return
+
+    else:
+        print("Opción inválida.")
+
+    return
 ############################# Funciones extras #############################
 
 def ValidarFechas():
@@ -879,6 +929,19 @@ def ValidarFechas():
             fecha = input("Ingrese la fecha del viaje (DD/MM/AAAA): ")
     return fecha
 
+def IngresarNombre():
+    
+    while True:
+        nombre = input("Ingrese el nombre completo del pasajero: ").strip()
+
+        nombre = " ".join(nombre.split()).title()
+
+        if not re.match(r"^[A-Za-zÁÉÍÓÚáéíóúÑñÜü ]+$", nombre):
+            print("Error: el nombre solo puede contener letras y espacios.")
+        elif len(nombre.split()) < 2:
+            print("Error: ingrese al menos un nombre y un apellido.")
+        else:
+            return nombre
 ######################################  Informes ###############################
 
 def InformeVentasPorDestino():
