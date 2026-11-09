@@ -17,7 +17,7 @@ def main():
             print("Error: Ingrese un numero válido.")
             continue
 
-        if opcion == 1: #MENU VENTAS
+        if opcion == 1:
 
             while True:
 
@@ -33,7 +33,7 @@ def main():
                 elif opcion == 2:
                     Utils.VerVentas()
 
-                elif opcion == 3: #SUBMENU BUSCAR VENTA
+                elif opcion == 3:
 
                     while True:
                         opcion = ConvertirOpcion(Utils.menu_buscar_venta())
@@ -57,7 +57,7 @@ def main():
                 else:
                     break
 
-        elif opcion == 2: #MENU INFORMES
+        elif opcion == 2:
 
             while True:
                 opcion = ConvertirOpcion(Utils.menu_informes())
@@ -78,7 +78,7 @@ def main():
                 else:
                     break
 
-        elif opcion == 3: #MENU VIAJES
+        elif opcion == 3:
 
             while True:
                 opcion = ConvertirOpcion(Utils.menu_viajes())
@@ -99,7 +99,7 @@ def main():
                 else:
                     break
 
-        elif opcion == 4: #MENU MICROS
+        elif opcion == 4:
 
             while True:
                 opcion = ConvertirOpcion(Utils.menu_micros())
@@ -120,23 +120,23 @@ def main():
                 else:
                     break
 
-        elif opcion == 5: #MENU DESTINOS
+        elif opcion == 5:
 
             while True:
-                opcion = ConvertirOpcion(Utils.menu_destinos())
+                opcion = ConvertirOpcion(Utils.menu_terminales())
 
                 if opcion < 1 or opcion > 4:
                     print("Error: Ingrese un numero válido.")
                     continue
 
                 if opcion == 1:
-                    Utils.VerDestinos()
+                    Utils.VerTerminales()
 
                 elif opcion == 2:
-                    Utils.AgregarDestino()
+                    Utils.AgregarTerminal()
 
                 elif opcion == 3:
-                    Utils.EliminarDestino()
+                    Utils.EliminarTerminal()
 
                 else:
                     break

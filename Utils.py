@@ -3,8 +3,6 @@ import time
 import random
 import json
 
-############################## Datos ##################################
-
 distancias = {}
 
 micros = []
@@ -41,7 +39,6 @@ apellidos = [
     "Sosa", "Aguirre", "Gimenez", "Vazquez", "Ledesma"
 ]
 
-############################## Json ##################################
 def GuardarDatos():
     datos = {
         "distancias": distancias,
@@ -61,6 +58,7 @@ def GuardarDatos():
             arch.close()
         except NameError:
             pass
+
 def CargarDatos():
     cargado = False
 
@@ -82,8 +80,8 @@ def CargarDatos():
 
     if cargado:
         distancias.clear()
-        for destino in datos.get("distancias", {}):
-            distancias[destino] = datos["distancias"][destino]
+        for terminal in datos.get("distancias", {}):
+            distancias[terminal] = datos["distancias"][terminal]
 
         micros.clear()
         micros.extend(datos.get("micros", []))
@@ -100,7 +98,6 @@ def CargarDatos():
 
         print("Datos cargados correctamente.")
 
-############################## Menu ##################################
 
 def menu_principal():
     print("=" * 45)
@@ -111,7 +108,7 @@ def menu_principal():
     print("2 - Informes")
     print("3 - Viajes")
     print("4 - Micros")
-    print("5 - Destinos")
+    print("5 - Terminales")
     print("6 - Salir")
 
     print("")
@@ -201,14 +198,14 @@ def menu_micros():
     print("")
     return opcion
 
-def menu_destinos():
+def menu_terminales():
     print("="*45)
-    print("Destinos".center(45))
+    print("Terminales".center(45))
     print("="*45)
     print("")
-    print("1 - Ver destinos")
-    print("2 - Agregar destinos")
-    print("3 - Eliminar destinos")
+    print("1 - Ver terminales")
+    print("2 - Agregar terminal")
+    print("3 - Eliminar terminal")
     print("4 - volver atras")
     print("")
 
@@ -232,7 +229,6 @@ def menu_gestion_venta():
     print("")
     return opcion
 
-############################## Micros ##################################
 
 def RegistrarMicro():
 
@@ -267,25 +263,11 @@ def DarBajaMicro():
     for i in range(len(micros)):
         print(f"{i + 1} - Patente: {micros[i]['patente']}")
 
-    while True:
-        try:
-            opcion = int(input("Seleccione el micro a dar de baja: "))
+    micro = ElegirDeLista(micros, "Seleccione el micro a dar de baja: ")
+    patente = micro["patente"]
 
-            if opcion < 1 or opcion > len(micros):
-                print("Error: opción fuera de rango.")
-                continue
-
-            break
-
-        except ValueError:
-            print("Error: debe ingresar un número.")
-
-    patente = micros[opcion - 1]["patente"]
-
-    micros.pop(opcion - 1)
-
-    if patente in patentes:
-        patentes.remove(patente)
+    micros.remove(micro)
+    patentes.discard(patente)
 
     viajes_nuevos = [viaje for viaje in viajes if viaje["patente"] != patente]
     viajes.clear()
@@ -332,100 +314,136 @@ def VerMicros():
 
         print("-" * 30)
 
-############################## Destinos ##################################
 
-def AgregarDestino():
-
-    destino = input("Ingrese el nombre del destino: ").strip().title()
-
-    while destino == "" or destino in distancias:
-        if destino == "":
-            print("Error: el destino no puede estar vacío.")
-        else:
-            print("Error: ese destino ya está registrado.")
-
-        destino = input("Ingrese otro destino: ").strip().title()
-
+def IngresarKm(terminal, otra):
     while True:
         try:
-            distancia = int(input("Ingrese la distancia en kilómetros desde Buenos Aires: "))
+            km = int(input(f"Distancia entre {terminal} y {otra} (km): "))
 
-            if distancia <= 0:
+            if km <= 0:
                 print("Error: la distancia debe ser mayor que cero.")
                 continue
 
-            break
+            return km
 
         except ValueError:
             print("Error: ingrese una distancia válida en números.")
 
-    distancias[destino] = distancia
+def AgregarTerminal():
+
+    terminal = input("Ingrese el nombre de la terminal: ").strip().title()
+
+    while terminal == "" or terminal in distancias:
+        if terminal == "":
+            print("Error: la terminal no puede estar vacía.")
+        else:
+            print("Error: esa terminal ya está registrada.")
+
+        terminal = input("Ingrese otra terminal: ").strip().title()
+
+    kms = {}
+    for otra in distancias:
+        kms[otra] = IngresarKm(terminal, otra)
+
+    distancias[terminal] = kms
+    for otra in kms:
+        distancias[otra][terminal] = kms[otra]
+
     GuardarDatos()
 
-    print(f"Destino '{destino}' registrado correctamente.")
+    print(f"Terminal '{terminal}' registrada correctamente.")
 
-def VerDestinos():
+def VerTerminales():
     if not distancias:
-        print("\nNo hay destinos registrados.")
+        print("\nNo hay terminales registradas.")
         return
 
     print("\n" + "=" * 40)
-    print("DESTINOS REGISTRADOS".center(40))
+    print("TERMINALES REGISTRADAS".center(40))
     print("=" * 40)
 
-    for i, destino in enumerate(distancias):
-        print(f"{i + 1}. {destino} - {distancias[destino]} km")
+    for i, terminal in enumerate(distancias):
+        print(f"{i + 1}. {terminal}")
+        for otra in distancias[terminal]:
+            print(f"     - a {otra}: {distancias[terminal][otra]} km")
 
     print("=" * 40)
 
-def EliminarDestino():
-    print("=" * 50)
-    print("ELIMINAR DESTINO".center(50))
-    print("=" * 50)
-
-    if len(distancias) == 0:
-        print("No hay destinos registrados.")
-        return
-
-    VerDestinos()
-
-    destinos = list(distancias.keys())
-
+def ElegirDeLista(lista, mensaje):
     while True:
         try:
-            opcion = int(input("Seleccione el destino a eliminar: "))
+            opcion = int(input(mensaje))
 
-            if opcion < 1 or opcion > len(destinos):
+            if opcion < 1 or opcion > len(lista):
                 print("Error: opción fuera de rango.")
                 continue
 
-            break
+            return lista[opcion - 1]
 
         except ValueError:
             print("Error: debe ingresar un número.")
 
-    destino = destinos[opcion - 1]
+def ElegirTerminal():
+    terminales = list(distancias.keys())
 
-    distancias.pop(destino)
+    print("\n" + "=" * 40)
+    print("TERMINALES".center(40))
+    print("=" * 40)
 
-    viajes_nuevos = [viaje for viaje in viajes if viaje["destino"] != destino]
+    for i, terminal in enumerate(terminales):
+        print(f"{i + 1}. {terminal}")
+
+    return ElegirDeLista(terminales, "Seleccione la terminal: ")
+
+def ElegirDestino(salida):
+    destinos = []
+    for terminal in distancias:
+        if terminal != salida:
+            destinos.append(terminal)
+
+    print("\n" + "=" * 40)
+    print(f"DESTINOS DESDE {salida.upper()}".center(40))
+    print("=" * 40)
+
+    for i, destino in enumerate(destinos):
+        print(f"{i + 1}. {destino} - {distancias[salida][destino]} km")
+
+    return ElegirDeLista(destinos, "Seleccione el destino: ")
+
+def EliminarTerminal():
+    print("=" * 50)
+    print("ELIMINAR TERMINAL".center(50))
+    print("=" * 50)
+
+    if len(distancias) == 0:
+        print("No hay terminales registradas.")
+        return
+
+    terminal = ElegirTerminal()
+
+    distancias.pop(terminal)
+    for otra in distancias:
+        distancias[otra].pop(terminal)
+
+    viajes_nuevos = [viaje for viaje in viajes
+                     if viaje["salida"] != terminal and viaje["destino"] != terminal]
     viajes.clear()
     viajes.extend(viajes_nuevos)
 
-    ventas_nuevas = [venta for venta in ventas if venta["destino"] != destino]
+    ventas_nuevas = [venta for venta in ventas
+                     if venta["salida"] != terminal and venta["destino"] != terminal]
     ventas.clear()
     ventas.extend(ventas_nuevas)
 
     GuardarDatos()
 
-    print(f"Destino '{destino}' eliminado correctamente.")
-    print("También se eliminaron sus viajes y ventas asociados.")
+    print(f"Terminal '{terminal}' eliminada correctamente.")
+    print("También se eliminaron los viajes y ventas que salían o llegaban ahí.")
 
-############################## Viajes ##################################
 
 def RegistrarViaje():
-    if len(distancias) == 0:
-        print("No hay destinos registrados. Primero agregue un destino.")
+    if len(distancias) < 2:
+        print("Se necesitan al menos 2 terminales para registrar un viaje.")
         return
 
     if len(micros) == 0:
@@ -439,74 +457,46 @@ def RegistrarViaje():
     else:
         viaje["id"] = viajes[-1]["id"] + 1
 
-    try:
+    salida = ElegirTerminal()
+    viaje["salida"] = salida
 
-        while True:
+    destino_elegido = ElegirDestino(salida)
+    viaje["destino"] = destino_elegido
 
-            VerDestinos()
-            print("")
+    VerMicros()
+    patente = input("Ingrese la patente del micro: ").strip().upper()
 
-            destinos = list(distancias.keys())
-            
-            opcion = int(input("Seleccione una opcion: "))
+    while patente not in patentes:
+        print("Error: esa patente no está registrada.")
+        patente = input("Ingrese la patente del micro: ").strip().upper()
 
-            if opcion < 1 or opcion > len(destinos):
-                print("Error. Fuera de rango.")
-                continue
+    viaje["patente"] = patente
 
-            destino_elegido = destinos[opcion - 1]
+    while True:
+        fecha = ValidarFechas()
 
-            viaje["destino"] = destino_elegido
-            break
+        ocupado = False
+        for v in viajes:
+            if v["patente"] == patente and v["fecha"] == fecha:
+                ocupado = True
+                break
 
-        while True:
-            VerMicros()
+        if ocupado:
+            print(f"Error: el micro {patente} ya tiene un viaje el {fecha}.")
+            continue
 
-            patente = input("Ingrese la patente del micro: ").strip().upper()
+        break
 
-            micro_elegido = None
+    viaje["fecha"] = fecha
 
-            for micro in micros:
-                if micro["patente"] == patente:
-                    micro_elegido = micro
-                    break
+    matriz = CrearMatriz()
+    matriz = CrearVenta(salida, destino_elegido, fecha, matriz, patente, viaje["id"])
+    viaje["asientos"] = matriz
 
-            if micro_elegido == None:
-                print("Error: esa patente no está registrada.")
-                continue
+    viajes.append(viaje)
+    GuardarDatos()
 
-            viaje["patente"] = patente
-
-            break
-
-        while True:
-            fecha = ValidarFechas()
-
-            ocupado = False
-            for v in viajes:
-                if v["patente"] == patente and v["fecha"] == fecha:
-                    ocupado = True
-                    break
-
-            if ocupado:
-                print(f"Error: el micro {patente} ya tiene un viaje el {fecha}.")
-                continue
-
-            break
-
-        viaje["fecha"] = fecha
-
-        matriz = CrearMatriz()
-        matriz = CrearVenta(destino_elegido, fecha, matriz, patente, viaje["id"])
-        viaje["asientos"] = matriz
-
-        viajes.append(viaje)
-        GuardarDatos()
-
-        print("Viaje registrado correctamente.")
-        
-    except ValueError:
-        print("Error. Caracter invalido")
+    print("Viaje registrado correctamente.")
 
 def VerViajes():
     print("=" * 50)
@@ -519,6 +509,7 @@ def VerViajes():
 
     for viaje in viajes:
         print(f"ID: {viaje['id']}")
+        print(f"Salida: {viaje['salida']}")
         print(f"Destino: {viaje['destino']}")
         print(f"Fecha: {viaje['fecha']}")
         print(f"Patente: {viaje['patente']}")
@@ -536,12 +527,16 @@ def Disponibilidad():
     print("\nVIAJES DISPONIBLES\n")
 
     ancho_num = max(len("N°"), len(str(len(viajes))))
+    ancho_salida = len("Salida")
     ancho_destino = len("Destino")
     for viaje in viajes:
+        if len(viaje["salida"]) > ancho_salida:
+            ancho_salida = len(viaje["salida"])
         if len(viaje["destino"]) > ancho_destino:
             ancho_destino = len(viaje["destino"])
 
-    encabezado = ("N°".rjust(ancho_num) + " | " + "Destino".ljust(ancho_destino) +
+    encabezado = ("N°".rjust(ancho_num) + " | " + "Salida".ljust(ancho_salida) +
+                  " | " + "Destino".ljust(ancho_destino) +
                   f" | {'Fecha':<10} | {'Patente':<7} | Lugares libres")
     print(encabezado)
     print("-" * len(encabezado))
@@ -550,25 +545,14 @@ def Disponibilidad():
         viaje = viajes[i]
         libres = FILAS * COLUMNAS - ContarAsientosOcupados(viaje["asientos"])
 
-        print(str(i + 1).rjust(ancho_num) + " | " + viaje["destino"].ljust(ancho_destino) +
+        print(str(i + 1).rjust(ancho_num) + " | " + viaje["salida"].ljust(ancho_salida) +
+              " | " + viaje["destino"].ljust(ancho_destino) +
               f" | {viaje['fecha']:<10} | {viaje['patente']:<7} | {libres:>14}")
 
-    while True:
-        try:
-            opcion = int(input("\nSeleccione un viaje: "))
-
-            if opcion < 1 or opcion > len(viajes):
-                print("Error: opción fuera de rango.")
-                continue
-
-            break
-
-        except ValueError:
-            print("Error: debe ingresar un número.")
-
-    viaje = viajes[opcion - 1]
+    viaje = ElegirDeLista(viajes, "\nSeleccione un viaje: ")
 
     print("\n" + "=" * 50)
+    print(f"SALIDA: {viaje['salida']}")
     print(f"DESTINO: {viaje['destino']}")
     print(f"FECHA: {viaje['fecha']}")
     print(f"PATENTE: {viaje['patente']}")
@@ -576,7 +560,6 @@ def Disponibilidad():
 
     ImprimirMatriz(viaje["asientos"])
 
-############################## Asientos ##################################
 def CrearMatriz():
     matriz = []
 
@@ -677,7 +660,6 @@ def CambiarAsiento(venta, matriz):
 
     print("Asiento modificado correctamente.")
 
-#####################################  Ventas ###############################
 
 def RegistrarVenta():
 
@@ -688,11 +670,15 @@ def RegistrarVenta():
     volver = False
 
     while True:
-        VerDestinos()
+        destinos = list(distancias.keys())
+
+        print("\n" + "=" * 40)
+        print("DESTINOS".center(40))
+        print("=" * 40)
+        for i, destino in enumerate(destinos):
+            print(f"{i + 1}. {destino}")
         print("0. Volver atras")
         print("")
-
-        destinos = list(distancias.keys())
 
         try:
             opcion = int(input("Seleccione una opcion: "))
@@ -725,6 +711,7 @@ def RegistrarVenta():
         for i in range(len(viajes_destino)):
             viaje = viajes_destino[i]
             print(f"{i + 1} - ID: {viaje['id']} | "
+                f"Salida: {viaje['salida']} | "
                 f"Fecha: {viaje['fecha']} | "
                 f"Patente: {viaje['patente']}")
 
@@ -733,22 +720,10 @@ def RegistrarVenta():
     if volver:
         return
 
-    while True:
-        try:
-            opcion_viaje = int(input("\nSeleccione un viaje: "))
-
-            if opcion_viaje < 1 or opcion_viaje > len(viajes_destino):
-                print("Error: opción fuera de rango.")
-                continue
-
-            break
-
-        except ValueError:
-            print("Error: debe ingresar un número.")
-
-    viaje_elegido = viajes_destino[opcion_viaje - 1]
+    viaje_elegido = ElegirDeLista(viajes_destino, "\nSeleccione un viaje: ")
 
     print("\nViaje seleccionado correctamente.")
+    print(f"Salida: {viaje_elegido['salida']}")
     print(f"Destino: {viaje_elegido['destino']}")
     print(f"Fecha: {viaje_elegido['fecha']}")
     print(f"Patente: {viaje_elegido['patente']}")
@@ -762,7 +737,7 @@ def RegistrarVenta():
     ImprimirMatriz(matriz)
     asiento_elegido = ElegirAsiento(matriz)
 
-    precio = distancias[viaje_elegido["destino"]] * TARIFAPORKM
+    precio = distancias[viaje_elegido["salida"]][viaje_elegido["destino"]] * TARIFAPORKM
 
     dni = IngresarDni()
 
@@ -776,6 +751,7 @@ def RegistrarVenta():
     print("\n" + "=" * 40)
     print("RESUMEN DE LA VENTA".center(40))
     print("=" * 40)
+    print(f"Salida: {viaje_elegido['salida']}")
     print(f"Destino: {viaje_elegido['destino']}")
     print(f"Fecha: {viaje_elegido['fecha']}")
     print(f"Nombre: {nombre}")
@@ -786,6 +762,7 @@ def RegistrarVenta():
 
     venta = {
     "viaje_id": viaje_elegido["id"],
+    "salida": viaje_elegido["salida"],
     "destino": viaje_elegido["destino"],
     "fecha": viaje_elegido["fecha"],
     "patente": viaje_elegido["patente"],
@@ -800,17 +777,14 @@ def RegistrarVenta():
 
     print("Venta registrada correctamente.")
 
-def CrearVenta(destino, fecha, matriz, patente, viaje_id):
-    precio = distancias[destino] * TARIFAPORKM
+def CrearVenta(salida, destino, fecha, matriz, patente, viaje_id):
+    precio = distancias[salida][destino] * TARIFAPORKM
     letras = ["A", "B", "C", "D"]
-
 
     for f in range(len(matriz)):
         for c in range(len(matriz[f])):
 
-            estado = random.randint(0, 1)
-
-            if estado == 1:
+            if random.randint(0, 1) == 1:
                 matriz[f][c] = "X"
                 asiento = str(f + 1) + letras[c]
 
@@ -822,6 +796,7 @@ def CrearVenta(destino, fecha, matriz, patente, viaje_id):
                     "viaje_id": viaje_id,
                     "nombre": nombre + " " + apellido,
                     "dni": dni,
+                    "salida": salida,
                     "destino": destino,
                     "fecha": fecha,
                     "patente": patente,
@@ -830,9 +805,6 @@ def CrearVenta(destino, fecha, matriz, patente, viaje_id):
                 }
 
                 ventas.append(venta)
-                
-            else:
-                matriz[f][c] = "O"
 
     return matriz
 
@@ -859,7 +831,7 @@ def VerVentas():
         return
 
     print("\n" + "=" * 50)
-    print(f"VENTAS DEL VIAJE {viaje['id']} - {viaje['destino']} - {viaje['fecha']}".center(50))
+    print(f"VENTAS DEL VIAJE {viaje['id']} - {viaje['salida']} a {viaje['destino']} - {viaje['fecha']}".center(50))
     print("=" * 50)
 
     cantidad = 0
@@ -876,7 +848,8 @@ def VerVentas():
 
 def MostrarVenta(venta):
     print(f"Pasajero: {venta['nombre']}")
-    print(f"DNI: {venta('dni', '-')}")
+    print(f"DNI: {venta.get('dni', '-')}")
+    print(f"Salida: {venta['salida']}")
     print(f"Destino: {venta['destino']}")
     print(f"Fecha: {venta['fecha']}")
     print(f"Asiento: {venta['asiento']}")
@@ -895,7 +868,6 @@ def CancelarVenta(venta, matriz):
 
     print("Venta cancelada correctamente.")
     
-############################# Búsquedas recursivas #############################
 
 def BuscarViajePorId(viaje_id, inicio=0, fin=None):
     if fin == None:
@@ -984,7 +956,6 @@ def BuscarVentasPorNombre(texto, inicio=0, fin=None, encontrados=None):
 
     return encontrados
 
-############################# Buscar venta #############################
 
 def SeleccionarVentaPorAsiento():
     print("=" * 50)
@@ -1114,80 +1085,62 @@ def GestionarVenta(venta):
     else:
         print("Opción inválida.")
 
-############################# Funciones extras #############################
 
 def ValidarFechas():
     fecha = input("Ingrese la fecha del viaje (DD/MM/AAAA): ")
     while True:
+        partes = fecha.split("/")
+        if len(partes) != 3:
+            print("Error: use el formato DD/MM/AAAA.")
+            fecha = input("Ingrese la fecha del viaje (DD/MM/AAAA): ")
+            continue
+
+        if len(partes[0]) != 2 or len(partes[1]) != 2 or len(partes[2]) != 4:
+            print("Error formato numerico: ingrese la fecha en el formato correcto DD/MM/AAAA 00/00/0000.")
+            fecha = input("Ingrese la fecha del viaje (DD/MM/AAAA): ")
+            continue
+
         try:
-            partes = fecha.split("/")
-            if len(partes) != 3:
-                print("Error: use el formato DD/MM/AAAA.")
-                fecha = input("Ingrese la fecha del viaje (DD/MM/AAAA): ")
-                continue
-
-            if len(partes[0]) != 2 or len(partes[1]) != 2 or len(partes[2]) != 4:
-                print("Error formato numerico: ingrese la fecha en el formato correcto DD/MM/AAAA 00/00/0000.")
-                fecha = input("Ingrese la fecha del viaje (DD/MM/AAAA): ")
-                continue
-
-            try:
-                dia = int(partes[0])
-            except ValueError:
-                print("Error de formato: ingrese día con números.")
-                fecha = input("Ingrese la fecha del viaje (DD/MM/AAAA): ")
-                continue
-
-            try:
-                mes = int(partes[1])
-            except ValueError:
-                print("Error de formato: ingrese mes con números.")
-                fecha = input("Ingrese la fecha del viaje (DD/MM/AAAA): ")
-                continue
-
-            try:
-                anio = int(partes[2])
-            except ValueError:
-                print("Error de formato: ingrese año con números.")
-                fecha = input("Ingrese la fecha del viaje (DD/MM/AAAA): ")
-                continue
-
-            if mes < 1 or mes > 12:
-                print("Error: el mes debe estar entre 1 y 12.")
-            else:
-                dias_por_mes = {
-                    1: 31, 2: 28, 3: 31, 4: 30,
-                    5: 31, 6: 30, 7: 31, 8: 31,
-                    9: 30, 10: 31, 11: 30, 12: 31
-                }
-
-                if anio % 4 == 0 and (anio % 100 != 0 or anio % 400 == 0):
-                    dias_por_mes[2] = 29
-
-                if dia < 1 or dia > dias_por_mes[mes]:
-                    print("Error: el día no es válido para ese mes.")
-                else:
-
-                    fecha_actual = time.localtime()
-
-                    dia_actual = fecha_actual.tm_mday
-                    mes_actual = fecha_actual.tm_mon
-                    anio_actual = fecha_actual.tm_year
-
-                    if (anio, mes, dia) < (anio_actual, mes_actual, dia_actual):
-                        print("Error: no se pueden ingresar fechas anteriores a hoy.")
-
-                    elif (anio, mes, dia) > (anio_actual + 1, mes_actual, dia_actual):
-                        print("Error: solo se pueden registrar viajes hasta un año desde hoy.")
-
-                    else:
-                        break
-
-            fecha = input("Ingrese la fecha del viaje (DD/MM/AAAA): ")            
-
+            dia = int(partes[0])
+            mes = int(partes[1])
+            anio = int(partes[2])
         except ValueError:
             print("Error: ingrese día, mes y año con números.")
             fecha = input("Ingrese la fecha del viaje (DD/MM/AAAA): ")
+            continue
+
+        if mes < 1 or mes > 12:
+            print("Error: el mes debe estar entre 1 y 12.")
+        else:
+            dias_por_mes = {
+                1: 31, 2: 28, 3: 31, 4: 30,
+                5: 31, 6: 30, 7: 31, 8: 31,
+                9: 30, 10: 31, 11: 30, 12: 31
+            }
+
+            if anio % 4 == 0 and (anio % 100 != 0 or anio % 400 == 0):
+                dias_por_mes[2] = 29
+
+            if dia < 1 or dia > dias_por_mes[mes]:
+                print("Error: el día no es válido para ese mes.")
+            else:
+                fecha_actual = time.localtime()
+
+                dia_actual = fecha_actual.tm_mday
+                mes_actual = fecha_actual.tm_mon
+                anio_actual = fecha_actual.tm_year
+
+                if (anio, mes, dia) < (anio_actual, mes_actual, dia_actual):
+                    print("Error: no se pueden ingresar fechas anteriores a hoy.")
+
+                elif (anio, mes, dia) > (anio_actual + 1, mes_actual, dia_actual):
+                    print("Error: solo se pueden registrar viajes hasta un año desde hoy.")
+
+                else:
+                    break
+
+        fecha = input("Ingrese la fecha del viaje (DD/MM/AAAA): ")
+
     return fecha
 
 def IngresarNombre():
@@ -1223,7 +1176,10 @@ def FormatoPrecio(numero):
         cad = cad[:-3]
     return cad + resultado
 
-######################################  Informes ###############################
+def RecaudacionViaje(viaje):
+    asientosOcupados = ContarAsientosOcupados(viaje["asientos"])
+    kilometros = distancias[viaje["salida"]][viaje["destino"]]
+    return asientosOcupados * kilometros * TARIFAPORKM
 
 def InformeVentasPorDestino():
     recaudacionPorDestino = {}
@@ -1231,20 +1187,18 @@ def InformeVentasPorDestino():
     for viaje in viajes:
         destino = viaje["destino"]
 
-        asientosOcupados = ContarAsientosOcupados(viaje["asientos"])
-
-        kilometros = distancias[destino]
-
-        recaudacion = asientosOcupados * kilometros * TARIFAPORKM
-
         if destino in recaudacionPorDestino:
-            recaudacionPorDestino[destino] += recaudacion
+            recaudacionPorDestino[destino] += RecaudacionViaje(viaje)
         else:
-            recaudacionPorDestino[destino] = recaudacion
+            recaudacionPorDestino[destino] = RecaudacionViaje(viaje)
 
     print("=" * 50)
     print("INFORME DE VENTAS POR DESTINO".center(50))
     print("=" * 50)
+
+    if len(recaudacionPorDestino) == 0:
+        print("No hay viajes registrados.")
+        return
 
     for destino in recaudacionPorDestino:
         print(f"Destino: {destino}")
@@ -1260,18 +1214,11 @@ def InformeVentasPorMes():
     for viaje in viajes:
         partes = viaje["fecha"].split("/")
         clave = (int(partes[2]), int(partes[1]))
-        destino = viaje["destino"]
-
-        asientosOcupados = ContarAsientosOcupados(viaje["asientos"])
-
-        kilometros = distancias[destino]
-
-        recaudacion = asientosOcupados * kilometros * TARIFAPORKM
 
         if clave in recaudacionPorMes:
-            recaudacionPorMes[clave] += recaudacion
+            recaudacionPorMes[clave] += RecaudacionViaje(viaje)
         else:
-            recaudacionPorMes[clave] = recaudacion
+            recaudacionPorMes[clave] = RecaudacionViaje(viaje)
 
     print("=" * 50)
     print("INFORME DE VENTAS POR MES".center(50))
@@ -1291,16 +1238,10 @@ def InformeVentasPorMes():
 def InformeRecaudacionTotal():
     recaudacionTotal = 0
     for viaje in viajes:
-        destino = viaje["destino"]
-        asientosOcupados = ContarAsientosOcupados(viaje["asientos"])
-        kilometros = distancias[destino]
-        recaudacion = asientosOcupados * kilometros * TARIFAPORKM
-        recaudacionTotal += recaudacion
+        recaudacionTotal += RecaudacionViaje(viaje)
 
     print("=" * 50)
     print("INFORME DE RECAUDACIÓN TOTAL".center(50))
     print("=" * 50)
     print(f"Recaudación Total: ${FormatoPrecio(recaudacionTotal)}")
     print("-" * 50)
-
-
