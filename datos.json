@@ -1,6 +1,60 @@
-{"distancias": {},
- "micros": [],
-  "patentes": [],
-   "viajes": [],
+{
+    "distancias": {
+        "Mar Del Plata": 400,
+        "Cordoba": 700,
+        "Rosario": 300,
+        "Mendoza": 1050,
+        "Bariloche": 1600,
+        "Salta": 1500,
+        "Tucuman": 1250,
+        "Pinamar": 340,
+        "Bahia Blanca": 650,
+        "Neuquen": 1150
+    },
+    "micros": [
+        {
+            "patente": "AB122CD"
+        },
+        {
+            "patente": "AF111DF"
+        },
+        {
+            "patente": "JG578GH"
+        },
+        {
+            "patente": "AC345KL"
+        },
+        {
+            "patente": "AD678MN"
+        },
+        {
+            "patente": "AE901PQ"
+        },
+        {
+            "patente": "AG234RS"
+        },
+        {
+            "patente": "AH567TU"
+        },
+        {
+            "patente": "AJ890VW"
+        },
+        {
+            "patente": "AK123XY"
+        }
+    ],
+    "patentes": [
+        "AB122CD",
+        "AF111DF",
+        "JG578GH",
+        "AC345KL",
+        "AD678MN",
+        "AE901PQ",
+        "AG234RS",
+        "AH567TU",
+        "AJ890VW",
+        "AK123XY"
+    ],
+    "viajes": [],
     "ventas": []
 }
