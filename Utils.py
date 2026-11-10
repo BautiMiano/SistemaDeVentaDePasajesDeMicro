@@ -919,7 +919,7 @@ def RegistrarViaje():
     viaje["fecha"] = fecha
 
     matriz = CrearMatriz()
-    matriz = GenerarVentasAlAzar(salida, destino_elegido, fecha, matriz, patente, viaje["id"])
+    # matriz = GenerarVentasAlAzar(salida, destino_elegido, fecha, matriz, patente, viaje["id"])
     viaje["asientos"] = matriz
 
     viajes.append(viaje)
