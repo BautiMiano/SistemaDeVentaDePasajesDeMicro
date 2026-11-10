@@ -1231,14 +1231,10 @@ def IngresarNombre():
     return nombre
 
 def FormatoPrecio(numero):
-    cad = str(numero)
-    resultado = ""
-
-    while len(cad) > 3:
-        resultado = "." + cad[-3:] + resultado
-        cad = cad[:-3]
-
-    return cad + resultado
+    if numero < 1000:
+        return str(numero)
+    else:
+        return FormatoPrecio(numero // 1000) + "." + f"{numero % 1000:03}"
 
 def Confirmar(mensaje):
     respuesta = input(mensaje + " (S/N): ").strip().upper()
