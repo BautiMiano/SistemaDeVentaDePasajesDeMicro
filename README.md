@@ -1,4 +1,4 @@
-# Sistema de Venta de Pasajes de Micro
+# TPO_Grupo3
 
 Trabajo Práctico Obligatorio de **Programación I – Algoritmos y Estructuras de Datos I** (UADE).
 Docente: Lic. Ricardo Thompson.
