@@ -59,18 +59,21 @@ apellidos = [
 
 ############################## Json ##################################
 
-# Qué hace: lee el archivo datos.json al arrancar el programa y copia su contenido a las
-#   estructuras globales (distancias, micros, patentes, viajes y ventas). Si el archivo no
-#   existe, el programa arranca vacío. Si está dañado o no se puede leer, muestra el error.
-# Recibe: nada.
-# Devuelve: nada. Modifica directamente las estructuras globales.
-# Cómo funciona: abre el archivo en modo lectura ("rt") dentro de un try y lo convierte a
-#   un diccionario con json.load(). En el finally lo cierra, con un try/except NameError por
-#   si el archivo nunca se llegó a abrir. La variable "cargado" indica si la lectura salió
-#   bien: solo en ese caso se copian los datos. Se usa .get(clave, valor) para que no falle
-#   si en el archivo falta alguna clave.
-# Estructuras y temas: archivos, JSON, excepciones (FileNotFoundError, ValueError, OSError),
-#   diccionarios, listas y conjuntos.
+# Esta función se ejecuta una sola vez, al arrancar el programa, y lo que hace es leer
+# datos.json y pasar su contenido a las estructuras globales: distancias, micros, patentes,
+# viajes y ventas.
+#
+# Abrimos el archivo en modo lectura ("rt") dentro de un try y lo convertimos a diccionario
+# con json.load(). Manejamos tres errores: si el archivo no existe (FileNotFoundError)
+# simplemente arrancamos vacíos, y si está dañado (ValueError) o no se puede leer (OSError)
+# mostramos el error. En el finally lo cerramos, y ese close está dentro de otro try con
+# except NameError porque, si el open falló, la variable arch nunca llegó a crearse.
+#
+# La variable cargado la usamos para copiar los datos solo si la lectura salió bien. Para
+# copiarlos usamos .get(clave, valor por defecto), así si en el archivo falta alguna clave
+# el programa no se rompe. Las patentes vienen del JSON como lista y acá las volvemos a
+# meter en el conjunto con .add(). Usamos extend() y no una asignación (viajes = ...) porque
+# la asignación crearía una variable local y la lista global quedaría vacía.
 def CargarDatos():
     cargado = False
 
@@ -104,16 +107,15 @@ def CargarDatos():
 
         print("Datos cargados correctamente.")
 
-# Qué hace: guarda todos los datos del sistema en datos.json. Se llama cada vez que termina
-#   una operación que cambia algo (una venta, un viaje, un micro, una terminal), así no se
-#   pierde nada aunque se cierre el programa.
-# Recibe: nada.
-# Devuelve: nada.
-# Cómo funciona: arma un diccionario "datos" con las cinco estructuras. El conjunto
-#   "patentes" se convierte a lista con list() porque JSON no puede guardar conjuntos. Abre
-#   el archivo en modo escritura ("wt"), que lo crea si no existe o lo reemplaza si ya
-#   existe, lo graba con json.dump() y lo cierra en el finally.
-# Estructuras y temas: archivos, JSON, excepciones (OSError), diccionarios, listas y conjuntos.
+# Esta función guarda todo el sistema en datos.json. La llamamos al final de cada operación
+# que cambia algo (una venta, un viaje, un micro, una terminal), así si se cierra el
+# programa no se pierde nada.
+#
+# Primero armamos un diccionario datos con las cinco estructuras. Al conjunto patentes lo
+# pasamos a lista con list() porque JSON no sabe guardar conjuntos. Después abrimos el
+# archivo en modo escritura ("wt"), que lo crea si no existe y lo pisa si ya existe, y lo
+# grabamos con json.dump(). Igual que al cargar, si hay un OSError mostramos el error, y el
+# archivo se cierra en el finally con el try/except NameError.
 def GuardarDatos():
     datos = {
         "distancias": distancias,
@@ -136,12 +138,13 @@ def GuardarDatos():
 
 ############################## Menu ##################################
 
-# Qué hace: muestra el menú principal con las 6 opciones del sistema y le pide al usuario
-#   que elija una.
-# Recibe: nada.
-# Devuelve: la opción que escribió el usuario, como texto (string). main.py la convierte a
-#   número con ConvertirOpcion().
-# Estructuras y temas: cadenas ("=" * 50 dibuja la línea y .center(50) centra el título).
+# Esta función muestra el menú principal con las seis secciones del sistema y le pide al
+# usuario que elija una. Devuelve lo que escribió tal cual, como texto, y en main.py lo
+# convertimos a número con ConvertirOpcion().
+#
+# Para el diseño usamos operaciones de cadenas: "=" * 50 repite el signo igual 50 veces para
+# hacer la línea, y .center(50) centra el título en ese mismo ancho. Todos los menús siguen
+# este mismo formato.
 def MostrarMenuPrincipal():
     print("=" * 50)
     print("SISTEMA DE GESTIÓN".center(50))
@@ -160,10 +163,10 @@ def MostrarMenuPrincipal():
 
     return opcion
 
-# Qué hace: muestra el menú de Ventas (registrar, ver, buscar o volver) y pide una opción.
-# Recibe: nada.
-# Devuelve: la opción escrita por el usuario, como texto.
-# Estructuras y temas: cadenas (.center() y repetición con *).
+# Esta función muestra el menú de Ventas: registrar una venta, ver las ventas de un viaje,
+# buscar una venta para cancelarla o cambiarle el asiento, o volver. Funciona igual que el
+# menú principal: imprime las opciones y devuelve lo que escribió el usuario como texto, que
+# después se convierte con ConvertirOpcion().
 def MostrarMenuVentas():
     print("=" * 50)
     print("VENTAS".center(50))
@@ -180,11 +183,9 @@ def MostrarMenuVentas():
 
     return opcion
 
-# Qué hace: muestra las tres formas de buscar una venta (por viaje y asiento, por DNI o por
-#   nombre) y pide una opción.
-# Recibe: nada.
-# Devuelve: la opción escrita por el usuario, como texto.
-# Estructuras y temas: cadenas (.center() y repetición con *).
+# Este menú aparece cuando el usuario quiere buscar una venta. Le ofrecemos tres formas de
+# buscarla: por viaje y asiento, por DNI o por nombre, y una cuarta opción para volver.
+# Igual que los otros menús, devuelve la opción como texto.
 def MostrarMenuBuscarVenta():
     print("=" * 50)
     print("BUSCAR VENTA".center(50))
@@ -201,12 +202,11 @@ def MostrarMenuBuscarVenta():
 
     return opcion
 
-# Qué hace: muestra qué se puede hacer con una venta ya encontrada (cancelarla, cambiar el
-#   asiento o volver) y pide una opción.
-# Recibe: nada.
-# Devuelve: la opción escrita, como texto y sin espacios (.strip()), porque GestionarVenta
-#   la compara directamente con "1", "2" y "3".
-# Estructuras y temas: cadenas (.center(), .strip() y repetición con *).
+# Este menú aparece cuando ya encontramos una venta, y pregunta qué hacer con ella:
+# cancelarla, cambiarle el asiento o volver. La diferencia con los otros menús es que acá le
+# aplicamos .strip() a la respuesta, porque GestionarVenta() la compara directamente con los
+# textos "1", "2" y "3" en lugar de convertirla a número, y así un espacio de más no hace
+# que la opción sea inválida.
 def MostrarMenuGestionVenta():
     print("=" * 50)
     print("GESTIONAR VENTA".center(50))
@@ -222,11 +222,8 @@ def MostrarMenuGestionVenta():
 
     return opcion
 
-# Qué hace: muestra el menú de Informes (recaudación por destino, por mes y total) y pide
-#   una opción.
-# Recibe: nada.
-# Devuelve: la opción escrita por el usuario, como texto.
-# Estructuras y temas: cadenas (.center() y repetición con *).
+# Esta función muestra el menú de Informes, donde se puede ver la recaudación por destino,
+# por mes o la total. Como todos los menús, devuelve la opción como texto.
 def MostrarMenuInformes():
     print("=" * 50)
     print("INFORMES".center(50))
@@ -243,11 +240,9 @@ def MostrarMenuInformes():
 
     return opcion
 
-# Qué hace: muestra el menú de Viajes (consultar disponibilidad, registrar un viaje o ver
-#   los viajes) y pide una opción.
-# Recibe: nada.
-# Devuelve: la opción escrita por el usuario, como texto.
-# Estructuras y temas: cadenas (.center() y repetición con *).
+# Esta función muestra el menú de Viajes: consultar la disponibilidad de asientos, registrar
+# un viaje nuevo o ver todos los viajes. Como todos los menús, devuelve la opción como
+# texto.
 def MostrarMenuViajes():
     print("=" * 50)
     print("VIAJES".center(50))
@@ -264,10 +259,8 @@ def MostrarMenuViajes():
 
     return opcion
 
-# Qué hace: muestra el menú de Micros (ver, registrar o dar de baja) y pide una opción.
-# Recibe: nada.
-# Devuelve: la opción escrita por el usuario, como texto.
-# Estructuras y temas: cadenas (.center() y repetición con *).
+# Esta función muestra el menú de Micros: ver los micros, registrar uno nuevo o darlo de
+# baja. Como todos los menús, devuelve la opción como texto.
 def MostrarMenuMicros():
     print("=" * 50)
     print("MICROS".center(50))
@@ -284,10 +277,8 @@ def MostrarMenuMicros():
 
     return opcion
 
-# Qué hace: muestra el menú de Terminales (ver, agregar o eliminar) y pide una opción.
-# Recibe: nada.
-# Devuelve: la opción escrita por el usuario, como texto.
-# Estructuras y temas: cadenas (.center() y repetición con *).
+# Esta función muestra el menú de Terminales: ver las terminales, agregar una nueva o
+# eliminarla. Como todos los menús, devuelve la opción como texto.
 def MostrarMenuTerminales():
     print("=" * 50)
     print("TERMINALES".center(50))
@@ -306,30 +297,33 @@ def MostrarMenuTerminales():
 
 ############################## Ventas ################################
 
-# Qué hace: vende un pasaje. Es la opción "Registrar venta de pasaje" del menú Ventas.
-# Recibe: nada (todo se pide por teclado).
-# Devuelve: nada. Agrega la venta a la lista "ventas" y marca el asiento en la matriz.
-# Cómo funciona, paso a paso:
-#   1. Si no hay viajes cargados, avisa y termina.
-#   2. Arma la lista "destinos" solo con los destinos que tienen al menos un viaje, sin
-#      repetir (usando "not in"). Así nunca se ofrece un destino sin viajes.
-#   3. Muestra los destinos numerados, con 0 para volver, y pide uno. Controla que sea un
-#      número (try/except ValueError) y que esté en rango. Si elige 0, la variable "volver"
-#      hace que la función termine.
-#   4. Arma "viajes_destino" con los viajes a ese destino, los muestra y el usuario elige
-#      uno con ElegirDeLista().
-#   5. Toma la matriz de asientos del viaje. Si está completo (ocupados == FILAS * COLUMNAS)
-#      avisa y termina.
-#   6. Muestra el mapa de asientos y el usuario elige uno con ElegirAsiento(), que ya lo
-#      marca como ocupado ("X").
-#   7. Calcula el precio: distancia entre salida y destino multiplicada por TARIFAPORKM.
-#   8. Pide el DNI. Si ese DNI ya compró antes (BuscarVentasPorDni, que es recursiva), usa
-#      el mismo nombre. Si es nuevo, pide el nombre con IngresarNombre().
-#   9. Muestra el resumen y pide confirmación. Si responde N, libera el asiento y termina
-#      sin guardar nada.
-#   10. Si confirma, arma el diccionario "venta", lo agrega a "ventas" y guarda el archivo.
-# Estructuras y temas: listas, diccionarios, matriz de asientos, excepciones, cadenas
-#   (f-strings, .upper(), .center()) y búsqueda recursiva.
+# Esta es la función que vende un pasaje, y es la más larga del sistema porque recorre todo
+# el proceso de una venta. Primero controlamos que haya viajes cargados; si no hay, no se
+# puede vender nada.
+#
+# Después armamos la lista destinos solo con los destinos que tienen al menos un viaje, y
+# usamos "not in" para no repetirlos. Así nunca le ofrecemos al usuario un destino al que no
+# va ningún micro. Mostramos los destinos numerados, con el 0 para volver, y validamos que
+# lo que escriba sea un número (con try/except ValueError) y que esté en rango. Si elige 0
+# ponemos la variable volver en True y salimos del ciclo con break; no hacemos el return
+# adentro del while porque en la materia no se sale de una función desde adentro de un
+# ciclo.
+#
+# Con el destino elegido armamos viajes_destino, que son los viajes que van ahí, y el
+# usuario elige uno con ElegirDeLista(). Tomamos la matriz de asientos de ese viaje y, si
+# está completa (los ocupados son FILAS * COLUMNAS), avisamos y terminamos.
+#
+# Si hay lugar, mostramos el mapa de asientos y el usuario elige uno con ElegirAsiento(),
+# que ya lo marca con "X". El precio lo calculamos multiplicando los km entre la salida y el
+# destino por TARIFAPORKM.
+#
+# Después pedimos el DNI. Si ese DNI ya compró antes (lo buscamos con BuscarVentasPorDni(),
+# que es recursiva) reutilizamos su nombre, y si es nuevo se lo pedimos con
+# IngresarNombre(). Esto evita que la misma persona quede cargada con dos nombres distintos.
+#
+# Por último mostramos un resumen y pedimos confirmación. Si dice que no, liberamos el
+# asiento que habíamos marcado y no se guarda nada. Si confirma, armamos el diccionario de
+# la venta, lo agregamos a la lista ventas y guardamos el archivo.
 def RegistrarVenta():
     if len(viajes) == 0:
         print("No hay viajes registrados. Primero registre un viaje.")
@@ -454,15 +448,14 @@ def RegistrarVenta():
 
     print("Venta registrada correctamente.")
 
-# Qué hace: muestra todas las ventas de un viaje que elige el usuario.
-# Recibe: nada.
-# Devuelve: nada.
-# Cómo funciona: muestra la lista de viajes con VerViajes() y pide el ID de uno. Si no es
-#   un número, avisa y termina. Busca el viaje con BuscarViajePorId() (recursiva); si no
-#   existe, avisa. Después recorre la lista "ventas" y muestra con MostrarVenta() las que
-#   tienen ese "viaje_id", contándolas con la variable "cantidad". Al final muestra el total
-#   o avisa que el viaje no tiene ventas.
-# Estructuras y temas: listas, diccionarios, excepciones (ValueError) y recursividad.
+# Esta función muestra todas las ventas de un viaje. Primero mostramos la lista de viajes
+# con VerViajes() para que el usuario vea los IDs, y le pedimos uno. Si no escribe un
+# número, el except ValueError muestra el error.
+#
+# Con el ID buscamos el viaje usando BuscarViajePorId(), que es recursiva; si devuelve None
+# es porque ese ID no existe. Después recorremos la lista ventas y mostramos, con
+# MostrarVenta(), las que tienen ese viaje_id. La variable cantidad la usamos para numerar
+# las ventas y, al final, para saber si el viaje no tenía ninguna o para mostrar el total.
 def VerVentas():
     print("=" * 50)
     print("VENTAS REGISTRADAS".center(50))
@@ -504,13 +497,13 @@ def VerVentas():
     else:
         print(f"Total de ventas del viaje: {cantidad}")
 
-# Qué hace: muestra por pantalla todos los datos de una venta.
-# Recibe: venta, que es un diccionario de la lista "ventas".
-# Devuelve: nada.
-# Cómo funciona: imprime cada campo con f-strings. El precio se muestra con puntos de miles
-#   usando FormatoPrecio(). El DNI se lee con .get('dni', '-'), que muestra un guión si la
-#   venta no tuviera DNI en lugar de dar error.
-# Estructuras y temas: diccionarios y cadenas (f-strings).
+# Esta función recibe una venta, que es un diccionario, y muestra todos sus datos. La
+# separamos en una función porque la usamos en varios lugares: al ver las ventas de un viaje
+# y al gestionar una venta encontrada.
+#
+# El precio lo mostramos con FormatoPrecio() para que tenga los puntos de miles. Para el DNI
+# usamos .get('dni', '-') en lugar de corchetes: si alguna venta no tuviera DNI, muestra un
+# guión en vez de tirar un KeyError.
 def MostrarVenta(venta):
     print(f"Pasajero: {venta['nombre']}")
     print(f"DNI: {venta.get('dni', '-')}")
@@ -522,14 +515,14 @@ def MostrarVenta(venta):
     print(f"Precio: ${FormatoPrecio(venta['precio'])}")
     print("-" * 50)
 
-# Qué hace: cancela una venta: libera el asiento y la borra de la lista "ventas".
-# Recibe: venta (el diccionario de la venta) y matriz (la matriz de asientos de su viaje).
-# Devuelve: nada.
-# Cómo funciona: primero pide confirmación con Confirmar(); si responde N, no hace nada.
-#   Si confirma, vuelve a poner el asiento en "O" con LiberarAsiento(), saca la venta de la
-#   lista con .remove() y guarda el archivo. Como las listas y los diccionarios son mutables,
-#   el cambio en la matriz queda hecho en el viaje sin necesidad de devolverla.
-# Estructuras y temas: listas, diccionarios y matriz.
+# Esta función cancela una venta. Recibe la venta y la matriz de asientos de su viaje.
+# Primero pedimos confirmación con Confirmar(), porque es una acción que no se puede
+# deshacer; si dice que no, no hacemos nada.
+#
+# Si confirma, volvemos a poner el asiento en "O" con LiberarAsiento(), sacamos la venta de
+# la lista con .remove() y guardamos el archivo. No hace falta devolver la matriz porque las
+# listas son mutables: al modificarla acá adentro, el cambio queda hecho en el viaje
+# original.
 def CancelarVenta(venta, matriz):
     asiento = venta["asiento"]
 
@@ -547,17 +540,14 @@ def CancelarVenta(venta, matriz):
 
 ############################## Buscar venta ##########################
 
-# Qué hace: es la búsqueda 1, "Por viaje y asiento". El usuario elige un viaje y un asiento
-#   y la función busca la venta de ese asiento.
-# Recibe: nada.
-# Devuelve: el diccionario de la venta encontrada, o None si no hay viajes, si el ID no es
-#   válido o si ese asiento no tiene venta. main.py llama a GestionarVenta() solo si no es
-#   None.
-# Cómo funciona: muestra los viajes, pide el ID y busca el viaje con BuscarViajePorId().
-#   Muestra su mapa de asientos, pide el asiento (con .upper() y .strip(), así "3b " sirve
-#   igual que "3B") y busca la venta con BuscarVentaPorAsiento(). Las dos búsquedas son
-#   recursivas.
-# Estructuras y temas: listas, diccionarios, excepciones, cadenas y recursividad.
+# Esta es la primera forma de buscar una venta: por viaje y asiento. Mostramos los viajes,
+# pedimos el ID y buscamos el viaje con BuscarViajePorId(). Después le mostramos el mapa de
+# asientos para que vea cuáles están ocupados y le pedimos el asiento. A lo que escribe le
+# aplicamos .upper() y .strip(), así "3b " se toma igual que "3B".
+#
+# Con el ID y el asiento buscamos la venta con BuscarVentaPorAsiento(), que también es
+# recursiva. La función devuelve la venta encontrada, o None si algo falló o si ese asiento
+# no tiene venta; en main.py solo llamamos a GestionarVenta() cuando no es None.
 def SeleccionarVentaPorAsiento():
     print("=" * 50)
     print("BUSCAR VENTA POR VIAJE Y ASIENTO".center(50))
@@ -591,14 +581,13 @@ def SeleccionarVentaPorAsiento():
 
     return venta
 
-# Qué hace: es la búsqueda 2, "Por DNI". Busca todas las ventas de un DNI y deja elegir una.
-# Recibe: nada.
-# Devuelve: el diccionario de la venta elegida, o None si no hay ventas con ese DNI o si
-#   el usuario elige volver.
-# Cómo funciona: pide el DNI con IngresarDni(), que ya lo valida. BuscarVentasPorDni()
-#   (recursiva) devuelve una lista con todas las coincidencias. Si está vacía avisa; si no,
-#   ElegirVentaDeLista() muestra las ventas y devuelve la que se elija.
-# Estructuras y temas: listas, diccionarios y recursividad.
+# Esta es la segunda forma de buscar una venta: por DNI. Pedimos el DNI con IngresarDni(),
+# que ya se encarga de validarlo. Después BuscarVentasPorDni(), que es recursiva, nos
+# devuelve una lista con todas las ventas de ese DNI, porque una misma persona puede haber
+# comprado varios pasajes.
+#
+# Si la lista está vacía avisamos y devolvemos None. Si no, se la pasamos a
+# ElegirVentaDeLista() para que el usuario elija con cuál quiere trabajar.
 def SeleccionarVentaPorDni():
     print("=" * 50)
     print("BUSCAR VENTA POR DNI".center(50))
@@ -614,16 +603,13 @@ def SeleccionarVentaPorDni():
 
     return ElegirVentaDeLista(encontradas)
 
-# Qué hace: es la búsqueda 3, "Por nombre". Busca las ventas cuyo pasajero tenga en el
-#   nombre el texto que escriba el usuario, y deja elegir una.
-# Recibe: nada.
-# Devuelve: el diccionario de la venta elegida, o None si no hay coincidencias o si el
-#   usuario elige volver.
-# Cómo funciona: pide un texto y no acepta que esté vacío (ciclo while). La búsqueda
-#   encuentra coincidencias parciales y sin importar mayúsculas: "per" encuentra a
-#   "Juan Perez". BuscarVentasPorNombre() (recursiva) devuelve la lista de coincidencias y
-#   ElegirVentaDeLista() deja elegir una.
-# Estructuras y temas: listas, diccionarios, cadenas y recursividad.
+# Esta es la tercera forma de buscar una venta: por nombre. Pedimos un texto y con un while
+# no dejamos que quede vacío, porque un texto vacío coincidiría con todas las ventas.
+#
+# La búsqueda acepta coincidencias parciales y no distingue mayúsculas, así que escribiendo
+# "per" encontramos a "Juan Perez". Eso lo hace BuscarVentasPorNombre(), que es recursiva y
+# devuelve la lista de coincidencias. Igual que en la búsqueda por DNI, si no hay ninguna
+# devolvemos None, y si hay, el usuario elige una con ElegirVentaDeLista().
 def SeleccionarVentaPorNombre():
     print("=" * 50)
     print("BUSCAR VENTA POR NOMBRE".center(50))
@@ -643,15 +629,16 @@ def SeleccionarVentaPorNombre():
 
     return ElegirVentaDeLista(encontradas)
 
-# Qué hace: cuando una búsqueda encuentra ventas, deja elegir una de ellas.
-# Recibe: lista, una lista de ventas (diccionarios) que devolvió una búsqueda.
-# Devuelve: el diccionario de la venta elegida, o None si el usuario elige 0 (volver).
-# Cómo funciona: si hay una sola venta, la devuelve directamente sin preguntar. Si hay
-#   varias, las muestra numeradas (armando cada renglón con += ) y pide un número entre 0 y
-#   la cantidad. Controla que sea un número (try/except) y que esté en rango. La variable
-#   "elegida" empieza en None y se sale del ciclo con break, para que el return quede fuera
-#   del ciclo como pide la materia.
-# Estructuras y temas: listas, diccionarios, excepciones y cadenas.
+# Esta función la usan las búsquedas por DNI y por nombre cuando encuentran ventas, para que
+# el usuario elija una. Si hay una sola, la devolvemos directamente sin preguntar nada.
+#
+# Si hay varias, las mostramos numeradas, armando cada renglón por partes con +=, y pedimos
+# un número entre 0 y la cantidad, donde 0 es volver. Validamos con try/except que sea un
+# número y con un if que esté en rango.
+#
+# La variable elegida arranca en None: si el usuario elige una venta la guardamos ahí, y si
+# elige 0 queda en None. Salimos del ciclo con break y el return queda afuera del while,
+# como pide la materia.
 def ElegirVentaDeLista(lista):
     if len(lista) == 1:
         print("\nSe encontró 1 venta.")
@@ -685,14 +672,14 @@ def ElegirVentaDeLista(lista):
 
     return elegida
 
-# Qué hace: después de encontrar una venta, permite cancelarla o cambiarle el asiento.
-# Recibe: venta, el diccionario de la venta encontrada.
-# Devuelve: nada.
-# Cómo funciona: busca el viaje de la venta con BuscarViajePorId() para obtener su matriz
-#   de asientos. Muestra la venta y el menú de gestión, y lo repite hasta que la opción sea
-#   "1", "2" o "3". Con 1 llama a CancelarVenta(), con 2 a CambiarAsiento(), y con 3 no hace
-#   nada y vuelve al menú de búsqueda.
-# Estructuras y temas: diccionarios, matriz y recursividad.
+# Esta función se llama cuando una búsqueda encontró una venta, y deja cancelarla o
+# cambiarle el asiento. Para las dos cosas necesitamos la matriz de asientos del viaje, así
+# que primero buscamos el viaje con BuscarViajePorId() usando el viaje_id que tiene guardado
+# la venta.
+#
+# Después mostramos la venta y el menú de gestión, y con un while lo repetimos hasta que la
+# opción sea "1", "2" o "3". Con 1 llamamos a CancelarVenta(), con 2 a CambiarAsiento(), y
+# con 3 no hacemos nada y volvemos al menú de búsqueda.
 def GestionarVenta(venta):
     viaje = BuscarViajePorId(venta["viaje_id"])
 
@@ -719,21 +706,22 @@ def GestionarVenta(venta):
 
 ############################## Búsquedas recursivas ##################
 
-# Qué hace: busca en la lista "viajes" el viaje que tiene un ID determinado, en forma
-#   recursiva.
-# Recibe: viaje_id (número entero). "inicio" y "fin" marcan el pedazo de la lista donde se
-#   busca. Desde afuera se llama solo con el ID: inicio vale 0 por omisión y fin empieza en
-#   None, y en la primera llamada se completa con len(viajes).
-# Devuelve: el diccionario del viaje, o None si no existe.
-# Cómo funciona ("divide y vencerás", Clase 10):
-#   - Caso base 1: el pedazo está vacío (fin - inicio == 0), entonces devuelve None.
-#   - Caso base 2: el pedazo tiene un solo viaje. Si es el del ID buscado lo devuelve; si
-#     no, devuelve None.
-#   - Caso recursivo: parte el pedazo a la mitad (medio = (inicio + fin) // 2), busca en la
-#     mitad izquierda y, si no lo encontró, busca en la mitad derecha.
-#   Como cada vez parte a la mitad, la cantidad de llamadas encadenadas es muy chica (con
-#   1000 viajes son unos 10 niveles), así nunca se llega al RecursionError.
-# Estructuras y temas: recursividad, listas, diccionarios y parámetros con valor por omisión.
+# Esta función busca un viaje por su ID en forma recursiva, usando la técnica de "divide y
+# vencerás" que vimos en la Clase 10. Los parámetros inicio y fin marcan el pedazo de la
+# lista donde estamos buscando. Desde afuera la llamamos solo con el ID: inicio vale 0 por
+# omisión, y fin arranca en None y en la primera llamada lo completamos con len(viajes).
+#
+# Tiene dos casos base. Si el pedazo está vacío, devolvemos None porque no hay nada que
+# buscar. Si el pedazo tiene un solo viaje, lo comparamos: si es el ID que buscamos lo
+# devolvemos, y si no, devolvemos None.
+#
+# En el caso recursivo partimos el pedazo a la mitad, calculando medio = (inicio + fin) //
+# 2. Buscamos primero en la mitad izquierda y, solo si no lo encontramos ahí, buscamos en la
+# mitad derecha.
+#
+# Elegimos partir a la mitad en lugar de avanzar de a un elemento porque así la profundidad
+# de la recursión es muy chica: con 1000 viajes son unos 10 niveles, entonces nunca llegamos
+# al límite de recursión de Python (RecursionError).
 def BuscarViajePorId(viaje_id, inicio=0, fin=None):
     if fin == None:
         fin = len(viajes)
@@ -756,15 +744,14 @@ def BuscarViajePorId(viaje_id, inicio=0, fin=None):
 
     return BuscarViajePorId(viaje_id, medio, fin)
 
-# Qué hace: busca en la lista "ventas" la venta de un viaje y un asiento determinados, en
-#   forma recursiva. La usa la búsqueda 1 ("Por viaje y asiento").
-# Recibe: viaje_id (número del viaje) y asiento (texto, por ejemplo "3B"). "inicio" y "fin"
-#   funcionan igual que en BuscarViajePorId().
-# Devuelve: el diccionario de la venta, o None si ese asiento no tiene venta.
-# Cómo funciona: igual que BuscarViajePorId(). Los casos base son el pedazo vacío o de un
-#   solo elemento, donde se compara que coincidan el viaje_id y el asiento. El caso recursivo
-#   parte la lista a la mitad y busca primero en la izquierda y después en la derecha.
-# Estructuras y temas: recursividad, listas y diccionarios.
+# Esta función busca la venta de un asiento en un viaje determinado, y la usamos en la
+# búsqueda por viaje y asiento. Funciona exactamente igual que BuscarViajePorId(): parte la
+# lista ventas a la mitad en cada llamada.
+#
+# Los casos base son el pedazo vacío, que devuelve None, y el pedazo de un solo elemento,
+# donde comparamos que coincidan tanto el viaje_id como el asiento. Tenemos que comparar los
+# dos porque el asiento "3B" existe en todos los viajes. En el caso recursivo buscamos
+# primero en la mitad izquierda y, si no está, en la derecha.
 def BuscarVentaPorAsiento(viaje_id, asiento, inicio=0, fin=None):
     if fin == None:
         fin = len(ventas)
@@ -789,17 +776,19 @@ def BuscarVentaPorAsiento(viaje_id, asiento, inicio=0, fin=None):
 
     return BuscarVentaPorAsiento(viaje_id, asiento, medio, fin)
 
-# Qué hace: busca todas las ventas de un DNI, en forma recursiva.
-# Recibe: dni (texto). "inicio" y "fin" marcan el pedazo de la lista. "encontrados" es la
-#   lista donde se van juntando los resultados entre una llamada y otra.
-# Devuelve: una lista con todas las ventas de ese DNI (vacía si no hay ninguna).
-# Cómo funciona: los casos base son el pedazo vacío o de un solo elemento (si el DNI
-#   coincide, se agrega a "encontrados"). En el caso recursivo busca en las dos mitades, sin
-#   frenar en la primera coincidencia, porque una persona puede tener varios pasajes.
-#   "encontrados" empieza en None y se crea la lista en la primera llamada. Si fuera
-#   encontrados=[] en el def, Python usaría la misma lista en todas las búsquedas y se
-#   mezclarían los resultados de una búsqueda con los de la anterior.
-# Estructuras y temas: recursividad, listas, diccionarios y parámetros con valor por omisión.
+# Esta función busca todas las ventas de un DNI, también en forma recursiva y partiendo la
+# lista a la mitad. La diferencia con las búsquedas anteriores es que no cortamos en la
+# primera coincidencia, porque una persona puede tener varios pasajes. Por eso buscamos
+# siempre en las dos mitades y vamos juntando los resultados en la lista encontrados, que se
+# pasa de una llamada a la otra.
+#
+# Los casos base son el pedazo vacío, donde no agregamos nada, y el pedazo de un solo
+# elemento, donde agregamos la venta si el DNI coincide.
+#
+# Un detalle importante: encontrados arranca en None y la lista la creamos en la primera
+# llamada. Si pusiéramos encontrados=[] directamente en el def, Python usaría siempre la
+# misma lista para todas las búsquedas, y los resultados de una búsqueda se mezclarían con
+# los de la anterior.
 def BuscarVentasPorDni(dni, inicio=0, fin=None, encontrados=None):
     if fin == None:
         fin = len(ventas)
@@ -823,15 +812,13 @@ def BuscarVentasPorDni(dni, inicio=0, fin=None, encontrados=None):
 
     return encontrados
 
-# Qué hace: busca todas las ventas cuyo nombre de pasajero contenga un texto, en forma
-#   recursiva.
-# Recibe: texto (lo que escribió el usuario). "inicio", "fin" y "encontrados" funcionan
-#   igual que en BuscarVentasPorDni().
-# Devuelve: una lista con las ventas que coinciden (vacía si no hay ninguna).
-# Cómo funciona: igual que BuscarVentasPorDni(), pero la comparación pasa el texto y el
-#   nombre a minúsculas con .lower() y usa "in" para ver si el texto está dentro del nombre.
-#   Así "per" o "PEREZ" encuentran a "Juan Perez".
-# Estructuras y temas: recursividad, listas, diccionarios y cadenas.
+# Esta función busca todas las ventas cuyo nombre de pasajero contenga un texto. Funciona
+# igual que BuscarVentasPorDni(): parte la lista a la mitad, busca en las dos mitades y
+# junta los resultados en encontrados.
+#
+# Lo único que cambia es la comparación del caso base: pasamos el texto y el nombre a
+# minúsculas con .lower() y usamos el operador in para ver si el texto está dentro del
+# nombre. Así, escribiendo "per" o "PEREZ", encontramos a "Juan Perez".
 def BuscarVentasPorNombre(texto, inicio=0, fin=None, encontrados=None):
     if fin == None:
         fin = len(ventas)
@@ -857,13 +844,12 @@ def BuscarVentasPorNombre(texto, inicio=0, fin=None, encontrados=None):
 
 ############################## Asientos ##############################
 
-# Qué hace: cuenta cuántos asientos ocupados tiene un viaje.
-# Recibe: asientos, la matriz de 10 filas x 4 columnas del viaje.
-# Devuelve: la cantidad de asientos ocupados (número entero).
-# Cómo funciona: recorre la matriz fila por fila y, dentro de cada fila, asiento por
-#   asiento, sumando 1 en "ocupados" cada vez que encuentra una "X". Se usa para saber si un
-#   viaje está completo, para mostrar los lugares libres y para calcular la recaudación.
-# Estructuras y temas: matrices (recorrido sin subíndices, Clase 04).
+# Esta función cuenta cuántos asientos ocupados tiene un viaje. Recibe la matriz de asientos
+# y la recorremos sin subíndices, como en la Clase 04: el primer for toma cada fila y el
+# segundo cada asiento de esa fila. Cada vez que encontramos una "X" sumamos 1.
+#
+# La usamos en varios lugares: para saber si un viaje está completo, para mostrar los
+# lugares libres y para calcular la recaudación.
 def ContarAsientosOcupados(asientos):
     ocupados = 0
 
@@ -874,13 +860,14 @@ def ContarAsientosOcupados(asientos):
 
     return ocupados
 
-# Qué hace: muestra el mapa de asientos de un viaje.
-# Recibe: matriz, la matriz de asientos del viaje.
-# Devuelve: nada.
-# Cómo funciona: imprime el encabezado con las columnas A B, el pasillo y C D. Después
-#   imprime cada fila con su número alineado a la derecha ({f+1:>2}) y los cuatro asientos,
-#   "O" si está libre y "X" si está ocupado. Al final muestra la referencia de los símbolos.
-# Estructuras y temas: matrices y cadenas (f-strings con ancho y alineación).
+# Esta función muestra el mapa de asientos de un viaje, como si fuera el micro visto desde
+# arriba. Primero imprimimos el encabezado con las columnas A y B, el pasillo, y C y D.
+# Después recorremos la matriz por filas e imprimimos el número de fila y sus cuatro
+# asientos.
+#
+# Para el número de fila usamos {f+1:>2} en el f-string, que lo alinea a la derecha en dos
+# lugares, así la fila 10 no desacomoda el dibujo. Al final mostramos la referencia: "O" es
+# libre y "X" es ocupado.
 def ImprimirMatriz(matriz):
     print("")
     print("     ASIENTOS")
@@ -894,20 +881,21 @@ def ImprimirMatriz(matriz):
     print("O = Disponible")
     print("X = Ocupado")
 
-# Qué hace: pide un asiento, controla que sea válido y que esté libre, y lo marca como
-#   ocupado.
-# Recibe: matriz, la matriz de asientos del viaje.
-# Devuelve: el asiento elegido como texto y normalizado (por ejemplo "3B"; si se escribe
-#   "03b" devuelve "3B").
-# Cómo funciona: el asiento se escribe como número de fila más letra. Con rebanadas se
-#   separan las dos partes: asiento[:-1] es la fila y asiento[-1] es la letra. La fila se
-#   pasa a número y la letra a columna (A=0, B=1, C=2, D=3) con if/elif. Se controla que la
-#   fila esté entre 1 y FILAS, que la letra sea A, B, C o D y que el asiento no tenga "X".
-#   Si se escribe algo sin formato (por ejemplo "A" o nada), el except (ValueError,
-#   IndexError) muestra el error. Cuando el asiento es válido, se pone "X" en la matriz.
-#   Ojo: el asiento queda ocupado apenas se elige. Si después la venta no se confirma,
-#   RegistrarVenta() lo libera con LiberarAsiento().
-# Estructuras y temas: matrices, cadenas (rebanadas, .upper(), .strip()) y excepciones.
+# Esta función le pide al usuario un asiento, controla que sea válido y que esté libre, y lo
+# marca como ocupado. El asiento se escribe como número de fila más letra, por ejemplo "3B".
+# Para separarlo usamos rebanadas: asiento[:-1] es todo menos el último carácter, o sea la
+# fila, y asiento[-1] es el último, o sea la letra. La fila la pasamos a número con int() y
+# la letra a número de columna con un if/elif, donde A es 0, B es 1, C es 2 y D es 3.
+#
+# Controlamos que la fila esté entre 1 y FILAS, que la letra sea A, B, C o D, y que ese
+# lugar de la matriz no tenga una "X". Si el usuario escribe algo sin formato, como una "A"
+# sola o nada, el int() o el índice fallan y el except (ValueError, IndexError) muestra el
+# error y vuelve a preguntar.
+#
+# Cuando el asiento es válido, ponemos la "X" en la matriz y devolvemos el asiento armado de
+# nuevo con str(x) + letra; así, si escribió "03b", lo guardamos como "3B". Hay que tener en
+# cuenta que el asiento queda ocupado apenas se elige: si después la venta no se confirma,
+# RegistrarVenta() lo libera.
 def ElegirAsiento(matriz):
     while True:
         try:
@@ -946,13 +934,13 @@ def ElegirAsiento(matriz):
 
     return asiento
 
-# Qué hace: deja libre un asiento de la matriz (vuelve a ponerle "O").
-# Recibe: matriz (la matriz de asientos del viaje) y asiento (texto, por ejemplo "3B").
-# Devuelve: nada. Modifica la matriz que recibe.
-# Cómo funciona: separa la fila y la letra con rebanadas igual que ElegirAsiento(), pasa la
-#   letra a número de columna y pone "O" en esa posición. No valida el asiento porque solo
-#   se la llama con asientos que salen de ventas que ya existen.
-# Estructuras y temas: matrices y cadenas (rebanadas).
+# Esta función hace lo contrario de ElegirAsiento(): deja libre un asiento, volviéndole a
+# poner "O" en la matriz. Separa la fila y la letra con rebanadas de la misma forma, pasa la
+# letra a número de columna y le resta 1 a la fila porque la matriz empieza en 0.
+#
+# No validamos el asiento porque a esta función solo la llamamos con asientos que vienen de
+# ventas que ya existen, y que ya se validaron al venderse. No devuelve nada porque la
+# matriz es mutable y el cambio queda hecho en el viaje.
 def LiberarAsiento(matriz, asiento):
     x = int(asiento[:-1]) - 1
     y = asiento[-1]
@@ -968,13 +956,12 @@ def LiberarAsiento(matriz, asiento):
 
     matriz[x][y] = "O"
 
-# Qué hace: le cambia el asiento a una venta.
-# Recibe: venta (el diccionario de la venta) y matriz (la matriz de asientos de su viaje).
-# Devuelve: nada.
-# Cómo funciona: libera el asiento actual con LiberarAsiento(), muestra el mapa (donde el
-#   asiento anterior ya aparece libre y se puede volver a elegir), pide el nuevo con
-#   ElegirAsiento(), lo guarda en venta["asiento"] y graba el archivo.
-# Estructuras y temas: diccionarios y matrices.
+# Esta función le cambia el asiento a una venta. Primero liberamos el asiento actual con
+# LiberarAsiento(). Lo hacemos antes de mostrar el mapa a propósito, para que el asiento
+# anterior aparezca libre y el pasajero pueda volver a elegirlo si se arrepiente.
+#
+# Después pedimos el nuevo asiento con ElegirAsiento(), que ya lo marca como ocupado, lo
+# guardamos en venta["asiento"] y grabamos el archivo.
 def CambiarAsiento(venta, matriz):
     asiento_anterior = venta["asiento"]
 
@@ -991,13 +978,13 @@ def CambiarAsiento(venta, matriz):
 
     print("Asiento modificado correctamente.")
 
-# Qué hace: crea la matriz de asientos vacía de un viaje nuevo.
-# Recibe: nada.
-# Devuelve: una matriz (lista de listas) de FILAS x COLUMNAS, es decir 10 x 4, con todos
-#   los asientos en "O" (libres).
-# Cómo funciona: por cada fila agrega a la matriz una lista de COLUMNAS elementos "O",
-#   creada con la repetición ["O"] * COLUMNAS. Es la "Alternativa 3" de la Clase 04.
-# Estructuras y temas: matrices y listas.
+# Esta función crea la matriz de asientos de un viaje nuevo, con todos los lugares libres.
+# Es una lista de listas de FILAS x COLUMNAS, o sea 10 filas de 4 asientos. Por cada fila
+# agregamos una lista hecha con ["O"] * COLUMNAS, que repite la "O" cuatro veces. Es la
+# "Alternativa 3" para crear matrices que vimos en la Clase 04.
+#
+# Usamos las constantes en lugar de poner 10 y 4 a mano, así si cambia el tamaño del micro
+# se modifica en un solo lugar.
 def CrearMatriz():
     matriz = []
 
@@ -1008,15 +995,14 @@ def CrearMatriz():
 
 ############################## Informes ##############################
 
-# Qué hace: muestra cuánto se recaudó con los viajes a cada destino.
-# Recibe: nada.
-# Devuelve: nada.
-# Cómo funciona: recorre todos los viajes y va sumando la recaudación de cada uno
-#   (CalcularRecaudacionViaje) en el diccionario "recaudacion_por_destino", cuya clave es el
-#   destino. Si el destino ya está en el diccionario se le suma; si no, se crea. Al final
-#   muestra los destinos ordenados alfabéticamente con sorted(), alineados con {destino:<15}
-#   y con el precio formateado con FormatoPrecio().
-# Estructuras y temas: diccionarios, listas y cadenas (f-strings con alineación).
+# Esta función muestra cuánto se recaudó con los viajes a cada destino. Usamos un
+# diccionario, recaudacion_por_destino, donde la clave es el destino y el valor es lo
+# recaudado.
+#
+# Recorremos todos los viajes y, con CalcularRecaudacionViaje(), sumamos lo de cada uno en
+# su destino: si el destino ya está en el diccionario le sumamos, y si no, lo creamos. Al
+# final mostramos los destinos en orden alfabético con sorted(), alineados con {destino:<15}
+# para que los montos queden en columna, y con el precio formateado con FormatoPrecio().
 def MostrarInformePorDestino():
     recaudacion_por_destino = {}
 
@@ -1041,16 +1027,19 @@ def MostrarInformePorDestino():
 
     print("-" * 50)
 
-# Qué hace: muestra cuánto se recaudó en cada mes, en orden cronológico.
-# Recibe: nada.
-# Devuelve: nada.
-# Cómo funciona: la lista "meses" sirve para mostrar el nombre del mes (meses[mes - 1]).
-#   Para cada viaje, separa la fecha con .split("/") y arma la clave (año, mes), que es una
-#   tupla. Se usa una tupla porque las claves de un diccionario tienen que ser inmutables, y
-#   porque al ordenarlas se compara primero el año y después el mes: así sorted() deja
-#   Diciembre 2026 antes que Enero 2027. La clave se desempaqueta con "anio, mes = clave".
-#   La recaudación se va acumulando igual que en el informe por destino.
-# Estructuras y temas: tuplas, diccionarios, listas y cadenas (.split(), f-strings).
+# Esta función muestra cuánto se recaudó en cada mes, en orden cronológico. La lista meses
+# la usamos para mostrar el nombre del mes en lugar del número, con meses[mes - 1] porque la
+# lista empieza en 0.
+#
+# Para cada viaje separamos la fecha con .split("/") y armamos la clave (año, mes), que es
+# una tupla. Usamos una tupla por dos motivos: primero, porque las claves de un diccionario
+# tienen que ser inmutables, así que una lista no se podría usar; y segundo, porque las
+# tuplas se ordenan comparando elemento por elemento, primero el año y después el mes, así
+# sorted() pone Diciembre 2026 antes que Enero 2027. Si usáramos solo el mes, se mezclarían
+# los años.
+#
+# Al mostrar, desempaquetamos la tupla con anio, mes = clave. La recaudación se acumula
+# igual que en el informe por destino.
 def MostrarInformePorMes():
     meses = [
         "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
@@ -1083,13 +1072,10 @@ def MostrarInformePorMes():
 
     print("-" * 50)
 
-# Qué hace: muestra cuánto se recaudó en total, sumando todos los viajes.
-# Recibe: nada.
-# Devuelve: nada.
-# Cómo funciona: suma en "recaudacion_total" (con +=) la recaudación de cada viaje,
-#   calculada con CalcularRecaudacionViaje(), y la muestra con FormatoPrecio(). Si no hay
-#   viajes muestra $0.
-# Estructuras y temas: listas y diccionarios.
+# Esta función muestra cuánto se recaudó en total. Arrancamos recaudacion_total en 0 y le
+# vamos sumando con += lo que recaudó cada viaje, calculado con CalcularRecaudacionViaje().
+# Al final lo mostramos con FormatoPrecio(). Si no hay viajes, el for no entra y se muestra
+# $0.
 def MostrarRecaudacionTotal():
     recaudacion_total = 0
 
@@ -1102,13 +1088,13 @@ def MostrarRecaudacionTotal():
     print(f"Recaudación total: ${FormatoPrecio(recaudacion_total)}")
     print("-" * 50)
 
-# Qué hace: calcula cuánto dinero se recaudó con un viaje.
-# Recibe: viaje, un diccionario de la lista "viajes".
-# Devuelve: la recaudación del viaje (número entero).
-# Cómo funciona: multiplica la cantidad de asientos ocupados (ContarAsientosOcupados) por
-#   los km entre la salida y el destino y por TARIFAPORKM. Da lo mismo que sumar el precio de
-#   cada venta del viaje, porque todas tienen ese mismo precio.
-# Estructuras y temas: diccionarios y matrices.
+# Esta función calcula cuánta plata se recaudó con un viaje. Multiplicamos la cantidad de
+# asientos ocupados, que contamos con ContarAsientosOcupados(), por los km entre la salida y
+# el destino y por TARIFAPORKM.
+#
+# Da lo mismo que sumar el precio de cada venta del viaje, porque todos los pasajes de un
+# mismo viaje cuestan lo mismo. La separamos en una función porque la usan los tres
+# informes.
 def CalcularRecaudacionViaje(viaje):
     asientos_ocupados = ContarAsientosOcupados(viaje["asientos"])
     kilometros = distancias[viaje["salida"]][viaje["destino"]]
@@ -1117,17 +1103,18 @@ def CalcularRecaudacionViaje(viaje):
 
 ############################## Viajes ################################
 
-# Qué hace: muestra una tabla con todos los viajes y sus lugares libres, y después el mapa
-#   de asientos del viaje que elija el usuario.
-# Recibe: nada.
-# Devuelve: nada.
-# Cómo funciona: para que la tabla quede alineada, primero calcula el ancho de cada columna
-#   según el texto más largo (con max() y len()). Después arma el encabezado y cada fila por
-#   partes con +=, usando .rjust() y .ljust() para alinear, y f-strings con ancho. Los
-#   lugares libres son FILAS * COLUMNAS menos los ocupados. Al final el usuario elige un
-#   viaje con ElegirDeLista() y se muestran sus datos y su mapa con ImprimirMatriz().
-# Estructuras y temas: listas, diccionarios, matrices y cadenas (.rjust(), .ljust(),
-#   f-strings).
+# Esta función muestra una tabla con todos los viajes y cuántos lugares libres le quedan a
+# cada uno, y después el mapa de asientos del viaje que elija el usuario.
+#
+# Para que la tabla quede alineada, primero calculamos el ancho de cada columna según el
+# texto más largo: arrancamos con el largo del título y recorremos los viajes buscando la
+# salida y el destino más largos. Después armamos el encabezado y cada fila por partes con
+# +=, usando .rjust() y .ljust() para alinear a derecha o izquierda, y f-strings con ancho
+# fijo para la fecha y la patente.
+#
+# Los lugares libres los calculamos como FILAS * COLUMNAS menos los ocupados. Al final el
+# usuario elige un viaje con ElegirDeLista() y le mostramos sus datos y su mapa con
+# ImprimirMatriz().
 def ConsultarDisponibilidad():
     print("=" * 50)
     print("CONSULTAR DISPONIBILIDAD".center(50))
@@ -1175,25 +1162,26 @@ def ConsultarDisponibilidad():
 
     ImprimirMatriz(viaje["asientos"])
 
-# Qué hace: registra un viaje nuevo. Es la opción "Registrar viaje" del menú Viajes.
-# Recibe: nada (todo se pide por teclado).
-# Devuelve: nada. Agrega el viaje a la lista "viajes".
-# Cómo funciona, paso a paso:
-#   1. Controla que haya al menos 2 terminales y al menos 1 micro.
-#   2. Calcula el ID nuevo: 1 si no hay viajes, o el ID del último viaje + 1. Funciona
-#      porque los viajes siempre se agregan al final, así el último tiene el ID más alto.
-#   3. Elige la salida con ElegirTerminal() y el destino con ElegirDestino(), que no
-#      muestra la terminal de salida.
-#   4. Muestra los micros numerados y se elige uno con ElegirDeLista().
-#   5. Pide la fecha con IngresarFecha() y controla que ese micro no tenga otro viaje ese
-#      mismo día (variable "ocupado", con un for y break). Si lo tiene, pide otra fecha.
-#   6. Crea la matriz de asientos vacía con CrearMatriz().
-#   7. La línea comentada llama a GenerarVentasAlAzar(), que llena el viaje con pasajeros
-#      de prueba. Está comentada para que los viajes nuevos arranquen sin ventas; para
-#      volver a usarla hay que sacarle el #.
-#   8. Guarda en el diccionario "viaje" el id, la salida, el destino, la patente, la fecha
-#      y los asientos, lo agrega a "viajes" y graba el archivo.
-# Estructuras y temas: diccionarios, listas y matrices.
+# Esta función registra un viaje nuevo. Primero controlamos que haya al menos 2 terminales,
+# porque un viaje necesita una salida y un destino distintos, y al menos un micro.
+#
+# El ID lo calculamos así: si no hay viajes es 1, y si hay, es el ID del último más 1. Esto
+# funciona porque los viajes siempre se agregan al final de la lista, entonces el último es
+# el que tiene el ID más alto.
+#
+# Después el usuario elige la terminal de salida con ElegirTerminal() y el destino con
+# ElegirDestino(), que ya no le muestra la terminal de salida. Elige el micro con
+# ElegirDeLista() y le pedimos la fecha con IngresarFecha().
+#
+# Con la fecha controlamos que ese micro no tenga otro viaje el mismo día, porque un micro
+# no puede estar en dos lugares a la vez. Para eso recorremos los viajes con la variable
+# ocupado y cortamos con break en cuanto encontramos uno; si está ocupado, pedimos otra
+# fecha.
+#
+# Por último creamos la matriz vacía con CrearMatriz(), guardamos todo en el diccionario
+# viaje, lo agregamos a la lista viajes y grabamos el archivo. La línea comentada llama a
+# GenerarVentasAlAzar(), que llena el viaje con pasajeros de prueba; la dejamos comentada
+# para que los viajes nuevos arranquen sin ventas.
 def RegistrarViaje():
     if len(distancias) < 2:
         print("Se necesitan al menos 2 terminales para registrar un viaje.")
@@ -1254,18 +1242,17 @@ def RegistrarViaje():
 
     print("Viaje registrado correctamente.")
 
-# Qué hace: llena un viaje con pasajeros al azar, para tener datos de prueba.
-# Recibe: los datos del viaje: salida, destino, fecha, matriz (sus asientos), patente y
-#   viaje_id.
-# Devuelve: la matriz, con los asientos ocupados marcados con "X". También agrega una venta
-#   a la lista "ventas" por cada asiento ocupado.
-# Cómo funciona: recorre la matriz asiento por asiento. random.randint(0, 1) decide si el
-#   asiento se ocupa (la mitad de las veces). Si se ocupa, se pone "X", se arma el nombre
-#   del asiento (fila + letra, por ejemplo "3B"), se elige un nombre y un apellido al azar
-#   de las listas "nombres" y "apellidos", se genera un DNI al azar de 8 números y se crea
-#   la venta con el precio del viaje. Hoy no se usa porque su llamada en RegistrarViaje()
-#   está comentada; se usó para cargar los viajes de prueba.
-# Estructuras y temas: matrices, listas, diccionarios y números al azar (módulo random).
+# Esta función la hicimos para tener datos de prueba: llena un viaje con pasajeros al azar.
+# Recorremos la matriz asiento por asiento con dos for, y random.randint(0, 1) decide si
+# cada asiento se ocupa, así que más o menos la mitad queda ocupada.
+#
+# Si el asiento se ocupa, ponemos la "X", armamos el nombre del asiento con la fila y la
+# letra, elegimos un nombre y un apellido al azar de las listas nombres y apellidos,
+# generamos un DNI al azar de 8 dígitos y agregamos la venta a la lista ventas con el precio
+# del viaje. Devuelve la matriz ya cargada.
+#
+# Hoy no se usa, porque su llamada en RegistrarViaje() está comentada; la usamos para cargar
+# los viajes de prueba.
 def GenerarVentasAlAzar(salida, destino, fecha, matriz, patente, viaje_id):
     precio = distancias[salida][destino] * TARIFAPORKM
     letras = ["A", "B", "C", "D"]
@@ -1297,14 +1284,11 @@ def GenerarVentasAlAzar(salida, destino, fecha, matriz, patente, viaje_id):
 
     return matriz
 
-# Qué hace: muestra todos los viajes programados con su ID, salida, destino, fecha y
-#   patente.
-# Recibe: nada.
-# Devuelve: nada.
-# Cómo funciona: recorre la lista "viajes" y muestra los datos de cada uno. También la usan
-#   VerVentas() y SeleccionarVentaPorAsiento(), para que el usuario vea los IDs antes de
-#   elegir uno.
-# Estructuras y temas: listas, diccionarios y cadenas (f-strings).
+# Esta función muestra todos los viajes programados con su ID, salida, destino, fecha y
+# patente. Simplemente recorremos la lista viajes y mostramos los datos de cada diccionario.
+# Además de usarla en el menú de Viajes, la llamamos desde VerVentas() y
+# SeleccionarVentaPorAsiento(), para que el usuario vea los IDs antes de tener que escribir
+# uno.
 def VerViajes():
     print("=" * 50)
     print("VIAJES PROGRAMADOS".center(50))
@@ -1324,13 +1308,11 @@ def VerViajes():
 
 ############################## Micros ################################
 
-# Qué hace: muestra todos los micros con los destinos a los que tienen viajes.
-# Recibe: nada.
-# Devuelve: nada.
-# Cómo funciona: por cada micro recorre los viajes y arma la lista "destinos_micro" con los
-#   destinos de los viajes de ese micro, sin repetir (usando "not in"). Si no tiene viajes,
-#   muestra "Sin viajes asignados".
-# Estructuras y temas: listas y diccionarios.
+# Esta función muestra todos los micros y, para cada uno, los destinos a los que tiene
+# viajes. Por cada micro recorremos la lista de viajes y armamos destinos_micro con los
+# destinos de los viajes que tienen esa patente. Usamos "not in" para no repetir un destino
+# si el micro va varias veces al mismo lugar. Si la lista queda vacía, mostramos "Sin viajes
+# asignados".
 def VerMicros():
     print("=" * 50)
     print("MICROS REGISTRADOS".center(50))
@@ -1359,15 +1341,18 @@ def VerMicros():
 
         print("-" * 50)
 
-# Qué hace: registra un micro nuevo a partir de su patente.
-# Recibe: nada.
-# Devuelve: nada. Agrega el micro a "micros" y su patente a "patentes".
-# Cómo funciona: pide la patente y la pasa a mayúsculas con .upper(). La valida con la
-#   expresión regular ^[A-Z][A-Z][0-9][0-9][0-9][A-Z][A-Z]$, que pide 2 letras, 3 números y
-#   2 letras (por ejemplo AB123CD). También controla que no esté en el conjunto "patentes":
-#   se usa un conjunto porque no admite repetidos y es rápido para ver si un dato está.
-#   Mientras la patente no sea válida o esté repetida, la vuelve a pedir.
-# Estructuras y temas: expresiones regulares, conjuntos, listas, diccionarios y cadenas.
+# Esta función registra un micro nuevo a partir de su patente. Pedimos la patente y la
+# pasamos a mayúsculas con .upper(), así se puede escribir en minúsculas.
+#
+# La validamos con la expresión regular ^[A-Z][A-Z][0-9][0-9][0-9][A-Z][A-Z]$, que pide dos
+# letras, tres números y dos letras, como AB123CD; el ^ y el $ hacen que tenga que ser
+# exactamente eso, sin nada antes ni después. También controlamos que la patente no esté
+# repetida buscándola en el conjunto patentes. Usamos un conjunto porque no admite elementos
+# repetidos y es muy rápido para preguntar si un dato está.
+#
+# Mientras la patente sea inválida o esté repetida, mostramos el error que corresponde y la
+# volvemos a pedir. Cuando es válida, agregamos el micro a la lista micros, la patente al
+# conjunto y guardamos.
 def RegistrarMicro():
     patente = input("Ingrese la patente del micro (ej. AB123CD): ").upper().strip()
 
@@ -1387,16 +1372,17 @@ def RegistrarMicro():
     GuardarDatos()
     print("Micro registrado correctamente.")
 
-# Qué hace: da de baja un micro y borra también sus viajes y las ventas de esos viajes.
-# Recibe: nada.
-# Devuelve: nada.
-# Cómo funciona: muestra los micros numerados, se elige uno con ElegirDeLista() y se pide
-#   confirmación con Confirmar(). Si confirma, saca el micro de la lista con .remove() y su
-#   patente del conjunto con .discard(). Después arma con listas por comprensión los viajes
-#   y las ventas que NO son de ese micro, y los copia a las listas originales con .clear() y
-#   .extend(). No se hace "viajes = viajes_nuevos" porque, dentro de una función, eso crearía
-#   una variable local nueva y la lista original no cambiaría.
-# Estructuras y temas: listas (listas por comprensión), conjuntos y diccionarios.
+# Esta función da de baja un micro, y junto con él borra sus viajes y las ventas de esos
+# viajes, porque si el micro ya no existe esos viajes no se pueden hacer. Mostramos los
+# micros numerados, el usuario elige uno con ElegirDeLista() y le pedimos confirmación. Si
+# confirma, sacamos el micro de la lista con .remove() y su patente del conjunto con
+# .discard().
+#
+# Para borrar los viajes y las ventas usamos listas por comprensión: armamos una lista nueva
+# solo con los que NO son de ese micro. Después vaciamos la lista original con .clear() y le
+# cargamos la nueva con .extend(). No hacemos directamente viajes = viajes_nuevos porque,
+# dentro de una función, eso crearía una variable local nueva y la lista global quedaría
+# igual.
 def DarBajaMicro():
     print("=" * 50)
     print("DAR DE BAJA MICRO".center(50))
@@ -1436,14 +1422,13 @@ def DarBajaMicro():
 
 ############################## Terminales ############################
 
-# Qué hace: muestra todas las terminales con la distancia a cada una de las demás.
-# Recibe: nada.
-# Devuelve: nada.
-# Cómo funciona: "distancias" es un diccionario de diccionarios: la clave de afuera es una
-#   terminal y su valor es otro diccionario con los km a cada una de las otras. Por ejemplo,
-#   distancias["Buenos Aires"]["Rosario"] vale 300. La función recorre las terminales
-#   numerándolas con enumerate() y, para cada una, recorre su diccionario interno.
-# Estructuras y temas: diccionarios (anidados) y cadenas (f-strings).
+# Esta función muestra todas las terminales con la distancia a cada una de las demás. Las
+# distancias las guardamos en un diccionario de diccionarios: la clave de afuera es una
+# terminal y su valor es otro diccionario con los km a cada una de las otras. Por ejemplo,
+# distancias["Buenos Aires"]["Rosario"] vale 300.
+#
+# Recorremos las terminales numerándolas con enumerate() y, para cada una, recorremos su
+# diccionario interno mostrando los km.
 def VerTerminales():
     print("=" * 50)
     print("TERMINALES REGISTRADAS".center(50))
@@ -1461,19 +1446,21 @@ def VerTerminales():
 
     print("=" * 50)
 
-# Qué hace: agrega una terminal nueva y pide la distancia a cada una de las que ya existen.
-# Recibe: nada.
-# Devuelve: nada.
-# Cómo funciona: pide el nombre y lo limpia: " ".join(terminal.split()) junta los espacios
-#   de más y .title() pone la primera letra de cada palabra en mayúscula (así "  san   luis"
-#   queda "San Luis"). Lo valida con una expresión regular que solo acepta letras (con
-#   tildes, ñ y ü) y espacios, y controla que la terminal no exista ("in" sobre las claves
-#   del diccionario). Después pide con IngresarKm() la distancia a cada terminal existente y
-#   la guarda en el diccionario "kms". Finalmente agrega la terminal a "distancias" y, en
-#   cada una de las otras, agrega la distancia hacia la nueva: cada distancia queda guardada
-#   en los dos sentidos para poder consultarla desde cualquiera de las dos terminales.
-# Estructuras y temas: diccionarios, cadenas (.split(), .join(), .title()) y expresiones
-#   regulares.
+# Esta función agrega una terminal nueva y pide la distancia hasta cada una de las que ya
+# existen. Primero pedimos el nombre y lo limpiamos: " ".join(terminal.split()) saca los
+# espacios de más, y .title() pone en mayúscula la primera letra de cada palabra, así "  san
+# luis" queda "San Luis". Lo hacemos para que la misma terminal no pueda quedar cargada dos
+# veces escrita de forma distinta.
+#
+# Validamos el nombre con una expresión regular que solo acepta letras (incluyendo tildes, ñ
+# y ü) y espacios. También controlamos con "in" que la terminal no esté ya en el
+# diccionario.
+#
+# Después, con IngresarKm(), pedimos la distancia a cada terminal existente y la guardamos
+# en el diccionario kms, que pasa a ser el diccionario interno de la terminal nueva. Por
+# último, en cada una de las otras terminales agregamos la distancia hacia la nueva.
+# Guardamos cada distancia en los dos sentidos para poder consultarla desde cualquiera de
+# las dos terminales, sin importar cuál sea la salida y cuál el destino.
 def AgregarTerminal():
     print("=" * 50)
     print("AGREGAR TERMINAL".center(50))
@@ -1505,16 +1492,14 @@ def AgregarTerminal():
 
     print(f"Terminal '{terminal}' registrada correctamente.")
 
-# Qué hace: pide la distancia en km entre dos terminales, hasta que se escriba un número
-#   válido.
-# Recibe: terminal y otra, los nombres de las dos terminales (para mostrarlos en la
-#   pregunta).
-# Devuelve: la distancia, como número entero mayor que cero.
-# Cómo funciona: repite la pregunta con un while True. Si lo escrito no es un número, el
-#   except ValueError muestra el error; si es cero o negativo, el continue vuelve a
-#   preguntar. Cuando el número es válido, el break sale del ciclo y el return devuelve el
-#   valor (el return queda fuera del ciclo, como pide la materia).
-# Estructuras y temas: excepciones (ValueError).
+# Esta función pide la distancia en km entre dos terminales y no la acepta hasta que sea un
+# número entero mayor que cero. Recibe los nombres de las dos terminales solo para
+# mostrarlos en la pregunta.
+#
+# Usamos un while True: si lo que escribe no es un número, el except ValueError muestra el
+# error; si es cero o negativo, mostramos el error y el continue vuelve a preguntar. Cuando
+# el número es válido salimos con break, y el return queda fuera del ciclo, como pide la
+# materia.
 def IngresarKm(terminal, otra):
     while True:
         try:
@@ -1531,16 +1516,14 @@ def IngresarKm(terminal, otra):
 
     return km
 
-# Qué hace: elimina una terminal y borra también los viajes y las ventas que salían o
-#   llegaban a ella.
-# Recibe: nada.
-# Devuelve: nada.
-# Cómo funciona: se elige la terminal con ElegirTerminal() y se pide confirmación. Si
-#   confirma, la saca de "distancias" con .pop() y también del diccionario interno de cada
-#   una de las otras terminales. Después, con listas por comprensión, se quedan solo los
-#   viajes y ventas que no salen ni llegan a esa terminal, y se copian a las listas
-#   originales con .clear() y .extend() (por el mismo motivo que en DarBajaMicro).
-# Estructuras y temas: diccionarios (anidados) y listas (listas por comprensión).
+# Esta función elimina una terminal, y con ella todos los viajes y ventas que salían o
+# llegaban ahí. El usuario elige la terminal con ElegirTerminal() y le pedimos confirmación.
+#
+# Si confirma, la sacamos del diccionario distancias con .pop(), y además la sacamos del
+# diccionario interno de cada una de las otras terminales, porque ahí también estaba
+# guardada la distancia hacia ella. Después, con listas por comprensión, nos quedamos solo
+# con los viajes y ventas que no salen ni llegan a esa terminal, y los copiamos a las listas
+# originales con .clear() y .extend(), por el mismo motivo que en DarBajaMicro().
 def EliminarTerminal():
     print("=" * 50)
     print("ELIMINAR TERMINAL".center(50))
@@ -1574,12 +1557,11 @@ def EliminarTerminal():
     print(f"Terminal '{terminal}' eliminada correctamente.")
     print("También se eliminaron los viajes y ventas que salían o llegaban ahí.")
 
-# Qué hace: muestra las terminales numeradas y deja elegir una.
-# Recibe: nada.
-# Devuelve: el nombre de la terminal elegida (texto).
-# Cómo funciona: arma una lista con las claves de "distancias" (list(distancias.keys())),
-#   la muestra numerada con enumerate() y usa ElegirDeLista() para que se elija una.
-# Estructuras y temas: diccionarios y listas.
+# Esta función muestra las terminales numeradas y deja elegir una. Como las terminales son
+# las claves del diccionario distancias, las pasamos a una lista con
+# list(distancias.keys()), porque para elegir por número necesitamos acceder por posición.
+# Las mostramos con enumerate() y el usuario elige con ElegirDeLista(). Devuelve el nombre
+# de la terminal elegida.
 def ElegirTerminal():
     terminales = list(distancias.keys())
 
@@ -1592,13 +1574,11 @@ def ElegirTerminal():
 
     return ElegirDeLista(terminales, "Seleccione la terminal: ")
 
-# Qué hace: muestra los destinos posibles desde una terminal de salida y deja elegir uno.
-# Recibe: salida, el nombre de la terminal de salida.
-# Devuelve: el nombre del destino elegido (texto).
-# Cómo funciona: arma la lista "destinos" con todas las terminales menos la de salida,
-#   porque no se puede viajar a la misma terminal. Los muestra numerados con la distancia
-#   entre paréntesis, por ejemplo "2 - Rosario (300 km)", y usa ElegirDeLista().
-# Estructuras y temas: diccionarios, listas y cadenas.
+# Esta función muestra los destinos posibles desde una terminal de salida y deja elegir uno.
+# Armamos la lista destinos con todas las terminales menos la de salida, porque no tiene
+# sentido un viaje que sale y llega al mismo lugar. Los mostramos numerados con la distancia
+# entre paréntesis, por ejemplo "2 - Rosario (300 km)", y el usuario elige con
+# ElegirDeLista().
 def ElegirDestino(salida):
     destinos = []
 
@@ -1617,15 +1597,18 @@ def ElegirDestino(salida):
 
 ############################## Funciones extras ######################
 
-# Qué hace: función general para elegir un elemento de cualquier lista escribiendo su
-#   número. La usan las pantallas que eligen terminales, destinos, micros y viajes.
-# Recibe: lista (la lista de donde se elige) y mensaje (el texto de la pregunta).
-# Devuelve: el elemento elegido de la lista, no el número que se escribió.
-# Cómo funciona: repite la pregunta hasta que se escriba un número entre 1 y la cantidad de
-#   elementos. Si no es un número, el except ValueError muestra el error; si está fuera de
-#   rango, el continue vuelve a preguntar. Sale del ciclo con break y el return queda fuera
-#   del ciclo. Como la lista se muestra empezando en 1, devuelve lista[opcion - 1].
-# Estructuras y temas: listas y excepciones (ValueError).
+# Esta es una función general que usamos en todo el sistema para elegir un elemento de una
+# lista escribiendo su número: terminales, destinos, micros y viajes. La hicimos genérica
+# para no repetir la misma validación en cada lugar. Recibe la lista y el mensaje de la
+# pregunta.
+#
+# Con un while True repetimos la pregunta hasta que se escriba un número entre 1 y el largo
+# de la lista: si no es un número, el except ValueError muestra el error, y si está fuera de
+# rango, el continue vuelve a preguntar. Salimos con break y el return queda afuera del
+# ciclo.
+#
+# Como al usuario le mostramos la lista empezando en 1 pero en Python empieza en 0,
+# devolvemos lista[opcion - 1]. O sea que devuelve el elemento elegido, no el número.
 def ElegirDeLista(lista, mensaje):
     while True:
         try:
@@ -1642,13 +1625,13 @@ def ElegirDeLista(lista, mensaje):
 
     return lista[opcion - 1]
 
-# Qué hace: pide el DNI de un pasajero hasta que sea válido.
-# Recibe: nada.
-# Devuelve: el DNI, como texto.
-# Cómo funciona: lo valida con la expresión regular ^[0-9]...[0-9]?$: siete [0-9]
-#   obligatorios y un octavo con "?", que significa "0 o 1 vez". Así acepta DNI de 7 u 8
-#   números, sin puntos ni espacios. Se guarda como texto porque no se hacen cuentas con él.
-# Estructuras y temas: expresiones regulares y cadenas.
+# Esta función pide el DNI del pasajero hasta que sea válido. Lo validamos con una expresión
+# regular que tiene siete [0-9] obligatorios y un octavo [0-9] con "?", que significa que
+# puede aparecer cero o una vez. Así aceptamos DNI de 7 u 8 números, sin puntos ni espacios;
+# el ^ y el $ hacen que no pueda haber nada más.
+#
+# Lo guardamos como texto y no como número porque no hacemos cuentas con él, solo lo
+# comparamos.
 def IngresarDni():
     dni = input("Ingrese el DNI del pasajero (sin puntos): ").strip()
 
@@ -1658,15 +1641,14 @@ def IngresarDni():
 
     return dni
 
-# Qué hace: pide el nombre completo de un pasajero hasta que sea válido.
-# Recibe: nada.
-# Devuelve: el nombre limpio y con mayúscula inicial en cada palabra (por ejemplo,
-#   "  juan   perez " queda "Juan Perez").
-# Cómo funciona: limpia los espacios con " ".join(nombre.split()) y aplica .title(). Lo
-#   valida con una expresión regular que solo acepta letras (incluye tildes, ñ y ü) y
-#   espacios, y con len(nombre.split()) controla que tenga al menos dos palabras (nombre y
-#   apellido). Si no cumple, muestra el error y vuelve a preguntar.
-# Estructuras y temas: cadenas (.split(), .join(), .title()) y expresiones regulares.
+# Esta función pide el nombre completo del pasajero hasta que sea válido. Primero lo
+# limpiamos con " ".join(nombre.split()), que saca los espacios de más, y .title(), que pone
+# la primera letra de cada palabra en mayúscula; así "  juan   perez " queda "Juan Perez".
+#
+# Después lo validamos con una expresión regular que solo acepta letras (incluyendo tildes,
+# ñ y ü) y espacios. Además, con len(nombre.split()) controlamos que tenga al menos dos
+# palabras, es decir nombre y apellido. Si algo no cumple, mostramos el error y volvemos a
+# preguntar.
 def IngresarNombre():
     while True:
         nombre = input("Ingrese el nombre completo del pasajero: ")
@@ -1682,33 +1664,32 @@ def IngresarNombre():
 
     return nombre
 
-# Qué hace: devuelve un número con puntos de miles, para mostrar precios. Por ejemplo,
-#   1234567 queda "1.234.567". Es una función recursiva.
-# Recibe: numero, un número entero.
-# Devuelve: el número con los puntos, como texto.
-# Cómo funciona:
-#   - Caso base: si el número es menor que 1000 no lleva puntos, entonces se devuelve tal
-#     cual con str().
-#   - Caso recursivo: se formatea la parte de los miles (numero // 1000) llamando a la misma
-#     función, y se le agrega un punto y los últimos 3 números (numero % 1000). El :03 del
-#     f-string completa con ceros adelante, así 1005 queda "1.005" y no "1.5".
-#   Ejemplo: FormatoPrecio(1234567) = FormatoPrecio(1234) + ".567"
-#                                   = FormatoPrecio(1) + ".234" + ".567" = "1.234.567"
-# Estructuras y temas: recursividad y cadenas (f-strings con relleno de ceros).
+# Esta función recibe un número y lo devuelve como texto con puntos de miles; por ejemplo,
+# 1234567 queda "1.234.567". La hicimos recursiva.
+#
+# El caso base es cuando el número es menor que 1000: no lleva puntos, así que lo devolvemos
+# tal cual con str().
+#
+# En el caso recursivo separamos el número en dos partes: numero // 1000, que son los miles,
+# y numero % 1000, que son los últimos tres dígitos. A los miles los formateamos llamando
+# otra vez a la misma función, y les pegamos un punto y los últimos tres dígitos. El :03 del
+# f-string completa con ceros adelante, así 1005 queda "1.005" y no "1.5".
+#
+# Por ejemplo, FormatoPrecio(1234567) es FormatoPrecio(1234) + ".567", que a su vez es
+# FormatoPrecio(1) + ".234" + ".567", y eso da "1.234.567".
 def FormatoPrecio(numero):
     if numero < 1000:
         return str(numero)
     else:
         return FormatoPrecio(numero // 1000) + "." + f"{numero % 1000:03}"
 
-# Qué hace: hace una pregunta de sí o no (S/N) y devuelve la respuesta. Se usa antes de dar
-#   de baja un micro, eliminar una terminal, confirmar una venta y cancelar una venta.
-# Recibe: mensaje, el texto de la pregunta. La función le agrega " (S/N): " al final.
-# Devuelve: True si se respondió S, o False si se respondió N.
-# Cómo funciona: aplica .strip() y .upper() a la respuesta, así "s" o " n " también sirven.
-#   Mientras no sea S ni N, muestra el error y vuelve a preguntar. Al final devuelve el
-#   resultado de la comparación respuesta == "S", que es True o False.
-# Estructuras y temas: cadenas (.strip(), .upper()) y valores booleanos.
+# Esta función hace una pregunta de sí o no y devuelve True o False. La usamos antes de
+# cualquier acción importante: confirmar o cancelar una venta, dar de baja un micro o
+# eliminar una terminal. Recibe el texto de la pregunta y le agregamos " (S/N): " al final.
+#
+# A la respuesta le aplicamos .strip() y .upper(), así "s" o " n " también sirven. Mientras
+# no sea S ni N, mostramos un error y volvemos a preguntar. Al final devolvemos respuesta ==
+# "S": esa comparación ya da True o False, así que no hace falta un if.
 def Confirmar(mensaje):
     respuesta = input(mensaje + " (S/N): ").strip().upper()
 
@@ -1718,22 +1699,22 @@ def Confirmar(mensaje):
 
     return respuesta == "S"
 
-# Qué hace: pide la fecha de un viaje y la controla hasta que sea válida.
-# Recibe: nada.
-# Devuelve: la fecha como texto, en formato "DD/MM/AAAA" (así se guarda en el archivo).
-# Cómo funciona: controla la fecha en pasos y, si alguno falla, muestra el error y la
-#   vuelve a pedir:
-#   1. Que tenga tres partes separadas por "/" (con .split("/")).
-#   2. Que el día y el mes tengan 2 números y el año 4.
-#   3. Que las tres partes sean números (try/except ValueError).
-#   4. Que el mes esté entre 1 y 12.
-#   5. Que el día exista en ese mes. El diccionario "dias_por_mes" tiene los días de cada
-#      mes, y febrero pasa a 29 si el año es bisiesto (divisible por 4 y no por 100, o
-#      divisible por 400).
-#   6. Que la fecha esté entre hoy y un año desde hoy. La fecha de hoy se obtiene con
-#      time.localtime(). Las fechas se comparan como tuplas (año, mes, día), que se comparan
-#      elemento a elemento: primero el año, después el mes y después el día.
-# Estructuras y temas: cadenas (.split(), .strip()), diccionarios, tuplas y excepciones.
+# Esta función pide la fecha de un viaje y la controla hasta que sea válida. La devuelve
+# como texto en formato DD/MM/AAAA, que es como la guardamos. La validación la hacemos por
+# pasos, y si alguno falla mostramos el error y la volvemos a pedir.
+#
+# Primero, que tenga tres partes separadas por "/", usando .split("/"). Segundo, que el día
+# y el mes tengan 2 dígitos y el año 4. Tercero, que las tres partes sean números, con un
+# try/except ValueError. Cuarto, que el mes esté entre 1 y 12.
+#
+# Quinto, que el día exista en ese mes. Para eso usamos el diccionario dias_por_mes, y si el
+# año es bisiesto le cambiamos febrero a 29. Un año es bisiesto si es divisible por 4 y no
+# por 100, o si es divisible por 400.
+#
+# Por último, que la fecha esté entre hoy y un año desde hoy. La fecha de hoy la sacamos con
+# time.localtime(). Para comparar fechas armamos tuplas (año, mes, día): las tuplas se
+# comparan elemento por elemento, primero el año, si empatan el mes y si empatan el día, que
+# es justo como se comparan las fechas.
 def IngresarFecha():
     fecha = input("Ingrese la fecha del viaje (DD/MM/AAAA): ").strip()
 

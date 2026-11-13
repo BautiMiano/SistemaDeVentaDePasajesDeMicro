@@ -1,12 +1,12 @@
 import Utils
 
-# Qué hace: convierte a número la opción que se escribió en un menú.
-# Recibe: opcion, el texto que devolvió la función del menú.
-# Devuelve: la opción como número entero, o 0 si lo escrito no era un número. El 0 queda
-#   fuera de rango en todos los menús, así que main() lo toma como opción inválida.
-# Cómo funciona: intenta convertir con int() dentro de un try; si da ValueError, usa 0. Se
-#   hizo como función porque se usa en los 6 menús y evita repetir el mismo try/except.
-# Estructuras y temas: excepciones (ValueError).
+# Esta función la usamos en todos los menús para pasar a número lo que escribió el usuario.
+# Los menús devuelven texto, porque input() siempre devuelve un string, así que acá
+# intentamos convertirlo con int() dentro de un try. Si el usuario escribió algo que no es
+# un número, salta un ValueError y en ese caso devolvemos 0. Elegimos el 0 porque ningún
+# menú tiene una opción 0, entonces main() lo toma como opción inválida y vuelve a
+# preguntar. La hicimos como función aparte para no repetir el mismo try/except en los seis
+# menús.
 def ConvertirOpcion(opcion):
     try:
         numero = int(opcion)
@@ -15,17 +15,20 @@ def ConvertirOpcion(opcion):
 
     return numero
 
-# Qué hace: maneja toda la navegación entre los menús del sistema.
-# Recibe: nada.
-# Devuelve: nada.
-# Cómo funciona: un while True muestra el menú principal y controla que la opción esté
-#   entre 1 y 6. Cada opción del 1 al 5 entra a su submenú, que tiene su propio while True
-#   y llama a las funciones de Utils según lo que se elija. La opción "Volver atrás" de cada
-#   submenú hace break y vuelve al menú principal. En Ventas hay un tercer nivel, el menú
-#   de búsqueda: si la búsqueda encuentra una venta, se llama a GestionarVenta(). La opción
-#   6 del menú principal termina el programa. Cada submenú guarda su respuesta en su propia
-#   variable (opcion_ventas, opcion_informes, etc.) para no pisar la del menú principal.
-# Estructuras y temas: ciclos while, if/elif/else y funciones de un módulo propio (Utils).
+# Esta es la función que maneja toda la navegación del sistema. Tiene un while True que
+# muestra el menú principal y controla que la opción esté entre 1 y 6; si no, muestra un
+# error y con continue vuelve a mostrar el menú.
+#
+# Cada opción del 1 al 5 entra a un submenú, que a su vez tiene su propio while True y llama
+# a las funciones de Utils según lo que elija el usuario. Cuando en un submenú se elige
+# "Volver atrás", hacemos break y volvemos al menú principal.
+#
+# En Ventas hay un tercer nivel, que es el menú de búsqueda: si la búsqueda encuentra una
+# venta, llamamos a GestionarVenta() para cancelarla o cambiarle el asiento. La opción 6
+# sale del ciclo y termina el programa.
+#
+# Cada submenú guarda la opción en su propia variable (opcion_ventas, opcion_informes, etc.)
+# para no pisar la del menú principal.
 def main():
     while True:
         opcion = ConvertirOpcion(Utils.MostrarMenuPrincipal())
