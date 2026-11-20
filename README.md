@@ -3,7 +3,7 @@
 Trabajo Práctico Obligatorio de **Programación I – Algoritmos y Estructuras de Datos I** (UADE).
 Docente: Lic. Ricardo Thompson.
 
-Es un programa de consola en Python para manejar la venta de pasajes de micro entre distintas terminales. Se pueden cargar terminales, micros y viajes, vender pasajes eligiendo el asiento, buscar ventas para cancelarlas o cambiar el asiento, y ver informes de recaudación. Todo se guarda en `datos.json`, así que al volver a abrir el programa los datos siguen ahí.
+Es un programa de consola en Python para manejar la venta de pasajes de micro entre distintas terminales. Se pueden cargar terminales, micros y viajes, vender pasajes eligiendo el asiento, buscar ventas para cancelarlas o cambiar el asiento, y ver informes de recaudación. Todo se guarda en archivos (`destinos.json`, `micros.json`, `viajes.json` y `ventas.jsonl`), así que al volver a abrir el programa los datos siguen ahí.
 
 ## Cómo correrlo
 
@@ -17,7 +17,10 @@ python main.py
 
 - `main.py`: carga los datos y maneja los menús.
 - `Utils.py`: todas las funciones del sistema.
-- `datos.json`: terminales, micros, viajes y ventas guardados.
+- `destinos.json`: las terminales y las distancias entre ellas.
+- `micros.json`: los micros (patentes).
+- `viajes.json`: los viajes con su matriz de asientos.
+- `ventas.jsonl`: las ventas, en formato JSON Lines (una venta por línea). Como las ventas son muchas y se acumulan (son un histórico), no se cargan en memoria: se leen línea por línea con `json.loads()` y se descartan las que no sirven.
 
 ## Qué se puede hacer
 
@@ -30,4 +33,4 @@ Cada micro tiene 40 asientos (10 filas, columnas A a D) y el pasaje cuesta $100 
 
 ## Temas de la materia que usamos
 
-Funciones, matrices (los asientos), cadenas, expresiones regulares (patente, DNI y nombre), diccionarios, conjuntos y tuplas, excepciones, archivos JSON y recursividad (las búsquedas de viajes y ventas).
+Funciones, matrices (los asientos), cadenas, expresiones regulares (patente, DNI y nombre), diccionarios, conjuntos y tuplas, excepciones, archivos (JSON y JSON Lines) y recursividad (la búsqueda de viajes por ID y el formato de precios).

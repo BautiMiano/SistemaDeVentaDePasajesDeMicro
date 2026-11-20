@@ -5,20 +5,28 @@ import json
 
 ############################## Datos #################################
 
-# Estructuras de datos del sistema (se cargan desde datos.json al arrancar):
+# Estructuras de datos del sistema que están en memoria (son pocas y chicas):
 #   distancias: diccionario de diccionarios con los km entre terminales. Las claves de
 #     afuera son las terminales. Ejemplo: distancias["Buenos Aires"]["Rosario"] = 300.
+#     Se guarda en destinos.json.
 #   micros: lista de diccionarios, uno por micro. Ejemplo: {"patente": "AB123CD"}.
+#     Se guarda en micros.json.
 #   patentes: conjunto con las patentes de los micros, para controlar rápido que no se
-#     repitan.
+#     repitan. No se guarda: se arma a partir de micros.json al arrancar.
 #   viajes: lista de diccionarios, uno por viaje, con: id, salida, destino, patente, fecha
 #     y "asientos", que es la matriz de 10 x 4 ("O" = libre, "X" = ocupado).
-#   ventas: lista de diccionarios, uno por pasaje vendido, con: viaje_id, salida, destino,
-#     fecha, patente, nombre, dni, asiento y precio.
+#     Se guarda en viajes.json.
+# Las ventas NO están en memoria. Como son muchas y se acumulan con el tiempo (son un
+#   histórico), se guardan en ventas.jsonl (JSON Lines): un archivo de texto donde cada
+#   línea es un registro, o sea una venta (un diccionario con viaje_id, salida, destino,
+#   fecha, patente, nombre, dni, asiento y precio). Para usarlas se lee el archivo línea
+#   por línea, se decodifica cada una con json.loads() y se descarta si no sirve.
 # Constantes:
 #   FILAS y COLUMNAS: tamaño de la matriz de asientos (10 x 4 = 40 asientos por micro).
 #   TARIFAPORKM: precio por kilómetro. El pasaje cuesta distancia x TARIFAPORKM.
-#   ARCHIVO_JSON: nombre del archivo donde se guardan los datos.
+#   ARCHIVO_...: nombres de los archivos de datos. ARCHIVO_VENTAS_TEMP es un archivo
+#     auxiliar que se usa al modificar o borrar ventas (ver ReescribirVentas()). Queda en
+#     la carpeta después de usarse y se vuelve a pisar la próxima vez.
 #   nombres y apellidos: listas que usa GenerarVentasAlAzar() para inventar pasajeros.
 
 distancias = {}
@@ -27,13 +35,16 @@ micros = []
 patentes = set()
 
 viajes = []
-ventas = []
 
 FILAS = 10
 COLUMNAS = 4
 TARIFAPORKM = 100
 
-ARCHIVO_JSON = "datos.json"
+ARCHIVO_DESTINOS = "destinos.json"
+ARCHIVO_MICROS = "micros.json"
+ARCHIVO_VIAJES = "viajes.json"
+ARCHIVO_VENTAS = "ventas.jsonl"
+ARCHIVO_VENTAS_TEMP = "ventas_temp.jsonl"
 
 nombres = [
     "Juan", "Santiago", "Mateo", "Nicolas", "Benjamin",
@@ -57,82 +68,201 @@ apellidos = [
     "Sosa", "Aguirre", "Gimenez", "Vazquez", "Ledesma"
 ]
 
-############################## Json ##################################
+############################## Archivos ##############################
 
-# Qué hace: lee el archivo datos.json al arrancar el programa y copia su contenido a las
-#   estructuras globales (distancias, micros, patentes, viajes y ventas). Si el archivo no
-#   existe, el programa arranca vacío. Si está dañado o no se puede leer, muestra el error.
+# Qué hace: lee un archivo .json chico (destinos, micros o viajes) y devuelve su contenido.
+# Recibe: nombre_archivo (el archivo a leer) y valor_vacio (lo que se devuelve si el
+#   archivo no existe o no se puede leer: {} para destinos y [] para micros y viajes).
+# Devuelve: el contenido del archivo (diccionario o lista), o valor_vacio.
+# Cómo funciona: abre el archivo en modo lectura ("rt") dentro de un try y lo convierte con
+#   json.load(). En el finally lo cierra, con un try/except NameError por si nunca se llegó
+#   a abrir. Se usa json.load() (que lee todo el archivo) solo para estos archivos porque
+#   son chicos: hay pocas terminales, micros y viajes. Las ventas, que son muchas, NO se
+#   leen así (ver ventas.jsonl).
+# Estructuras y temas: archivos, JSON y excepciones (FileNotFoundError, ValueError, OSError).
+def LeerJson(nombre_archivo, valor_vacio):
+    datos = valor_vacio
+
+    try:
+        arch = open(nombre_archivo, "rt", encoding="UTF8")
+        datos = json.load(arch)
+    except FileNotFoundError:
+        print(f"Todavía no existe {nombre_archivo}.")
+    except ValueError as mensaje:
+        print(f"Error: {nombre_archivo} está dañado:", mensaje)
+    except OSError as mensaje:
+        print(f"Error: no se pudo leer {nombre_archivo}:", mensaje)
+    finally:
+        try:
+            arch.close()
+        except NameError:
+            pass
+
+    return datos
+
+# Qué hace: guarda una estructura (distancias, micros o viajes) en su archivo .json.
+# Recibe: nombre_archivo (dónde guardar) y datos (el diccionario o la lista a guardar).
+# Devuelve: nada.
+# Cómo funciona: abre el archivo en modo escritura ("wt"), que lo crea si no existe o lo
+#   reemplaza si ya existe, lo graba con json.dump() y lo cierra en el finally. Cada
+#   operación guarda solo el archivo que cambió (por ejemplo, registrar un micro guarda
+#   solo micros.json).
+# Estructuras y temas: archivos, JSON y excepciones (OSError).
+def GuardarJson(nombre_archivo, datos):
+    try:
+        arch = open(nombre_archivo, "wt", encoding="UTF8")
+        json.dump(datos, arch, indent=4)
+    except OSError as mensaje:
+        print(f"Error: no se pudo guardar {nombre_archivo}:", mensaje)
+    finally:
+        try:
+            arch.close()
+        except NameError:
+            pass
+
+# Qué hace: al arrancar el programa, carga en memoria las terminales, los micros y los
+#   viajes. Las ventas no se cargan: quedan en ventas.jsonl y se leen cuando hacen falta.
 # Recibe: nada.
 # Devuelve: nada. Modifica directamente las estructuras globales.
-# Cómo funciona: abre el archivo en modo lectura ("rt") dentro de un try y lo convierte a
-#   un diccionario con json.load(). En el finally lo cierra, con un try/except NameError por
-#   si el archivo nunca se llegó a abrir. La variable "cargado" indica si la lectura salió
-#   bien: solo en ese caso se copian los datos. Se usa .get(clave, valor) para que no falle
-#   si en el archivo falta alguna clave.
-# Estructuras y temas: archivos, JSON, excepciones (FileNotFoundError, ValueError, OSError),
-#   diccionarios, listas y conjuntos.
+# Cómo funciona: lee cada archivo con LeerJson() y copia su contenido a la estructura
+#   global con append() (listas), add() (conjunto) o asignando la clave (diccionario).
+#   El conjunto "patentes" se arma a partir de los micros, así no hace falta guardarlo.
+# Estructuras y temas: archivos, JSON, diccionarios, listas y conjuntos.
 def CargarDatos():
-    cargado = False
+    datos_destinos = LeerJson(ARCHIVO_DESTINOS, {})
+
+    for terminal in datos_destinos:
+        distancias[terminal] = datos_destinos[terminal]
+
+    for micro in LeerJson(ARCHIVO_MICROS, []):
+        micros.append(micro)
+        patentes.add(micro["patente"])
+
+    for viaje in LeerJson(ARCHIVO_VIAJES, []):
+        viajes.append(viaje)
+
+    print("Datos cargados correctamente.")
+
+############################## Archivo de ventas (JSON Lines) ########
+
+# Qué hace: agrega una venta nueva al final de ventas.jsonl.
+# Recibe: venta, el diccionario de la venta.
+# Devuelve: True si se pudo guardar, False si hubo un error.
+# Cómo funciona: abre el archivo en modo agregado ("at"), que lo crea si no existe y si ya
+#   existe escribe al final sin borrar lo anterior. Convierte la venta a texto con
+#   json.dumps() y la graba como una sola línea, agregando el "\n" a mano porque write()
+#   no lo pone. No hace falta leer las ventas que ya estaban.
+# Estructuras y temas: archivos de texto, JSON Lines, diccionarios y excepciones.
+def GuardarVenta(venta):
+    guardada = False
 
     try:
-        arch = open(ARCHIVO_JSON, "rt", encoding="UTF8")
-        datos = json.load(arch)
-        cargado = True
+        arch = open(ARCHIVO_VENTAS, "at", encoding="UTF8")
+        arch.write(json.dumps(venta) + "\n")
+        guardada = True
+    except OSError as mensaje:
+        print("Error: no se pudo guardar la venta:", mensaje)
+    finally:
+        try:
+            arch.close()
+        except NameError:
+            pass
+
+    return guardada
+
+# Qué hace: modifica o borra ventas de ventas.jsonl. Se usa para cancelar una venta,
+#   cambiarle el asiento y borrar las ventas de los viajes que se eliminan.
+# Recibe:
+#   viaje_id y asiento: identifican UNA venta (un asiento de un viaje se vende una sola
+#     vez). Si nuevo_asiento es None, esa venta se borra; si no, se le cambia el asiento.
+#     Si no se quiere tocar una venta puntual, se pasa None en viaje_id.
+#   nuevo_asiento: el asiento nuevo, o None para borrar la venta.
+#   ids_borrados: conjunto con ids de viajes eliminados; se borran todas sus ventas.
+# Devuelve: True si todo salió bien, False si hubo un error.
+# Cómo funciona: un archivo de texto no se puede modificar "en el medio", así que se hace
+#   en dos pasos:
+#   1. Se lee ventas.jsonl línea por línea (for linea in entrada) y cada venta se
+#      decodifica con json.loads(). Las que hay que borrar no se copian; la que cambia de
+#      asiento se copia modificada; el resto se copia igual a ventas_temp.jsonl. En
+#      memoria hay una sola venta por vez.
+#   2. Con los dos archivos ya cerrados, CopiarArchivo() copia ventas_temp.jsonl de vuelta
+#      a ventas.jsonl. Se pueden volver a abrir porque cada uno se abre con un modo
+#      distinto al de antes (ventas.jsonl estaba en "rt" y ahora va en "wt"; la copia
+#      estaba en "wt" y ahora va en "rt").
+#   Si ventas.jsonl no existe, no hay ventas y no hay nada que hacer.
+# Estructuras y temas: archivos de texto, JSON Lines, conjuntos, diccionarios y
+#   excepciones (FileNotFoundError, ValueError, OSError).
+def ReescribirVentas(viaje_id, asiento, nuevo_asiento, ids_borrados):
+    copiado = False
+
+    try:
+        entrada = open(ARCHIVO_VENTAS, "rt", encoding="UTF8")
+        salida = open(ARCHIVO_VENTAS_TEMP, "wt", encoding="UTF8")
+
+        for linea in entrada:
+            venta = json.loads(linea)
+
+            if venta["viaje_id"] in ids_borrados:
+                continue
+
+            if venta["viaje_id"] == viaje_id and venta["asiento"] == asiento:
+                if nuevo_asiento == None:
+                    continue
+
+                venta["asiento"] = nuevo_asiento
+
+            salida.write(json.dumps(venta) + "\n")
+
+        copiado = True
     except FileNotFoundError:
-        print("Todavía no existe un archivo de datos.")
+        return True
     except ValueError as mensaje:
-        print("Error: datos.json está dañado:", mensaje)
+        print("Error: ventas.jsonl tiene una línea dañada:", mensaje)
     except OSError as mensaje:
-        print("Error: no se pudieron cargar los datos:", mensaje)
+        print("Error: no se pudieron actualizar las ventas:", mensaje)
     finally:
         try:
-            arch.close()
+            entrada.close()
+            salida.close()
         except NameError:
             pass
 
-    if cargado:
-        for terminal in datos.get("distancias", {}):
-            distancias[terminal] = datos["distancias"][terminal]
+    if not copiado:
+        return False
 
-        micros.extend(datos.get("micros", []))
+    return CopiarArchivo(ARCHIVO_VENTAS_TEMP, ARCHIVO_VENTAS)
 
-        for patente in datos.get("patentes", []):
-            patentes.add(patente)
-
-        viajes.extend(datos.get("viajes", []))
-        ventas.extend(datos.get("ventas", []))
-
-        print("Datos cargados correctamente.")
-
-# Qué hace: guarda todos los datos del sistema en datos.json. Se llama cada vez que termina
-#   una operación que cambia algo (una venta, un viaje, un micro, una terminal), así no se
-#   pierde nada aunque se cierre el programa.
-# Recibe: nada.
-# Devuelve: nada.
-# Cómo funciona: arma un diccionario "datos" con las cinco estructuras. El conjunto
-#   "patentes" se convierte a lista con list() porque JSON no puede guardar conjuntos. Abre
-#   el archivo en modo escritura ("wt"), que lo crea si no existe o lo reemplaza si ya
-#   existe, lo graba con json.dump() y lo cierra en el finally.
-# Estructuras y temas: archivos, JSON, excepciones (OSError), diccionarios, listas y conjuntos.
-def GuardarDatos():
-    datos = {
-        "distancias": distancias,
-        "micros": micros,
-        "patentes": list(patentes),
-        "viajes": viajes,
-        "ventas": ventas
-    }
+# Qué hace: copia un archivo de texto en otro, línea por línea.
+# Recibe: origen (el archivo que se lee) y destino (el archivo que se graba).
+# Devuelve: True si se copió bien, False si hubo un error.
+# Cómo funciona: abre el origen en modo lectura ("rt") y el destino en modo escritura
+#   ("wt"), que lo vacía si ya existía. Recorre el origen con for y graba cada línea tal
+#   cual en el destino (ya trae su "\n"). Nunca tiene más de una línea en memoria. Cierra
+#   los dos en el finally, igual que el ejemplo de "notas.txt" de la clase.
+# Estructuras y temas: archivos de texto y excepciones (FileNotFoundError, OSError).
+def CopiarArchivo(origen, destino):
+    copiado = False
 
     try:
-        arch = open(ARCHIVO_JSON, "wt", encoding="UTF8")
-        json.dump(datos, arch,indent=4)
+        entrada = open(origen, "rt", encoding="UTF8")
+        salida = open(destino, "wt", encoding="UTF8")
+
+        for linea in entrada:
+            salida.write(linea)
+
+        copiado = True
+    except FileNotFoundError as mensaje:
+        print("Error: no se encontró el archivo:", mensaje)
     except OSError as mensaje:
-        print("Error: no se pudieron guardar los datos:", mensaje)
+        print("Error: no se pudo copiar el archivo:", mensaje)
     finally:
         try:
-            arch.close()
+            entrada.close()
+            salida.close()
         except NameError:
             pass
+
+    return copiado
 
 ############################## Menu ##################################
 
@@ -308,7 +438,7 @@ def MostrarMenuTerminales():
 
 # Qué hace: vende un pasaje. Es la opción "Registrar venta de pasaje" del menú Ventas.
 # Recibe: nada (todo se pide por teclado).
-# Devuelve: nada. Agrega la venta a la lista "ventas" y marca el asiento en la matriz.
+# Devuelve: nada. Agrega la venta a ventas.jsonl y marca el asiento en la matriz.
 # Cómo funciona, paso a paso:
 #   1. Si no hay viajes cargados, avisa y termina.
 #   2. Arma la lista "destinos" solo con los destinos que tienen al menos un viaje, sin
@@ -323,13 +453,15 @@ def MostrarMenuTerminales():
 #   6. Muestra el mapa de asientos y el usuario elige uno con ElegirAsiento(), que ya lo
 #      marca como ocupado ("X").
 #   7. Calcula el precio: distancia entre salida y destino multiplicada por TARIFAPORKM.
-#   8. Pide el DNI. Si ese DNI ya compró antes (BuscarVentasPorDni, que es recursiva), usa
-#      el mismo nombre. Si es nuevo, pide el nombre con IngresarNombre().
+#   8. Pide el DNI. Si ese DNI ya compró antes (BuscarNombrePorDni() lo busca en
+#      ventas.jsonl), usa el mismo nombre. Si es nuevo, pide el nombre con IngresarNombre().
 #   9. Muestra el resumen y pide confirmación. Si responde N, libera el asiento y termina
 #      sin guardar nada.
-#   10. Si confirma, arma el diccionario "venta", lo agrega a "ventas" y guarda el archivo.
+#   10. Si confirma, arma el diccionario "venta" y lo agrega al final de ventas.jsonl con
+#      GuardarVenta(). Si se guardó bien, guarda viajes.json (cambió la matriz); si no,
+#      libera el asiento para que no quede ocupado sin venta.
 # Estructuras y temas: listas, diccionarios, matriz de asientos, excepciones, cadenas
-#   (f-strings, .upper(), .center()) y búsqueda recursiva.
+#   (f-strings, .upper(), .center()) y archivos (JSON Lines).
 def RegistrarVenta():
     if len(viajes) == 0:
         print("No hay viajes registrados. Primero registre un viaje.")
@@ -412,10 +544,9 @@ def RegistrarVenta():
 
     dni = IngresarDni()
 
-    ventas_dni = BuscarVentasPorDni(dni)
+    nombre = BuscarNombrePorDni(dni)
 
-    if len(ventas_dni) > 0:
-        nombre = ventas_dni[0]["nombre"]
+    if nombre != None:
         print(f"Pasajero ya registrado: {nombre}")
     else:
         nombre = IngresarNombre()
@@ -449,8 +580,12 @@ def RegistrarVenta():
         "precio": precio
     }
 
-    ventas.append(venta)
-    GuardarDatos()
+    if not GuardarVenta(venta):
+        LiberarAsiento(matriz, asiento_elegido)
+        print("La venta no se registró. El asiento quedó libre.")
+        return
+
+    GuardarJson(ARCHIVO_VIAJES, viajes)
 
     print("Venta registrada correctamente.")
 
@@ -459,10 +594,12 @@ def RegistrarVenta():
 # Devuelve: nada.
 # Cómo funciona: muestra la lista de viajes con VerViajes() y pide el ID de uno. Si no es
 #   un número, avisa y termina. Busca el viaje con BuscarViajePorId() (recursiva); si no
-#   existe, avisa. Después recorre la lista "ventas" y muestra con MostrarVenta() las que
-#   tienen ese "viaje_id", contándolas con la variable "cantidad". Al final muestra el total
-#   o avisa que el viaje no tiene ventas.
-# Estructuras y temas: listas, diccionarios, excepciones (ValueError) y recursividad.
+#   existe, avisa. Después lee ventas.jsonl línea por línea: decodifica cada venta con
+#   json.loads() y, si tiene ese "viaje_id", la muestra con MostrarVenta(); si no, la
+#   descarta y pasa a la siguiente. Así nunca se cargan todas las ventas en memoria. Las
+#   cuenta con la variable "cantidad" y al final muestra el total o avisa que no hay.
+# Estructuras y temas: listas, diccionarios, archivos (JSON Lines), excepciones
+#   (ValueError, FileNotFoundError, OSError) y recursividad.
 def VerVentas():
     print("=" * 50)
     print("VENTAS REGISTRADAS".center(50))
@@ -493,11 +630,27 @@ def VerVentas():
 
     cantidad = 0
 
-    for venta in ventas:
-        if venta["viaje_id"] == viaje["id"]:
-            cantidad += 1
-            print(f"Venta N°: {cantidad}")
-            MostrarVenta(venta)
+    try:
+        arch = open(ARCHIVO_VENTAS, "rt", encoding="UTF8")
+
+        for linea in arch:
+            venta = json.loads(linea)
+
+            if venta["viaje_id"] == viaje["id"]:
+                cantidad += 1
+                print(f"Venta N°: {cantidad}")
+                MostrarVenta(venta)
+    except FileNotFoundError:
+        pass
+    except ValueError as mensaje:
+        print("Error: ventas.jsonl tiene una línea dañada:", mensaje)
+    except OSError as mensaje:
+        print("Error: no se pudieron leer las ventas:", mensaje)
+    finally:
+        try:
+            arch.close()
+        except NameError:
+            pass
 
     if cantidad == 0:
         print("Este viaje no tiene ventas registradas.")
@@ -505,7 +658,7 @@ def VerVentas():
         print(f"Total de ventas del viaje: {cantidad}")
 
 # Qué hace: muestra por pantalla todos los datos de una venta.
-# Recibe: venta, que es un diccionario de la lista "ventas".
+# Recibe: venta, el diccionario de una venta leída de ventas.jsonl.
 # Devuelve: nada.
 # Cómo funciona: imprime cada campo con f-strings. El precio se muestra con puntos de miles
 #   usando FormatoPrecio(). El DNI se lee con .get('dni', '-'), que muestra un guión si la
@@ -522,14 +675,15 @@ def MostrarVenta(venta):
     print(f"Precio: ${FormatoPrecio(venta['precio'])}")
     print("-" * 50)
 
-# Qué hace: cancela una venta: libera el asiento y la borra de la lista "ventas".
+# Qué hace: cancela una venta: la borra de ventas.jsonl y libera el asiento.
 # Recibe: venta (el diccionario de la venta) y matriz (la matriz de asientos de su viaje).
 # Devuelve: nada.
 # Cómo funciona: primero pide confirmación con Confirmar(); si responde N, no hace nada.
-#   Si confirma, vuelve a poner el asiento en "O" con LiberarAsiento(), saca la venta de la
-#   lista con .remove() y guarda el archivo. Como las listas y los diccionarios son mutables,
-#   el cambio en la matriz queda hecho en el viaje sin necesidad de devolverla.
-# Estructuras y temas: listas, diccionarios y matriz.
+#   Si confirma, borra la venta del archivo con ReescribirVentas() (pasando None como
+#   asiento nuevo). Si salió bien, vuelve a poner el asiento en "O" con LiberarAsiento() y
+#   guarda viajes.json. Como las listas son mutables, el cambio en la matriz queda hecho en
+#   el viaje sin necesidad de devolverla.
+# Estructuras y temas: diccionarios, matriz, conjuntos y archivos (JSON Lines).
 def CancelarVenta(venta, matriz):
     asiento = venta["asiento"]
 
@@ -537,11 +691,13 @@ def CancelarVenta(venta, matriz):
         print("Operación cancelada.")
         return
 
+    if not ReescribirVentas(venta["viaje_id"], asiento, None, set()):
+        print("No se pudo cancelar la venta.")
+        return
+
     LiberarAsiento(matriz, asiento)
 
-    ventas.remove(venta)
-
-    GuardarDatos()
+    GuardarJson(ARCHIVO_VIAJES, viajes)
 
     print("Venta cancelada correctamente.")
 
@@ -555,8 +711,8 @@ def CancelarVenta(venta, matriz):
 #   None.
 # Cómo funciona: muestra los viajes, pide el ID y busca el viaje con BuscarViajePorId().
 #   Muestra su mapa de asientos, pide el asiento (con .upper() y .strip(), así "3b " sirve
-#   igual que "3B") y busca la venta con BuscarVentaPorAsiento(). Las dos búsquedas son
-#   recursivas.
+#   igual que "3B") y busca la venta con BuscarVentaPorAsiento(), que la busca en
+#   ventas.jsonl. La búsqueda del viaje es recursiva.
 # Estructuras y temas: listas, diccionarios, excepciones, cadenas y recursividad.
 def SeleccionarVentaPorAsiento():
     print("=" * 50)
@@ -596,9 +752,9 @@ def SeleccionarVentaPorAsiento():
 # Devuelve: el diccionario de la venta elegida, o None si no hay ventas con ese DNI o si
 #   el usuario elige volver.
 # Cómo funciona: pide el DNI con IngresarDni(), que ya lo valida. BuscarVentasPorDni()
-#   (recursiva) devuelve una lista con todas las coincidencias. Si está vacía avisa; si no,
-#   ElegirVentaDeLista() muestra las ventas y devuelve la que se elija.
-# Estructuras y temas: listas, diccionarios y recursividad.
+#   lee ventas.jsonl y devuelve una lista solo con las ventas de ese DNI. Si está vacía
+#   avisa; si no, ElegirVentaDeLista() muestra las ventas y devuelve la que se elija.
+# Estructuras y temas: listas, diccionarios y archivos (JSON Lines).
 def SeleccionarVentaPorDni():
     print("=" * 50)
     print("BUSCAR VENTA POR DNI".center(50))
@@ -621,9 +777,9 @@ def SeleccionarVentaPorDni():
 #   usuario elige volver.
 # Cómo funciona: pide un texto y no acepta que esté vacío (ciclo while). La búsqueda
 #   encuentra coincidencias parciales y sin importar mayúsculas: "per" encuentra a
-#   "Juan Perez". BuscarVentasPorNombre() (recursiva) devuelve la lista de coincidencias y
-#   ElegirVentaDeLista() deja elegir una.
-# Estructuras y temas: listas, diccionarios, cadenas y recursividad.
+#   "Juan Perez". BuscarVentasPorNombre() lee ventas.jsonl y devuelve la lista de
+#   coincidencias, y ElegirVentaDeLista() deja elegir una.
+# Estructuras y temas: listas, diccionarios, cadenas y archivos (JSON Lines).
 def SeleccionarVentaPorNombre():
     print("=" * 50)
     print("BUSCAR VENTA POR NOMBRE".center(50))
@@ -717,7 +873,7 @@ def GestionarVenta(venta):
     elif opcion == "2":
         CambiarAsiento(venta, matriz)
 
-############################## Búsquedas recursivas ##################
+############################## Búsquedas ###########################
 
 # Qué hace: busca en la lista "viajes" el viaje que tiene un ID determinado, en forma
 #   recursiva.
@@ -756,104 +912,139 @@ def BuscarViajePorId(viaje_id, inicio=0, fin=None):
 
     return BuscarViajePorId(viaje_id, medio, fin)
 
-# Qué hace: busca en la lista "ventas" la venta de un viaje y un asiento determinados, en
-#   forma recursiva. La usa la búsqueda 1 ("Por viaje y asiento").
-# Recibe: viaje_id (número del viaje) y asiento (texto, por ejemplo "3B"). "inicio" y "fin"
-#   funcionan igual que en BuscarViajePorId().
+# Qué hace: busca en ventas.jsonl la venta de un viaje y un asiento determinados. La usa
+#   la búsqueda 1 ("Por viaje y asiento").
+# Recibe: viaje_id (número del viaje) y asiento (texto, por ejemplo "3B").
 # Devuelve: el diccionario de la venta, o None si ese asiento no tiene venta.
-# Cómo funciona: igual que BuscarViajePorId(). Los casos base son el pedazo vacío o de un
-#   solo elemento, donde se compara que coincidan el viaje_id y el asiento. El caso recursivo
-#   parte la lista a la mitad y busca primero en la izquierda y después en la derecha.
-# Estructuras y temas: recursividad, listas y diccionarios.
-def BuscarVentaPorAsiento(viaje_id, asiento, inicio=0, fin=None):
-    if fin == None:
-        fin = len(ventas)
+# Cómo funciona: lee el archivo línea por línea (for linea in arch) y decodifica cada
+#   venta con json.loads(). Si coinciden el viaje_id y el asiento, la guarda y corta el
+#   ciclo con break (un asiento se vende una sola vez, no hace falta seguir leyendo). Si no
+#   coincide, la descarta y pasa a la siguiente. En memoria hay una sola venta por vez.
+# Estructuras y temas: archivos de texto, JSON Lines, diccionarios y excepciones.
+def BuscarVentaPorAsiento(viaje_id, asiento):
+    encontrada = None
 
-    if fin - inicio == 0:
-        return None
+    try:
+        arch = open(ARCHIVO_VENTAS, "rt", encoding="UTF8")
 
-    if fin - inicio == 1:
-        venta = ventas[inicio]
+        for linea in arch:
+            venta = json.loads(linea)
 
-        if venta["viaje_id"] == viaje_id and venta["asiento"] == asiento:
-            return venta
+            if venta["viaje_id"] == viaje_id and venta["asiento"] == asiento:
+                encontrada = venta
+                break
+    except FileNotFoundError:
+        pass
+    except ValueError as mensaje:
+        print("Error: ventas.jsonl tiene una línea dañada:", mensaje)
+    except OSError as mensaje:
+        print("Error: no se pudieron leer las ventas:", mensaje)
+    finally:
+        try:
+            arch.close()
+        except NameError:
+            pass
 
-        return None
+    return encontrada
 
-    medio = (inicio + fin) // 2
+# Qué hace: busca en ventas.jsonl el nombre del pasajero que tiene un DNI, para no volver
+#   a pedirlo cuando la misma persona compra otro pasaje.
+# Recibe: dni (texto).
+# Devuelve: el nombre (texto), o None si ese DNI nunca compró.
+# Cómo funciona: igual que BuscarVentaPorAsiento(): lee venta por venta y corta con break
+#   en la primera que tenga ese DNI. No junta las ventas en una lista porque solo hace
+#   falta el nombre.
+# Estructuras y temas: archivos de texto, JSON Lines, diccionarios y excepciones.
+def BuscarNombrePorDni(dni):
+    nombre = None
 
-    venta = BuscarVentaPorAsiento(viaje_id, asiento, inicio, medio)
+    try:
+        arch = open(ARCHIVO_VENTAS, "rt", encoding="UTF8")
 
-    if venta != None:
-        return venta
+        for linea in arch:
+            venta = json.loads(linea)
 
-    return BuscarVentaPorAsiento(viaje_id, asiento, medio, fin)
+            if venta.get("dni") == dni:
+                nombre = venta["nombre"]
+                break
+    except FileNotFoundError:
+        pass
+    except ValueError as mensaje:
+        print("Error: ventas.jsonl tiene una línea dañada:", mensaje)
+    except OSError as mensaje:
+        print("Error: no se pudieron leer las ventas:", mensaje)
+    finally:
+        try:
+            arch.close()
+        except NameError:
+            pass
 
-# Qué hace: busca todas las ventas de un DNI, en forma recursiva.
-# Recibe: dni (texto). "inicio" y "fin" marcan el pedazo de la lista. "encontrados" es la
-#   lista donde se van juntando los resultados entre una llamada y otra.
-# Devuelve: una lista con todas las ventas de ese DNI (vacía si no hay ninguna).
-# Cómo funciona: los casos base son el pedazo vacío o de un solo elemento (si el DNI
-#   coincide, se agrega a "encontrados"). En el caso recursivo busca en las dos mitades, sin
-#   frenar en la primera coincidencia, porque una persona puede tener varios pasajes.
-#   "encontrados" empieza en None y se crea la lista en la primera llamada. Si fuera
-#   encontrados=[] en el def, Python usaría la misma lista en todas las búsquedas y se
-#   mezclarían los resultados de una búsqueda con los de la anterior.
-# Estructuras y temas: recursividad, listas, diccionarios y parámetros con valor por omisión.
-def BuscarVentasPorDni(dni, inicio=0, fin=None, encontrados=None):
-    if fin == None:
-        fin = len(ventas)
+    return nombre
 
-    if encontrados == None:
-        encontrados = []
+# Qué hace: busca en ventas.jsonl todas las ventas de un DNI.
+# Recibe: dni (texto).
+# Devuelve: una lista con las ventas de ese DNI (vacía si no hay ninguna).
+# Cómo funciona: lee el archivo línea por línea y decodifica cada venta con json.loads().
+#   Si el DNI coincide la agrega a "encontradas"; si no, la descarta. No corta en la
+#   primera coincidencia porque una persona puede tener varios pasajes. En la lista solo
+#   quedan las ventas que sirven (las de esa persona), nunca el archivo entero.
+# Estructuras y temas: archivos de texto, JSON Lines, listas, diccionarios y excepciones.
+def BuscarVentasPorDni(dni):
+    encontradas = []
 
-    if fin - inicio == 0:
-        return encontrados
+    try:
+        arch = open(ARCHIVO_VENTAS, "rt", encoding="UTF8")
 
-    if fin - inicio == 1:
-        if ventas[inicio].get("dni") == dni:
-            encontrados.append(ventas[inicio])
+        for linea in arch:
+            venta = json.loads(linea)
 
-        return encontrados
+            if venta.get("dni") == dni:
+                encontradas.append(venta)
+    except FileNotFoundError:
+        pass
+    except ValueError as mensaje:
+        print("Error: ventas.jsonl tiene una línea dañada:", mensaje)
+    except OSError as mensaje:
+        print("Error: no se pudieron leer las ventas:", mensaje)
+    finally:
+        try:
+            arch.close()
+        except NameError:
+            pass
 
-    medio = (inicio + fin) // 2
+    return encontradas
 
-    BuscarVentasPorDni(dni, inicio, medio, encontrados)
-    BuscarVentasPorDni(dni, medio, fin, encontrados)
-
-    return encontrados
-
-# Qué hace: busca todas las ventas cuyo nombre de pasajero contenga un texto, en forma
-#   recursiva.
-# Recibe: texto (lo que escribió el usuario). "inicio", "fin" y "encontrados" funcionan
-#   igual que en BuscarVentasPorDni().
+# Qué hace: busca en ventas.jsonl todas las ventas cuyo nombre de pasajero contenga un texto.
+# Recibe: texto (lo que escribió el usuario).
 # Devuelve: una lista con las ventas que coinciden (vacía si no hay ninguna).
 # Cómo funciona: igual que BuscarVentasPorDni(), pero la comparación pasa el texto y el
 #   nombre a minúsculas con .lower() y usa "in" para ver si el texto está dentro del nombre.
 #   Así "per" o "PEREZ" encuentran a "Juan Perez".
-# Estructuras y temas: recursividad, listas, diccionarios y cadenas.
-def BuscarVentasPorNombre(texto, inicio=0, fin=None, encontrados=None):
-    if fin == None:
-        fin = len(ventas)
+# Estructuras y temas: archivos de texto, JSON Lines, listas, diccionarios y cadenas.
+def BuscarVentasPorNombre(texto):
+    encontradas = []
 
-    if encontrados == None:
-        encontrados = []
+    try:
+        arch = open(ARCHIVO_VENTAS, "rt", encoding="UTF8")
 
-    if fin - inicio == 0:
-        return encontrados
+        for linea in arch:
+            venta = json.loads(linea)
 
-    if fin - inicio == 1:
-        if texto.lower() in ventas[inicio]["nombre"].lower():
-            encontrados.append(ventas[inicio])
+            if texto.lower() in venta["nombre"].lower():
+                encontradas.append(venta)
+    except FileNotFoundError:
+        pass
+    except ValueError as mensaje:
+        print("Error: ventas.jsonl tiene una línea dañada:", mensaje)
+    except OSError as mensaje:
+        print("Error: no se pudieron leer las ventas:", mensaje)
+    finally:
+        try:
+            arch.close()
+        except NameError:
+            pass
 
-        return encontrados
-
-    medio = (inicio + fin) // 2
-
-    BuscarVentasPorNombre(texto, inicio, medio, encontrados)
-    BuscarVentasPorNombre(texto, medio, fin, encontrados)
-
-    return encontrados
+    return encontradas
 
 ############################## Asientos ##############################
 
@@ -949,11 +1140,20 @@ def ElegirAsiento(matriz):
 # Qué hace: deja libre un asiento de la matriz (vuelve a ponerle "O").
 # Recibe: matriz (la matriz de asientos del viaje) y asiento (texto, por ejemplo "3B").
 # Devuelve: nada. Modifica la matriz que recibe.
-# Cómo funciona: separa la fila y la letra con rebanadas igual que ElegirAsiento(), pasa la
-#   letra a número de columna y pone "O" en esa posición. No valida el asiento porque solo
-#   se la llama con asientos que salen de ventas que ya existen.
-# Estructuras y temas: matrices y cadenas (rebanadas).
+# Cómo funciona: llama a MarcarAsiento() con "O".
+# Estructuras y temas: matrices.
 def LiberarAsiento(matriz, asiento):
+    MarcarAsiento(matriz, asiento, "O")
+
+# Qué hace: pone una marca ("O" libre o "X" ocupado) en un asiento de la matriz.
+# Recibe: matriz (la matriz de asientos del viaje), asiento (texto, por ejemplo "3B") y
+#   marca ("O" o "X").
+# Devuelve: nada. Modifica la matriz que recibe.
+# Cómo funciona: separa la fila y la letra con rebanadas igual que ElegirAsiento(), pasa la
+#   letra a número de columna y pone la marca en esa posición. No valida el asiento porque
+#   solo se la llama con asientos que salen de ventas que ya existen.
+# Estructuras y temas: matrices y cadenas (rebanadas).
+def MarcarAsiento(matriz, asiento, marca):
     x = int(asiento[:-1]) - 1
     y = asiento[-1]
 
@@ -966,15 +1166,18 @@ def LiberarAsiento(matriz, asiento):
     else:
         y = 3
 
-    matriz[x][y] = "O"
+    matriz[x][y] = marca
 
 # Qué hace: le cambia el asiento a una venta.
 # Recibe: venta (el diccionario de la venta) y matriz (la matriz de asientos de su viaje).
 # Devuelve: nada.
 # Cómo funciona: libera el asiento actual con LiberarAsiento(), muestra el mapa (donde el
 #   asiento anterior ya aparece libre y se puede volver a elegir), pide el nuevo con
-#   ElegirAsiento(), lo guarda en venta["asiento"] y graba el archivo.
-# Estructuras y temas: diccionarios y matrices.
+#   ElegirAsiento() y cambia el asiento de esa venta en ventas.jsonl con ReescribirVentas().
+#   Si el archivo se actualizó bien, guarda el nuevo asiento en venta["asiento"] y graba
+#   viajes.json. Si falló, deshace el cambio en la matriz (libera el nuevo asiento y vuelve
+#   a ocupar el anterior) para que la matriz y las ventas no queden distintas.
+# Estructuras y temas: diccionarios, matrices, conjuntos y archivos (JSON Lines).
 def CambiarAsiento(venta, matriz):
     asiento_anterior = venta["asiento"]
 
@@ -985,9 +1188,15 @@ def CambiarAsiento(venta, matriz):
 
     nuevo_asiento = ElegirAsiento(matriz)
 
+    if not ReescribirVentas(venta["viaje_id"], asiento_anterior, nuevo_asiento, set()):
+        LiberarAsiento(matriz, nuevo_asiento)
+        MarcarAsiento(matriz, asiento_anterior, "X")
+        print("No se pudo modificar el asiento.")
+        return
+
     venta["asiento"] = nuevo_asiento
 
-    GuardarDatos()
+    GuardarJson(ARCHIVO_VIAJES, viajes)
 
     print("Asiento modificado correctamente.")
 
@@ -1192,7 +1401,7 @@ def ConsultarDisponibilidad():
 #      de prueba. Está comentada para que los viajes nuevos arranquen sin ventas; para
 #      volver a usarla hay que sacarle el #.
 #   8. Guarda en el diccionario "viaje" el id, la salida, el destino, la patente, la fecha
-#      y los asientos, lo agrega a "viajes" y graba el archivo.
+#      y los asientos, lo agrega a "viajes" y graba viajes.json.
 # Estructuras y temas: diccionarios, listas y matrices.
 def RegistrarViaje():
     if len(distancias) < 2:
@@ -1250,7 +1459,7 @@ def RegistrarViaje():
     viaje["asientos"] = matriz
 
     viajes.append(viaje)
-    GuardarDatos()
+    GuardarJson(ARCHIVO_VIAJES, viajes)
 
     print("Viaje registrado correctamente.")
 
@@ -1258,42 +1467,55 @@ def RegistrarViaje():
 # Recibe: los datos del viaje: salida, destino, fecha, matriz (sus asientos), patente y
 #   viaje_id.
 # Devuelve: la matriz, con los asientos ocupados marcados con "X". También agrega una venta
-#   a la lista "ventas" por cada asiento ocupado.
+#   a ventas.jsonl por cada asiento ocupado.
 # Cómo funciona: recorre la matriz asiento por asiento. random.randint(0, 1) decide si el
 #   asiento se ocupa (la mitad de las veces). Si se ocupa, se pone "X", se arma el nombre
 #   del asiento (fila + letra, por ejemplo "3B"), se elige un nombre y un apellido al azar
 #   de las listas "nombres" y "apellidos", se genera un DNI al azar de 8 números y se crea
-#   la venta con el precio del viaje. Hoy no se usa porque su llamada en RegistrarViaje()
-#   está comentada; se usó para cargar los viajes de prueba.
-# Estructuras y temas: matrices, listas, diccionarios y números al azar (módulo random).
+#   la venta con el precio del viaje. El archivo se abre una sola vez en modo agregado
+#   ("at") antes de recorrer la matriz y cada venta se graba como una línea con
+#   json.dumps(); no se abre y cierra por cada venta. Hoy no se usa porque su llamada en
+#   RegistrarViaje() está comentada; se usó para cargar los viajes de prueba.
+# Estructuras y temas: matrices, listas, diccionarios, archivos (JSON Lines) y números al
+#   azar (módulo random).
 def GenerarVentasAlAzar(salida, destino, fecha, matriz, patente, viaje_id):
     precio = distancias[salida][destino] * TARIFAPORKM
     letras = ["A", "B", "C", "D"]
 
-    for f in range(len(matriz)):
-        for c in range(len(matriz[f])):
+    try:
+        arch = open(ARCHIVO_VENTAS, "at", encoding="UTF8")
 
-            if random.randint(0, 1) == 1:
-                matriz[f][c] = "X"
-                asiento = str(f + 1) + letras[c]
+        for f in range(len(matriz)):
+            for c in range(len(matriz[f])):
 
-                nombre = nombres[random.randint(0, len(nombres) - 1)]
-                apellido = apellidos[random.randint(0, len(apellidos) - 1)]
-                dni = str(random.randint(15000000, 45999999))
+                if random.randint(0, 1) == 1:
+                    matriz[f][c] = "X"
+                    asiento = str(f + 1) + letras[c]
 
-                venta = {
-                    "viaje_id": viaje_id,
-                    "nombre": nombre + " " + apellido,
-                    "dni": dni,
-                    "salida": salida,
-                    "destino": destino,
-                    "fecha": fecha,
-                    "patente": patente,
-                    "asiento": asiento,
-                    "precio": precio
-                }
+                    nombre = nombres[random.randint(0, len(nombres) - 1)]
+                    apellido = apellidos[random.randint(0, len(apellidos) - 1)]
+                    dni = str(random.randint(15000000, 45999999))
 
-                ventas.append(venta)
+                    venta = {
+                        "viaje_id": viaje_id,
+                        "nombre": nombre + " " + apellido,
+                        "dni": dni,
+                        "salida": salida,
+                        "destino": destino,
+                        "fecha": fecha,
+                        "patente": patente,
+                        "asiento": asiento,
+                        "precio": precio
+                    }
+
+                    arch.write(json.dumps(venta) + "\n")
+    except OSError as mensaje:
+        print("Error: no se pudieron guardar las ventas de prueba:", mensaje)
+    finally:
+        try:
+            arch.close()
+        except NameError:
+            pass
 
     return matriz
 
@@ -1384,7 +1606,7 @@ def RegistrarMicro():
     }
     micros.append(micro)
     patentes.add(patente)
-    GuardarDatos()
+    GuardarJson(ARCHIVO_MICROS, micros)
     print("Micro registrado correctamente.")
 
 # Qué hace: da de baja un micro y borra también sus viajes y las ventas de esos viajes.
@@ -1392,11 +1614,10 @@ def RegistrarMicro():
 # Devuelve: nada.
 # Cómo funciona: muestra los micros numerados, se elige uno con ElegirDeLista() y se pide
 #   confirmación con Confirmar(). Si confirma, saca el micro de la lista con .remove() y su
-#   patente del conjunto con .discard(). Después arma con listas por comprensión los viajes
-#   y las ventas que NO son de ese micro, y los copia a las listas originales con .clear() y
-#   .extend(). No se hace "viajes = viajes_nuevos" porque, dentro de una función, eso crearía
-#   una variable local nueva y la lista original no cambiaría.
-# Estructuras y temas: listas (listas por comprensión), conjuntos y diccionarios.
+#   patente del conjunto con .discard() y guarda micros.json. Después junta en el conjunto
+#   "ids_borrados" los ID de los viajes de ese micro y llama a EliminarViajesYVentas(),
+#   que los saca de "viajes" y borra sus ventas de ventas.jsonl.
+# Estructuras y temas: listas, conjuntos, diccionarios y archivos.
 def DarBajaMicro():
     print("=" * 50)
     print("DAR DE BAJA MICRO".center(50))
@@ -1420,16 +1641,15 @@ def DarBajaMicro():
 
     micros.remove(micro)
     patentes.discard(patente)
+    GuardarJson(ARCHIVO_MICROS, micros)
 
-    viajes_nuevos = [viaje for viaje in viajes if viaje["patente"] != patente]
-    viajes.clear()
-    viajes.extend(viajes_nuevos)
+    ids_borrados = set()
 
-    ventas_nuevas = [venta for venta in ventas if venta["patente"] != patente]
-    ventas.clear()
-    ventas.extend(ventas_nuevas)
+    for viaje in viajes:
+        if viaje["patente"] == patente:
+            ids_borrados.add(viaje["id"])
 
-    GuardarDatos()
+    EliminarViajesYVentas(ids_borrados)
 
     print(f"Micro con patente {patente} dado de baja correctamente.")
     print("También se eliminaron sus viajes y ventas asociados.")
@@ -1501,7 +1721,7 @@ def AgregarTerminal():
     for otra in kms:
         distancias[otra][terminal] = kms[otra]
 
-    GuardarDatos()
+    GuardarJson(ARCHIVO_DESTINOS, distancias)
 
     print(f"Terminal '{terminal}' registrada correctamente.")
 
@@ -1537,10 +1757,10 @@ def IngresarKm(terminal, otra):
 # Devuelve: nada.
 # Cómo funciona: se elige la terminal con ElegirTerminal() y se pide confirmación. Si
 #   confirma, la saca de "distancias" con .pop() y también del diccionario interno de cada
-#   una de las otras terminales. Después, con listas por comprensión, se quedan solo los
-#   viajes y ventas que no salen ni llegan a esa terminal, y se copian a las listas
-#   originales con .clear() y .extend() (por el mismo motivo que en DarBajaMicro).
-# Estructuras y temas: diccionarios (anidados) y listas (listas por comprensión).
+#   una de las otras terminales, y guarda destinos.json. Después junta en el conjunto
+#   "ids_borrados" los ID de los viajes que salen o llegan a esa terminal y llama a
+#   EliminarViajesYVentas() (igual que en DarBajaMicro).
+# Estructuras y temas: diccionarios (anidados), listas, conjuntos y archivos.
 def EliminarTerminal():
     print("=" * 50)
     print("ELIMINAR TERMINAL".center(50))
@@ -1561,18 +1781,41 @@ def EliminarTerminal():
     for otra in distancias:
         distancias[otra].pop(terminal)
 
-    viajes_nuevos = [viaje for viaje in viajes if viaje["salida"] != terminal and viaje["destino"] != terminal]
-    viajes.clear()
-    viajes.extend(viajes_nuevos)
+    GuardarJson(ARCHIVO_DESTINOS, distancias)
 
-    ventas_nuevas = [venta for venta in ventas if venta["salida"] != terminal and venta["destino"] != terminal]
-    ventas.clear()
-    ventas.extend(ventas_nuevas)
+    ids_borrados = set()
 
-    GuardarDatos()
+    for viaje in viajes:
+        if viaje["salida"] == terminal or viaje["destino"] == terminal:
+            ids_borrados.add(viaje["id"])
+
+    EliminarViajesYVentas(ids_borrados)
 
     print(f"Terminal '{terminal}' eliminada correctamente.")
     print("También se eliminaron los viajes y ventas que salían o llegaban ahí.")
+
+# Qué hace: borra varios viajes de la lista "viajes" y todas las ventas de esos viajes de
+#   ventas.jsonl. La usan DarBajaMicro() y EliminarTerminal().
+# Recibe: ids_borrados, un conjunto con los ID de los viajes a borrar.
+# Devuelve: nada.
+# Cómo funciona: recorre "viajes" de atrás hacia adelante y saca con .pop(i) los que
+#   tienen un ID del conjunto. Se recorre al revés porque al sacar un elemento los que
+#   están después se corren un lugar; yendo desde el final, los que faltan revisar no se
+#   mueven. Así se modifica la misma lista global sin crear otra. Después guarda
+#   viajes.json y borra las ventas con ReescribirVentas() (que lee ventas.jsonl línea por
+#   línea y no copia las de esos viajes). Si no hay viajes para borrar, no hace nada.
+# Estructuras y temas: listas, conjuntos y archivos (JSON Lines).
+def EliminarViajesYVentas(ids_borrados):
+    if len(ids_borrados) == 0:
+        return
+
+    for i in range(len(viajes) - 1, -1, -1):
+        if viajes[i]["id"] in ids_borrados:
+            viajes.pop(i)
+
+    GuardarJson(ARCHIVO_VIAJES, viajes)
+
+    ReescribirVentas(None, None, None, ids_borrados)
 
 # Qué hace: muestra las terminales numeradas y deja elegir una.
 # Recibe: nada.
@@ -1792,74 +2035,3 @@ def IngresarFecha():
         fecha = input("Ingrese la fecha del viaje (DD/MM/AAAA): ").strip()
 
     return fecha
-
-
-def RecaudacionViaje(viaje):
-    asientosOcupados = ContarAsientosOcupados(viaje["asientos"])
-    kilometros = distancias[viaje["salida"]][viaje["destino"]]
-    return asientosOcupados * kilometros * TARIFAPORKM
-
-def InformeVentasPorDestino():
-    recaudacionPorDestino = {}
-
-    for viaje in viajes:
-        destino = viaje["destino"]
-
-        if destino in recaudacionPorDestino:
-            recaudacionPorDestino[destino] += RecaudacionViaje(viaje)
-        else:
-            recaudacionPorDestino[destino] = RecaudacionViaje(viaje)
-
-    print("=" * 50)
-    print("INFORME DE VENTAS POR DESTINO".center(50))
-    print("=" * 50)
-
-    if len(recaudacionPorDestino) == 0:
-        print("No hay viajes registrados.")
-        return
-
-    for destino in recaudacionPorDestino:
-        print(f"Destino: {destino}")
-        print(f"Recaudación: ${FormatoPrecio(recaudacionPorDestino[destino])}")
-        print("-" * 50)
-
-def InformeVentasPorMes():
-    meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio",
-             "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
-
-    recaudacionPorMes = {}
-
-    for viaje in viajes:
-        partes = viaje["fecha"].split("/")
-        clave = (int(partes[2]), int(partes[1]))
-
-        if clave in recaudacionPorMes:
-            recaudacionPorMes[clave] += RecaudacionViaje(viaje)
-        else:
-            recaudacionPorMes[clave] = RecaudacionViaje(viaje)
-
-    print("=" * 50)
-    print("INFORME DE VENTAS POR MES".center(50))
-    print("=" * 50)
-
-    if len(recaudacionPorMes) == 0:
-        print("No hay viajes registrados.")
-        return
-
-    for clave in sorted(recaudacionPorMes):
-        anio, mes = clave
-        nombre_mes = f"{meses[mes - 1]} {anio}"
-        print(f"{nombre_mes:<15} : ${FormatoPrecio(recaudacionPorMes[clave])}")
-
-    print("-" * 50)
-
-def InformeRecaudacionTotal():
-    recaudacionTotal = 0
-    for viaje in viajes:
-        recaudacionTotal += RecaudacionViaje(viaje)
-
-    print("=" * 50)
-    print("INFORME DE RECAUDACIÓN TOTAL".center(50))
-    print("=" * 50)
-    print(f"Recaudación Total: ${FormatoPrecio(recaudacionTotal)}")
-    print("-" * 50)

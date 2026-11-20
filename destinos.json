@@ -1,0 +1,22 @@
+{
+    "Liniers": {
+        "Mar Del Plata": 500,
+        "Tandil": 300,
+        "Jujuy": 100
+    },
+    "Mar Del Plata": {
+        "Liniers": 500,
+        "Tandil": 150,
+        "Jujuy": 1000
+    },
+    "Tandil": {
+        "Liniers": 300,
+        "Mar Del Plata": 150,
+        "Jujuy": 1000
+    },
+    "Jujuy": {
+        "Liniers": 100,
+        "Mar Del Plata": 1000,
+        "Tandil": 1000
+    }
+}

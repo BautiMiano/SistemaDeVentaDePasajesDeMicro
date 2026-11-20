@@ -159,10 +159,11 @@ def main():
 # Primero se cargan los datos guardados con CargarDatos() y después se ejecuta main().
 # El try/except KeyboardInterrupt hace que, si el usuario cierra el programa con Ctrl+C,
 # se muestre un mensaje en lugar de un error. Los datos no se pierden porque cada
-# operación ya se guardó en datos.json al terminar.
+# operación ya se guardó en su archivo (destinos.json, micros.json, viajes.json o
+# ventas.jsonl) al terminar.
 Utils.CargarDatos()
 
 try:
     main()
 except KeyboardInterrupt:
-    print("\nPrograma cerrado. Los datos ya están guardados en datos.json.")
+    print("\nPrograma cerrado. Los datos ya están guardados.")
